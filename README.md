@@ -58,6 +58,99 @@ plausible, the world bends around it.
 
 ![Phone UI](docs/screenshots/10-phone.png)
 
+## A complete heist, captured frame-by-frame
+
+The screenshots below are pulled from the **end-to-end test** — Playwright
+drives the running dev server in mock mode, so this is the actual game flow
+the test verifies. **38 / 38 checks pass.**
+
+### 1. Game start
+
+Player on the rainy street at 6:00 PM. Bank front-left, cafe glowing yellow
+right, payphone red center. Eddie Cole the guard begins his beat.
+
+![Street at 6 PM](docs/test-shots/01-street-6pm.png)
+
+### 2. Voice captured → Notebook
+
+The player has just recorded the manager's calm 6:15 PM cigarette break.
+Voice card appears in the Notebook with the calm tag and a recording duration.
+
+![Notebook with first voice card](docs/test-shots/02-notebook-with-card.png)
+
+### 3. The phone
+
+Pick a target. Pick a voice. Type what you want them to hear.
+
+![Phone — initial state](docs/test-shots/03-phone-open.png)
+
+### 4. The diversion lands
+
+Calling the manager from the payphone in his **wife's** voice — *"Honey,
+there's been a break-in at the house. Come home now."* He believes it. The
+toast in the corner confirms: *"The manager rushes for the door."*
+
+![Phone call active — manager rushes home](docs/test-shots/04-phone-call-active.png)
+
+### 5. Inside the bank
+
+With the manager gone and the hallway unlocked, the player walks into the
+empty lobby. The vault intercom is at the end of the hallway.
+
+![Bank lobby](docs/test-shots/05-bank-lobby.png)
+
+### 6. Vault authentication required
+
+Click the intercom. The system asks for the phrase
+*"Authorize vault, code 7-7-1"* in the manager's voice. The Notebook lists
+every matching voice card.
+
+![Vault auth dialog open](docs/test-shots/06-vault-auth-open.png)
+
+### 7. Wrong recording — rejected
+
+The player tries the **stressed** recording from the manager's 6:45 PM phone
+fight. *"Voice too stressed — try a calmer recording."* +15 suspicion.
+
+![Stressed voice rejected](docs/test-shots/07-vault-auth-stressed-fail.png)
+
+### 8. Calm recording — accepted
+
+The cigarette-break recording passes. *"Voiceprint accepted."*
+
+![Calm voice accepted](docs/test-shots/08-vault-auth-calm-pass.png)
+
+### 9. Vault open
+
+Brass door swings. Briefcase sits inside under a single lamp.
+
+![Vault open](docs/test-shots/09-vault-open.png)
+
+### 10. WIN
+
+Briefcase in hand, the player reaches the train station before 9:00 PM.
+
+![Win screen — A clean con.](docs/test-shots/10-win.png)
+
+### 11. Failure paths
+
+Get caught — too many failed auths, too many bad calls, suspicion crosses 100
+and the alarm goes. End of evening.
+
+![Lost — alarm raised](docs/test-shots/11-lost.png)
+
+…or just run out the clock past 9:00 PM.
+
+![Lost — last train](docs/test-shots/12-lost-timeout.png)
+
+### 12. Solution C kicks off
+
+Calling the manager *as the secretary* — *"Sir, I left the safe-deposit ledger
+at the cafe. Could you grab it on your way back?"* Manager pivots to the cafe;
+the player can now record him there, calm, in person.
+
+![Solution C — secretary call lures the manager to the cafe](docs/test-shots/13-solution-c-call.png)
+
 ## Controls
 
 | Key / action | What it does |
@@ -114,8 +207,26 @@ ELEVENLABS_VOICE_ID_SECRETARY=...
 ELEVENLABS_VOICE_ID_BANK_GUARD=...
 ELEVENLABS_VOICE_ID_WIFE=...
 
-npm run render-scripts
+npm run verify-eleven       # 30s smoke test against the live API
+npm run render-scripts      # render all 14 NPC dialogue clips
+npm run dev
 ```
+
+## Tests
+
+The end-to-end run that produced the screenshots above lives at
+`vt-e2e.cjs`. With the dev server running in mock mode:
+
+```bash
+node vt-e2e.cjs
+```
+
+It exercises every gameplay primitive — phase transitions, recording,
+notebook inventory, phone diversion (wife→manager break-in flips the manager
+to `rushedHome` and unlocks the hallway), voice auth (stressed fails, calm
+passes), briefcase, train-station win, suspicion-driven loss, time-out loss,
+and the Solution C secretary→manager pivot — plus 9 direct API contract
+checks. Full transcript is in [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
 ## Architecture
 

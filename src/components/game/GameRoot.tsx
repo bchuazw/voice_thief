@@ -26,6 +26,13 @@ export default function GameRoot() {
 
   useEffect(() => {
     fetch("/api/bootstrap").catch(() => {});
+    if (typeof window !== "undefined") {
+      (window as unknown as { __vt?: unknown }).__vt = {
+        store: useGame,
+        getState: useGame.getState,
+        setState: useGame.setState,
+      };
+    }
   }, []);
 
   return (
