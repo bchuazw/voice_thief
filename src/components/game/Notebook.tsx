@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { clockLabel } from "@/game/timeFormat";
 import { NPC_SCHEDULES } from "@/game/npcSchedules";
+import { emotionColorClass, emotionGlyph } from "@/game/emotionDisplay";
 import type { NpcId } from "@/game/types";
 
 const TABS = ["voices", "suspects", "schedule"] as const;
@@ -18,8 +19,21 @@ export default function Notebook() {
   // briefing. Once they've recorded anything, default back to Voices.
   const [tab, setTab] = useState<Tab>(inventory.length > 0 ? "voices" : "schedule");
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") toggleNotebook(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleNotebook]);
+
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-4 pointer-events-auto">
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-4 pointer-events-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="notebook-title"
+    >
       <div
         className="relative h-[80%] w-[min(900px,90vw)] overflow-hidden rounded border border-noir-paper/25 text-noir-paper shadow-2xl"
         style={{
@@ -31,7 +45,7 @@ export default function Notebook() {
       >
         <div className="flex items-center justify-between border-b border-noir-paper/15 px-6 py-3">
           <div className="flex items-baseline gap-3">
-            <span className="font-serif text-2xl italic">Notebook</span>
+            <h2 id="notebook-title" className="font-serif text-2xl italic">Notebook</h2>
             <span className="text-[10px] uppercase tracking-[0.4em] text-noir-fog">
               First City — Thursday
             </span>
@@ -80,15 +94,8 @@ export default function Notebook() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-noir-fog">
-                    <span
-                      className={
-                        card.emotionalState === "calm"
-                          ? "text-[#3affa6]"
-                          : card.emotionalState === "stressed"
-                            ? "text-noir-amber"
-                            : "text-noir-neon"
-                      }
-                    >
+                    <span className={emotionColorClass(card.emotionalState)}>
+                      <span aria-hidden className="mr-1">{emotionGlyph(card.emotionalState)}</span>
                       {card.emotionalState}
                     </span>{" "}
                     · {card.durationSeconds.toFixed(1)}s
@@ -139,15 +146,8 @@ export default function Notebook() {
                           <span>{clockLabel(m.startSeconds)}</span>
                           <span>
                             {m.location} ·{" "}
-                            <span
-                              className={
-                                m.emotion === "calm"
-                                  ? "text-[#3affa6]"
-                                  : m.emotion === "stressed"
-                                    ? "text-noir-amber"
-                                    : "text-noir-neon"
-                              }
-                            >
+                            <span className={emotionColorClass(m.emotion)}>
+                              <span aria-hidden className="mr-1">{emotionGlyph(m.emotion)}</span>
                               {m.emotion}
                             </span>
                             {m.recordable ? " · recordable" : ""}

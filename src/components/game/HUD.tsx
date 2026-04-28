@@ -6,7 +6,9 @@ import { clockLabel } from "@/game/timeFormat";
 import { GAME_END_SECONDS } from "@/game/types";
 import { distance } from "@/game/pathfinding";
 import { findActiveMoment } from "@/game/npcSchedules";
-import { useRecordingHotkey } from "@/game/recordingManager";
+import { beginRecording, endRecording, useRecordingHotkey } from "@/game/recordingManager";
+import { suspicionTier } from "@/game/emotionDisplay";
+import { NPC_PROFILES } from "@/config/voices";
 import type { NpcId } from "@/game/types";
 
 const RECORD_GOOD_MS = 5000;
@@ -22,6 +24,10 @@ export default function HUD() {
   const togglePhone = useGame((s) => s.togglePhone);
   const isRecording = useGame((s) => s.player.isRecording);
   const recordingStartedAt = useGame((s) => s.player.recordingStartedAt);
+  const notebookOpen = useGame((s) => s.notebookOpen);
+  const phoneOpen = useGame((s) => s.phoneOpen);
+  const activeAuth = useGame((s) => s.activeAuth);
+  const isPaused = notebookOpen || phoneOpen || activeAuth !== null;
 
   useRecordingHotkey();
 
@@ -60,32 +66,44 @@ export default function HUD() {
   const recordPct = Math.min(1, recordedMs / RECORD_MAX_MS);
   const recordGood = recordedMs >= RECORD_GOOD_MS;
 
-  const suspColor =
-    suspicion > 70 ? "#ff3c3c" : suspicion > 40 ? "#f5a623" : "#3affa6";
+  const tier = suspicionTier(suspicion);
+  const suspColor = tier.color;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 select-none">
       <div className="absolute left-4 top-4 flex items-baseline gap-3 rounded bg-black/60 px-3 py-2 text-noir-paper backdrop-blur">
-        <span className="text-[10px] uppercase tracking-[0.4em] text-noir-fog">Now</span>
+        <span className="text-[11px] uppercase tracking-[0.4em] text-noir-fog">Now</span>
         <span
           className={`font-mono text-2xl ${timeUrgent ? "animate-neon-flicker text-noir-neon" : ""}`}
         >
           {clockLabel(time)}
         </span>
+        {isPaused && (
+          <span className="ml-1 rounded border border-noir-amber/60 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.3em] text-noir-amber">
+            paused
+          </span>
+        )}
       </div>
 
       <div className="absolute right-4 top-4 flex flex-col items-end gap-1 rounded bg-black/60 px-3 py-2 backdrop-blur">
         <div className="flex items-baseline gap-2">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-noir-fog">Suspicion</span>
+          <span className="text-[11px] uppercase tracking-[0.4em] text-noir-fog">Suspicion</span>
           <span
-            className="font-mono text-[11px]"
+            className="font-mono text-xs"
             style={{ color: suspColor }}
             title="At 100, the alarm goes off."
           >
-            {Math.round(suspicion)} / 100
+            {Math.round(suspicion)} / 100 · {tier.label}
           </span>
         </div>
-        <div className="h-2 w-44 overflow-hidden rounded bg-noir-ash">
+        <div
+          className="h-2.5 w-44 overflow-hidden rounded bg-noir-ash"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(suspicion)}
+          aria-label={`Suspicion ${Math.round(suspicion)} of 100`}
+        >
           <div
             className="h-full transition-all"
             style={{ width: `${suspicion}%`, background: suspColor }}
@@ -96,13 +114,15 @@ export default function HUD() {
       <div className="pointer-events-auto absolute bottom-4 left-4 flex flex-col gap-2">
         <button
           onClick={() => toggleNotebook()}
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black"
+          aria-label="Open notebook"
+          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
         >
-          Notebook ({inventory.length})  · N
+          Notebook ({inventory.length}) · N
         </button>
         <button
           onClick={() => togglePhone()}
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black"
+          aria-label="Open phone"
+          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
         >
           Phone · P
         </button>
@@ -110,26 +130,53 @@ export default function HUD() {
 
       {/* Persistent control strip — first-time players never miss this */}
       <div className="pointer-events-none absolute bottom-2 right-4 text-right">
-        <p className="text-[9px] uppercase tracking-[0.3em] text-noir-fog/70">
-          Click to walk · Hold <span className="text-noir-amber">E</span> to record · <span className="text-noir-amber">N</span> notebook · <span className="text-noir-amber">P</span> phone
+        <p className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
+          Click to walk · Hold <kbd className="text-noir-amber">E</kbd> to record · <kbd className="text-noir-amber">N</kbd> notebook · <kbd className="text-noir-amber">P</kbd> phone · <kbd className="text-noir-amber">Esc</kbd> close
         </p>
       </div>
 
-      {/* Recording indicator with progress */}
+      {/* Recording indicator + accessible on-screen Record button */}
       <div className="absolute bottom-14 left-1/2 -translate-x-1/2 transform">
         {recordableNpc && (
-          <div
-            className={`flex flex-col items-center gap-1 rounded bg-black/70 px-4 py-2 text-[12px] uppercase tracking-[0.3em] backdrop-blur ${
-              isRecording ? "text-noir-neon" : "text-noir-paper"
+          <button
+            type="button"
+            onPointerDown={() => beginRecording()}
+            onPointerUp={() => endRecording()}
+            onPointerLeave={() => isRecording && endRecording()}
+            onKeyDown={(e) => {
+              if ((e.key === "e" || e.key === "E" || e.key === " " || e.key === "Enter") && !e.repeat) {
+                e.preventDefault();
+                beginRecording();
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.key === "e" || e.key === "E" || e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                endRecording();
+              }
+            }}
+            aria-label={`Record ${NPC_PROFILES[recordableNpc].displayName}, hold to capture`}
+            className={`pointer-events-auto flex flex-col items-center gap-1 rounded border bg-black/75 px-4 py-2 text-xs uppercase tracking-[0.3em] backdrop-blur transition focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber ${
+              isRecording
+                ? "border-noir-neon text-noir-neon animate-pulse"
+                : "border-noir-amber/60 text-noir-paper hover:bg-noir-paper hover:text-black"
             }`}
+            aria-live="polite"
           >
             <span>
               {isRecording
-                ? `● Recording… ${(recordedMs / 1000).toFixed(1)}s`
-                : "Hold E to record"}
+                ? `● Recording ${(recordedMs / 1000).toFixed(1)}s`
+                : "Hold to record · E"}
             </span>
             {isRecording && (
-              <div className="h-1 w-44 overflow-hidden rounded bg-noir-ash">
+              <div
+                className="h-1.5 w-44 overflow-hidden rounded bg-noir-ash"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={30}
+                aria-valuenow={recordedMs / 1000}
+                aria-label="Recording progress"
+              >
                 <div
                   className="h-full transition-all"
                   style={{
@@ -139,7 +186,7 @@ export default function HUD() {
                 />
               </div>
             )}
-          </div>
+          </button>
         )}
       </div>
     </div>

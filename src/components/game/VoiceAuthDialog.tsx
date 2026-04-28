@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { AUTH_REQUIREMENTS } from "@/game/solutionValidator";
+import { emotionGlyph } from "@/game/emotionDisplay";
 import type { AuthAttempt } from "@/game/types";
 
 const DEVICE_LABELS: Record<AuthAttempt["device"], string> = {
@@ -25,6 +26,14 @@ export default function VoiceAuthDialog() {
   const requirement = AUTH_REQUIREMENTS[auth.device];
 
   const candidates = inventory.filter((c) => c.npcId === requirement.expectedNpc);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiveAuth(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setActiveAuth]);
 
   async function tryAuth(cardId: string) {
     const card = inventory.find((c) => c.id === cardId);
@@ -71,12 +80,17 @@ export default function VoiceAuthDialog() {
   }
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 px-4 pointer-events-auto">
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 px-4 pointer-events-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-title"
+    >
       <div className="w-[min(560px,92vw)] rounded border border-noir-paper/30 bg-noir-smoke p-6 text-noir-paper shadow-2xl">
-        <div className="mb-1 text-[10px] uppercase tracking-[0.4em] text-noir-fog">
+        <div className="mb-1 text-[11px] uppercase tracking-[0.4em] text-noir-fog">
           {DEVICE_LABELS[auth.device]}
         </div>
-        <h2 className="font-serif text-2xl italic">Authentication required</h2>
+        <h2 id="auth-title" className="font-serif text-2xl italic">Authentication required</h2>
         <p className="mt-2 text-sm text-noir-fog">
           Speak the phrase{" "}
           <span className="font-serif italic text-noir-paper">
@@ -100,11 +114,12 @@ export default function VoiceAuthDialog() {
             >
               <span>
                 <span className="text-sm">{NPC_PROFILES[card.npcId].displayName}</span>
-                <span className="ml-2 text-[10px] uppercase tracking-[0.3em] text-noir-fog">
+                <span className="ml-2 text-[11px] uppercase tracking-[0.3em] text-noir-fog">
+                  <span aria-hidden className="mr-1">{emotionGlyph(card.emotionalState)}</span>
                   {card.emotionalState} · {card.durationSeconds.toFixed(1)}s
                 </span>
               </span>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-noir-amber">
+              <span className="text-[11px] uppercase tracking-[0.3em] text-noir-amber">
                 Try
               </span>
             </button>
@@ -116,8 +131,12 @@ export default function VoiceAuthDialog() {
             className={`mt-4 text-sm ${
               verdict.passes ? "text-[#3affa6]" : "text-noir-neon"
             }`}
+            role="status"
+            aria-live="polite"
           >
-            {verdict.passes ? "✓ " : "✗ "}
+            <span className="mr-1 font-semibold">
+              {verdict.passes ? "✓ Accepted." : "✗ Rejected."}
+            </span>
             {verdict.reason}
           </p>
         )}

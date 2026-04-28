@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { setBranch } from "@/game/npcSchedules";
+import { emotionGlyph } from "@/game/emotionDisplay";
 import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
@@ -40,6 +41,17 @@ export default function PhoneUI() {
   useEffect(() => {
     if (!voiceCardId && inventory[0]) setVoiceCardId(inventory[0].id);
   }, [inventory, voiceCardId]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setActiveCall(null);
+        togglePhone(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setActiveCall, togglePhone]);
 
   async function placeCall() {
     const card = inventory.find((v) => v.id === voiceCardId);
@@ -148,12 +160,17 @@ export default function PhoneUI() {
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/65 px-4 pointer-events-auto">
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center bg-black/65 px-4 pointer-events-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="phone-title"
+    >
       <div className="w-[min(720px,92vw)] rounded border border-noir-amber/40 bg-noir-smoke p-6 text-noir-paper shadow-2xl ring-1 ring-noir-amber/10">
         <div className="mb-4 flex items-baseline justify-between">
           <div className="flex items-baseline gap-3">
             <span aria-hidden className="text-noir-amber text-xl">☎</span>
-            <h2 className="font-serif text-2xl italic">The Phone</h2>
+            <h2 id="phone-title" className="font-serif text-2xl italic">The Phone</h2>
           </div>
           <button
             onClick={() => {
@@ -192,7 +209,7 @@ export default function PhoneUI() {
               {inventory.length === 0 && <option value="">— no voices yet —</option>}
               {inventory.map((card) => (
                 <option key={card.id} value={card.id}>
-                  {NPC_PROFILES[card.npcId].displayName} ({card.emotionalState})
+                  {NPC_PROFILES[card.npcId].displayName} ({emotionGlyph(card.emotionalState)} {card.emotionalState})
                 </option>
               ))}
             </select>
