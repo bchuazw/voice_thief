@@ -1,0 +1,54 @@
+{
+  "npc": "bankManager",
+  "moments": [
+    {
+      "id": "manager-cigarette-6_15",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Long day. Same as yesterday.", "pause": 0.5 },
+        { "text": "I should call Maggie. Tell her I'll be late again.", "pause": 1.0 },
+        { "text": "Vault audit at nine tomorrow. Code 7-7-1. Same as it's always been.", "pause": 0.8 },
+        { "text": "One more cigarette and back in.", "pause": 0.3 }
+      ]
+    },
+    {
+      "id": "manager-office-mutter",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Lillian, did you file the Henderson papers? ... Good.", "pause": 0.6 }
+      ]
+    },
+    {
+      "id": "manager-phone-fight-6_45",
+      "emotion": "stressed",
+      "lines": [
+        { "text": "Maggie, I am NOT getting into this on the phone.", "pause": 0.6 },
+        { "text": "I'll be home when I'm home. There's an audit.", "pause": 0.7 },
+        { "text": "No — no, that is not what I said. Listen to me.", "pause": 0.8 }
+      ]
+    },
+    {
+      "id": "manager-office-late",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Last few signatures and we're done. Almost there.", "pause": 1.2 }
+      ]
+    },
+    {
+      "id": "manager-rushing-home",
+      "emotion": "panicked",
+      "lines": [
+        { "text": "Maggie? Maggie?! Hold on, I'm coming, just hold on!", "pause": 0.4 },
+        { "text": "Out of my way, please — emergency!", "pause": 0.4 }
+      ]
+    },
+    {
+      "id": "manager-at-cafe",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Coffee, black. And — has Lillian's ledger been turned in?", "pause": 0.7 },
+        { "text": "No? She said she left it here. Let me look around.", "pause": 0.8 }
+      ]
+    }
+  ]
+}

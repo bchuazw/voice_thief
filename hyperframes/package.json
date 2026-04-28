@@ -1,0 +1,10 @@
+{
+  "name": "voice-thief-trailer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "preview": "npx hyperframes preview",
+    "lint": "npx hyperframes lint",
+    "render": "npx hyperframes render --output ./output/voice-thief-trailer.mp4"
+  }
+}

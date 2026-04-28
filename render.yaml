@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: voice-thief
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api/bootstrap
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NEXT_PUBLIC_GAME_VERSION
+        value: 0.1.0
+      - key: VT_MOCK_AI
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_BANK_MANAGER
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_SECRETARY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_BANK_GUARD
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_WIFE
+        sync: false
+      - key: ELEVENLABS_AGENT_ID_BANK_MANAGER
+        sync: false
+      - key: ELEVENLABS_AGENT_ID_SECRETARY
+        sync: false
+      - key: ELEVENLABS_AGENT_ID_BANK_GUARD
+        sync: false
+      - key: ELEVENLABS_AGENT_ID_WIFE
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

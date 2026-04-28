@@ -1,0 +1,21 @@
+{
+  "npc": "bankGuard",
+  "moments": [
+    {
+      "id": "guard-humming",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Hmmm-mm-mm... duh-duh-duh...", "pause": 0.5 },
+        { "text": "Quiet night. Always a quiet night on this beat.", "pause": 0.8 },
+        { "text": "Hmmm-mm... 'round midnight...", "pause": 0.6 }
+      ]
+    },
+    {
+      "id": "guard-lobby",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Evenin'. Just signing in. Cole.", "pause": 0.7 }
+      ]
+    }
+  ]
+}

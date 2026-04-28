@@ -1,0 +1,22 @@
+{
+  "npc": "wife",
+  "moments": [
+    {
+      "id": "wife-gossip-6_30",
+      "emotion": "calm",
+      "lines": [
+        { "text": "Ruthie, you would not BELIEVE what Harry told me last night.", "pause": 0.6 },
+        { "text": "Apparently the Hendersons are pulling all their money out. ALL of it.", "pause": 0.8 },
+        { "text": "Yes, yes, of course I'll pretend I didn't tell you.", "pause": 0.6 },
+        { "text": "Oh — someone at the door. Hold on, Ruthie.", "pause": 0.4 }
+      ]
+    },
+    {
+      "id": "wife-quiet-7_15",
+      "emotion": "stressed",
+      "lines": [
+        { "text": "He's working late again. Same as every Thursday.", "pause": 0.9 }
+      ]
+    }
+  ]
+}
