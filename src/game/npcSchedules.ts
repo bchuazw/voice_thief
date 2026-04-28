@@ -94,7 +94,7 @@ export const NPC_SCHEDULES: Record<NpcId, ScheduleMoment[]> = {
     {
       id: "secretary-cafe-6_00",
       startSeconds: T(18, 0),
-      endSeconds: T(18, 10),
+      endSeconds: T(18, 18),
       branch: "default",
       location: "cafe",
       position: { x: 8, y: 0, z: 4 },

@@ -23,14 +23,24 @@ const FRAG = /* glsl */ `
 
   void main() {
     vec2 uv = vUv;
-    uv.x *= 1.5;
-    uv.y -= uTime * 0.7;
-    vec2 cell = floor(uv * vec2(120.0, 60.0));
+    uv.x *= 1.4;
+    // Fast vertical scroll at 1.4x speed
+    uv.y -= uTime * 1.4;
+    // Dense cell grid → many tiny drops
+    vec2 cellCount = vec2(220.0, 90.0);
+    vec2 cell = floor(uv * cellCount);
     float r = rand(cell);
-    float streak = step(0.985, r);
-    float fade = smoothstep(0.0, 0.5, fract(uv.y * 60.0));
-    vec3 col = vec3(0.7, 0.78, 0.95) * streak * fade;
-    float alpha = streak * fade * 0.55;
+    // Only ~2.5% of cells are streaks
+    float seed = step(0.975, r);
+    // Vertical tail inside the cell — gives each drop length, not a square
+    vec2 cellUv = fract(uv * cellCount);
+    float tail = smoothstep(0.0, 0.08, cellUv.y) * smoothstep(1.0, 0.4, cellUv.y);
+    // Subtle horizontal taper so the streak is a needle, not a stick
+    float horiz = smoothstep(0.55, 0.5, abs(cellUv.x - 0.5));
+    float streak = seed * tail * horiz;
+    // Cool gray-blue tint
+    vec3 col = vec3(0.78, 0.84, 1.0) * streak;
+    float alpha = streak * 0.32;
     gl_FragColor = vec4(col, alpha);
   }
 `;
@@ -43,18 +53,35 @@ export default function RainShader() {
     if (mat.current) (mat.current.uniforms as { uTime: { value: number } }).uTime.value += dt;
   });
 
+  // Two staggered curtains tilted toward camera so streaks read as falling
+  // lines rather than a flat layer of stickers.
   return (
-    <mesh position={[0, 6, 4]} rotation={[0, 0, 0]}>
-      <planeGeometry args={[60, 18]} />
-      <shaderMaterial
-        ref={mat}
-        vertexShader={VERT}
-        fragmentShader={FRAG}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </mesh>
+    <group>
+      <mesh position={[0, 5, 6]} rotation={[-0.5, 0, 0]}>
+        <planeGeometry args={[80, 22]} />
+        <shaderMaterial
+          ref={mat}
+          vertexShader={VERT}
+          fragmentShader={FRAG}
+          uniforms={uniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <mesh position={[0, 5, -2]} rotation={[-0.4, 0, 0]}>
+        <planeGeometry args={[80, 22]} />
+        <shaderMaterial
+          vertexShader={VERT}
+          fragmentShader={FRAG}
+          uniforms={uniforms}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
   );
 }

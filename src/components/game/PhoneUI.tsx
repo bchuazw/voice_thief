@@ -8,6 +8,21 @@ import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
 
+function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
+  if (!caller) return "Pick a stolen voice, then dial.";
+  if (caller === "wife" && target === "bankManager")
+    return 'e.g. "Honey, there\'s been a break-in. Come home now."';
+  if (caller === "secretary" && target === "bankManager")
+    return 'e.g. "Sir, I left the ledger at the cafe. Could you grab it?"';
+  if (caller === "bankManager" && target === "secretary")
+    return 'e.g. "Lillian — I left something upstairs. Go check, would you?"';
+  if (caller === "bankManager" && target === "wife")
+    return 'e.g. "Maggie — I\'ll be home late again. Don\'t wait up."';
+  if (target === "bankGuard")
+    return "Eddie won't leave his post. Don't bother trying.";
+  return "What do you want them to hear…";
+}
+
 export default function PhoneUI() {
   const inventory = useGame((s) => s.voiceInventory);
   const togglePhone = useGame((s) => s.togglePhone);
@@ -82,7 +97,7 @@ export default function PhoneUI() {
           useGame.getState().pushToast(`${NPC_PROFILES[target].displayName} hung up.`);
           setActiveCall(null);
           togglePhone(false);
-        }, 1800);
+        }, 4200);
       }
     } catch (err) {
       useGame.getState().pushToast(`Call failed: ${(err as Error).message}`);
@@ -128,11 +143,18 @@ export default function PhoneUI() {
     setMessage("");
   }
 
+  // Pick a placeholder hint based on (caller voice → target) combo.
+  const callerVoiceNpcId = inventory.find((c) => c.id === voiceCardId)?.npcId ?? null;
+  const placeholder = phonePlaceholder(callerVoiceNpcId, target);
+
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 px-4 pointer-events-auto">
-      <div className="w-[min(720px,92vw)] rounded border border-noir-paper/30 bg-noir-smoke p-6 text-noir-paper shadow-2xl">
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/65 px-4 pointer-events-auto">
+      <div className="w-[min(720px,92vw)] rounded border border-noir-amber/40 bg-noir-smoke p-6 text-noir-paper shadow-2xl ring-1 ring-noir-amber/10">
         <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="font-serif text-2xl italic">The Phone</h2>
+          <div className="flex items-baseline gap-3">
+            <span aria-hidden className="text-noir-amber text-xl">☎</span>
+            <h2 className="font-serif text-2xl italic">The Phone</h2>
+          </div>
           <button
             onClick={() => {
               endCall();
@@ -180,9 +202,9 @@ export default function PhoneUI() {
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="What do you want to say…"
+          placeholder={placeholder}
           rows={3}
-          className="mt-3 w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog focus:outline-none"
+          className="mt-3 w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog/70 placeholder:italic focus:outline-none"
         />
 
         <div className="mt-2 flex items-center justify-between">

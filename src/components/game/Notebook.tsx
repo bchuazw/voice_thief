@@ -14,11 +14,21 @@ export default function Notebook() {
   const inventory = useGame((s) => s.voiceInventory);
   const npcs = useGame((s) => s.npcs);
   const toggleNotebook = useGame((s) => s.toggleNotebook);
-  const [tab, setTab] = useState<Tab>("voices");
+  // First-time players get the Schedule tab — it's the actual strategy
+  // briefing. Once they've recorded anything, default back to Voices.
+  const [tab, setTab] = useState<Tab>(inventory.length > 0 ? "voices" : "schedule");
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 px-4 pointer-events-auto">
-      <div className="relative h-[80%] w-[min(900px,90vw)] overflow-hidden rounded border border-noir-paper/30 bg-noir-smoke text-noir-paper shadow-2xl">
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-4 pointer-events-auto">
+      <div
+        className="relative h-[80%] w-[min(900px,90vw)] overflow-hidden rounded border border-noir-paper/25 text-noir-paper shadow-2xl"
+        style={{
+          backgroundColor: "#221d18",
+          backgroundImage:
+            "radial-gradient(1200px 600px at 30% 20%, rgba(244,241,234,0.04), transparent 60%)," +
+            "repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(244,241,234,0.025) 28px, rgba(244,241,234,0.025) 29px)",
+        }}
+      >
         <div className="flex items-center justify-between border-b border-noir-paper/15 px-6 py-3">
           <div className="flex items-baseline gap-3">
             <span className="font-serif text-2xl italic">Notebook</span>
@@ -70,7 +80,6 @@ export default function Notebook() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-noir-fog">
-                    Emotion:{" "}
                     <span
                       className={
                         card.emotionalState === "calm"
@@ -82,11 +91,7 @@ export default function Notebook() {
                     >
                       {card.emotionalState}
                     </span>{" "}
-                    · {card.durationSeconds.toFixed(1)}s ·{" "}
-                    {card.mock ? "mock clone" : "live clone"}
-                  </p>
-                  <p className="mt-1 font-mono text-[10px] text-noir-fog/60">
-                    {card.elevenLabsVoiceId}
+                    · {card.durationSeconds.toFixed(1)}s
                   </p>
                 </div>
               ))}

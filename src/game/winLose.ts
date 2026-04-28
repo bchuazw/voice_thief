@@ -8,8 +8,14 @@ const TRAIN_RADIUS = 2.5;
 export function evaluateWinCondition(state: GameState): boolean {
   if (!state.briefcaseTaken) return false;
   if (state.alarmTriggered) return false;
-  if (state.player.currentLocation !== "street") return false;
-  return distance(state.player.position, TRAIN_STATION_POS) < TRAIN_RADIUS;
+  // Beta feedback: don't gate the win on currentLocation strictly. Either
+  // standing on the street train tile or the dedicated trainStation marker
+  // counts.
+  const onStreetTile =
+    state.player.currentLocation === "street" &&
+    distance(state.player.position, TRAIN_STATION_POS) < TRAIN_RADIUS;
+  const atStation = state.player.currentLocation === "trainStation";
+  return onStreetTile || atStation;
 }
 
 export function evaluateLossConditions(state: GameState): string | null {

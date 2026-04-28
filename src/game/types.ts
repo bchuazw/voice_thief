@@ -92,4 +92,6 @@ export interface GameState {
 export const GAME_START_SECONDS = 18 * 3600;
 export const GAME_END_SECONDS = 21 * 3600;
 export const GAME_DURATION_SECONDS = GAME_END_SECONDS - GAME_START_SECONDS;
-export const REAL_SECONDS_PER_GAME_SECOND = 0.083;
+// Real-time pace. 0.12 → ~22 real-min run (was 0.083 / ~15 min).
+// Beta feedback: 15 min was too brutal vs. recordable windows.
+export const REAL_SECONDS_PER_GAME_SECOND = 0.12;

@@ -8,7 +8,8 @@ import { GAME_END_SECONDS, REAL_SECONDS_PER_GAME_SECOND } from "./types";
 import { evaluateLossConditions } from "./winLose";
 
 const TICK_MS = 200;
-const BANK_CLOSE_TIME = inGameTimeFromClock(19, 0);
+// Bank front locks at 7:30 (was 7:00 — too brutal for first-run players).
+const BANK_CLOSE_TIME = inGameTimeFromClock(19, 30);
 
 export function useGameTick(): void {
   const phase = useGame((s) => s.phase);

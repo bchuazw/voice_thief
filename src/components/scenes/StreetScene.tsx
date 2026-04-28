@@ -10,6 +10,7 @@ import NpcActor from "@/components/characters/NpcActor";
 import RainShader from "@/components/shaders/RainShader";
 import VolumetricLamp from "@/components/shaders/VolumetricLamp";
 import WetAsphalt from "@/components/shaders/WetAsphalt";
+import { Html } from "@react-three/drei";
 import InteractiveProp from "@/components/world/InteractiveProp";
 import LocationGate from "@/components/world/LocationGate";
 import TargetPing from "@/components/world/TargetPing";
@@ -55,18 +56,18 @@ export default function StreetScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.32} color="#1a2030" />
+      <ambientLight intensity={0.55} color="#3a4665" />
       <directionalLight
         position={[6, 14, 6]}
-        intensity={0.35}
+        intensity={0.55}
         color="#aac6ff"
         castShadow
       />
-      <hemisphereLight args={["#3a4a6a", "#0a0a14", 0.25]} />
+      <hemisphereLight args={["#5b6f9a", "#1a1a26", 0.4]} />
 
       <VolumetricLamp position={[-12, 4, 4]} color="#f5a623" />
       <VolumetricLamp position={[12, 4, 4]} color="#ffe9b0" />
-      <VolumetricLamp position={[0, 4, -8]} color="#ff8a42" />
+      <VolumetricLamp position={[0, 4, -8]} color="#f5a623" />
 
       <mesh
         ref={groundRef}
@@ -75,6 +76,11 @@ export default function StreetScene() {
         receiveShadow
         onClick={(e) => handleGroundClick(e)}
       >
+        <planeGeometry args={[60, 40]} />
+        <meshStandardMaterial color="#0e1118" roughness={0.55} metalness={0.4} />
+      </mesh>
+      {/* Wet-asphalt overlay layer (no click handler — events pass through) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 0]} raycast={() => null}>
         <planeGeometry args={[60, 40]} />
         <WetAsphalt />
       </mesh>
@@ -87,10 +93,35 @@ export default function StreetScene() {
         <boxGeometry args={[2.2, 2.8, 0.1]} />
         <meshStandardMaterial color="#3a2a18" emissive="#22150a" emissiveIntensity={0.4} />
       </mesh>
+      {/* Bank facade neon underline */}
       <mesh position={[-10, 6.2, -4]}>
-        <boxGeometry args={[5, 0.6, 0.1]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#ff3c3c" emissiveIntensity={1.2} />
+        <boxGeometry args={[5.6, 0.18, 0.1]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#ff3c3c" emissiveIntensity={1.4} />
       </mesh>
+      {/* In-world serif signage as an Html overlay (drei Text needs remote
+          font load which is unreliable; Html is rock-solid). */}
+      <Html
+        center
+        position={[-10, 5.8, 0.06]}
+        distanceFactor={6}
+        zIndexRange={[8, 0]}
+        occlude={false}
+      >
+        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[28px] tracking-[0.12em] text-[#f4eccd] drop-shadow-[0_0_8px_rgba(255,60,60,0.45)]">
+          First City Bank
+        </div>
+      </Html>
+      <Html
+        center
+        position={[10, 4.7, -0.95]}
+        distanceFactor={7}
+        zIndexRange={[8, 0]}
+        occlude={false}
+      >
+        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[18px] tracking-[0.08em] text-[#f5d6a0]">
+          the all-night
+        </div>
+      </Html>
 
       <mesh position={[10, 2.5, -4]} castShadow>
         <boxGeometry args={[6, 5, 6]} />
