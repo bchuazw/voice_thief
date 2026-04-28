@@ -87,6 +87,8 @@ export interface GameState {
   notebookOpen: boolean;
   phoneOpen: boolean;
   toasts: { id: string; text: string; expiresAt: number }[];
+  audioMuted: boolean;
+  audioVolume: number;
 }
 
 export const GAME_START_SECONDS = 18 * 3600;

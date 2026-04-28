@@ -1,6 +1,7 @@
 "use client";
 
 import { Howl } from "howler";
+import { useGame } from "@/game/store";
 import type { NpcId } from "@/game/types";
 
 const activeSounds = new Map<NpcId, Howl>();
@@ -11,10 +12,12 @@ function urlForMoment(momentId: string): string {
 
 export function startNpcAudio(npcId: NpcId, momentId: string): void {
   stopNpcAudio(npcId);
+  const { audioMuted, audioVolume } = useGame.getState();
+  if (audioMuted) return;
   const url = urlForMoment(momentId);
   const sound = new Howl({
     src: [url],
-    volume: 0.85,
+    volume: audioVolume,
     html5: true,
     onloaderror: () => {},
     onplayerror: () => {},

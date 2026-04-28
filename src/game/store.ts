@@ -68,6 +68,8 @@ export const initialState: GameState = {
   notebookOpen: false,
   phoneOpen: false,
   toasts: [],
+  audioMuted: false,
+  audioVolume: 0.85,
 };
 
 export interface GameActions {
@@ -95,6 +97,8 @@ export interface GameActions {
   togglePhone(open?: boolean): void;
   pushToast(text: string, ttlMs?: number): void;
   pruneToasts(now: number): void;
+  toggleMute(value?: boolean): void;
+  setVolume(value: number): void;
   reset(): void;
 }
 
@@ -240,6 +244,19 @@ export const useGame = create<GameState & GameActions>()(
     pruneToasts: (now) =>
       set((s) => ({ toasts: s.toasts.filter((t) => t.expiresAt > now) })),
 
-    reset: () => set({ ...initialState, phase: "title" }),
+    toggleMute: (value) =>
+      set((s) => ({ audioMuted: value !== undefined ? value : !s.audioMuted })),
+
+    setVolume: (value) =>
+      set({ audioVolume: Math.max(0, Math.min(1, value)) }),
+
+    reset: () =>
+      set((s) => ({
+        ...initialState,
+        phase: "title",
+        // Preserve user audio prefs across resets
+        audioMuted: s.audioMuted,
+        audioVolume: s.audioVolume,
+      })),
   })),
 );

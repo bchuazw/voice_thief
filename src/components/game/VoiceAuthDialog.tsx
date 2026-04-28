@@ -5,6 +5,7 @@ import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { AUTH_REQUIREMENTS } from "@/game/solutionValidator";
 import { emotionGlyph } from "@/game/emotionDisplay";
+import { playAudio } from "@/audio/play";
 import type { AuthAttempt } from "@/game/types";
 
 const DEVICE_LABELS: Record<AuthAttempt["device"], string> = {
@@ -58,11 +59,7 @@ export default function VoiceAuthDialog() {
         reason: string;
         audio: string | null;
       };
-      if (data.audio) {
-        const a = new Audio(data.audio);
-        a.volume = 0.9;
-        a.play().catch(() => {});
-      }
+      if (data.audio) playAudio(data.audio);
       setVerdict({ passes: data.passes, reason: data.reason });
       if (data.passes) {
         setTimeout(() => {

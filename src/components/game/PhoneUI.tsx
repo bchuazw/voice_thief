@@ -5,6 +5,7 @@ import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { setBranch } from "@/game/npcSchedules";
 import { emotionGlyph } from "@/game/emotionDisplay";
+import { playAudio } from "@/audio/play";
 import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
@@ -94,9 +95,9 @@ export default function PhoneUI() {
         npcAudio: string | null;
       };
 
-      if (data.callerAudio) playDataUrl(data.callerAudio);
+      if (data.callerAudio) playAudio(data.callerAudio);
       pushCallTurn({ role: "npc", text: data.npcText });
-      if (data.npcAudio) setTimeout(() => playDataUrl(data.npcAudio!), 600);
+      if (data.npcAudio) setTimeout(() => playAudio(data.npcAudio!), 600);
 
       if (data.raisedSuspicion > 0) {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
@@ -260,10 +261,3 @@ export default function PhoneUI() {
   );
 }
 
-function playDataUrl(url: string) {
-  try {
-    const audio = new Audio(url);
-    audio.volume = 0.85;
-    audio.play().catch(() => {});
-  } catch {}
-}

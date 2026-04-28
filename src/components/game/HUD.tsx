@@ -27,7 +27,17 @@ export default function HUD() {
   const notebookOpen = useGame((s) => s.notebookOpen);
   const phoneOpen = useGame((s) => s.phoneOpen);
   const activeAuth = useGame((s) => s.activeAuth);
+  const audioMuted = useGame((s) => s.audioMuted);
+  const toggleMute = useGame((s) => s.toggleMute);
   const isPaused = notebookOpen || phoneOpen || activeAuth !== null;
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "m" || e.key === "M") toggleMute();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleMute]);
 
   useRecordingHotkey();
 
@@ -79,7 +89,11 @@ export default function HUD() {
           {clockLabel(time)}
         </span>
         {isPaused && (
-          <span className="ml-1 rounded border border-noir-amber/60 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.3em] text-noir-amber">
+          <span
+            className="ml-1 rounded border border-noir-amber/60 px-2 py-0.5 text-[11px] uppercase tracking-[0.3em] text-noir-amber"
+            role="status"
+            aria-live="polite"
+          >
             paused
           </span>
         )}
@@ -126,12 +140,24 @@ export default function HUD() {
         >
           Phone · P
         </button>
+        <button
+          onClick={() => toggleMute()}
+          aria-label={audioMuted ? "Unmute audio" : "Mute audio"}
+          aria-pressed={audioMuted}
+          className={`rounded border bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber ${
+            audioMuted
+              ? "border-noir-amber text-noir-amber"
+              : "border-noir-paper/30 text-noir-paper"
+          }`}
+        >
+          {audioMuted ? "Muted · M" : "Sound · M"}
+        </button>
       </div>
 
       {/* Persistent control strip — first-time players never miss this */}
       <div className="pointer-events-none absolute bottom-2 right-4 text-right">
         <p className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
-          Click to walk · Hold <kbd className="text-noir-amber">E</kbd> to record · <kbd className="text-noir-amber">N</kbd> notebook · <kbd className="text-noir-amber">P</kbd> phone · <kbd className="text-noir-amber">Esc</kbd> close
+          Click to walk · Hold <kbd className="text-noir-amber">E</kbd> record · <kbd className="text-noir-amber">N</kbd> notebook · <kbd className="text-noir-amber">P</kbd> phone · <kbd className="text-noir-amber">M</kbd> mute · <kbd className="text-noir-amber">Esc</kbd> close
         </p>
       </div>
 
