@@ -13,6 +13,7 @@ import VoiceAuthDialog from "./VoiceAuthDialog";
 import EndCard from "./EndCard";
 import ToastStack from "./ToastStack";
 import TitleScreen from "./TitleScreen";
+import SceneTitle from "./SceneTitle";
 
 export default function GameRoot() {
   const phase = useGame((s) => s.phase);
@@ -34,6 +35,7 @@ export default function GameRoot() {
       {(phase === "playing" || phase === "won" || phase === "lost") && (
         <>
           <GameCanvas />
+          <SceneTitle />
           <HUD />
           <ToastStack />
           {notebookOpen && <Notebook />}

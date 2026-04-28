@@ -7,6 +7,7 @@ import { moveToward } from "@/game/pathfinding";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import LocationGate from "@/components/world/LocationGate";
+import TargetPing from "@/components/world/TargetPing";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["secretary", "bankManager"];
@@ -57,6 +58,7 @@ export default function CafeScene() {
       </mesh>
 
       <PlayerCharacter />
+      <TargetPing />
       {NPC_LIST.map((id) => (
         <NpcActor key={id} npcId={id} sceneLocation="cafe" />
       ))}

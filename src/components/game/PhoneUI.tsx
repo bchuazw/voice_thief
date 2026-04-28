@@ -81,7 +81,8 @@ export default function PhoneUI() {
         setTimeout(() => {
           useGame.getState().pushToast(`${NPC_PROFILES[target].displayName} hung up.`);
           setActiveCall(null);
-        }, 1400);
+          togglePhone(false);
+        }, 1800);
       }
     } catch (err) {
       useGame.getState().pushToast(`Call failed: ${(err as Error).message}`);

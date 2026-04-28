@@ -40,7 +40,7 @@ export default function InteractiveProp({ position, label, color, onClick }: Pro
           emissiveIntensity={hovered ? 0.9 : 0.4}
         />
       </mesh>
-      <Html center position={[0, 0.9, 0]} distanceFactor={9}>
+      <Html center position={[0, 0.9, 0]} distanceFactor={9} zIndexRange={[12, 0]}>
         <div className="pointer-events-none rounded bg-black/70 px-2 py-1 text-[10px] uppercase tracking-[0.25em] text-noir-paper">
           {label}
         </div>

@@ -36,9 +36,8 @@ yarn-error.log*
 .vt-agents.json
 .vt-cleanup-queue.json
 
-# rendered NPC audio (regenerable via scripts/render-npc-scripts.ts)
-public/audio/npc-scripts/*.mp3
-!public/audio/npc-scripts/.gitkeep
+# rendered NPC audio (silent placeholders ship in repo so the mock-mode
+# demo works out of the box; real-key TTS overwrites them locally)
 
 # hyperframes outputs
 hyperframes/output/*

@@ -42,7 +42,7 @@ export default function LocationGate({ position, label, color, onClick }: Props)
           opacity={0.55}
         />
       </mesh>
-      <Html center position={[0, 1.2, 0]} distanceFactor={10}>
+      <Html center position={[0, 1.2, 0]} distanceFactor={10} zIndexRange={[12, 0]}>
         <div className="pointer-events-none rounded bg-black/80 px-2 py-1 text-[10px] uppercase tracking-[0.25em] text-noir-paper">
           {label}
         </div>

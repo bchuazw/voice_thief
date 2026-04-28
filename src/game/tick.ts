@@ -3,10 +3,12 @@
 import { useEffect } from "react";
 import { useGame } from "./store";
 import { stepNpcSchedules } from "./npcSchedules";
+import { inGameTimeFromClock } from "./timeFormat";
 import { GAME_END_SECONDS, REAL_SECONDS_PER_GAME_SECOND } from "./types";
 import { evaluateLossConditions } from "./winLose";
 
 const TICK_MS = 200;
+const BANK_CLOSE_TIME = inGameTimeFromClock(19, 0);
 
 export function useGameTick(): void {
   const phase = useGame((s) => s.phase);
@@ -15,11 +17,17 @@ export function useGameTick(): void {
     if (phase !== "playing") return;
     const interval = setInterval(() => {
       const state = useGame.getState();
+      const prevTime = state.inGameTime;
       const deltaInGame = (TICK_MS / 1000) / REAL_SECONDS_PER_GAME_SECOND;
       state.advanceTime(deltaInGame);
       state.pruneToasts(Date.now());
 
       const next = useGame.getState();
+      if (prevTime < BANK_CLOSE_TIME && next.inGameTime >= BANK_CLOSE_TIME && next.bankFrontUnlocked) {
+        next.openBankFront(false);
+        next.pushToast("7:00 PM — bank doors lock for the night.");
+      }
+
       stepNpcSchedules(next.inGameTime);
 
       const after = useGame.getState();

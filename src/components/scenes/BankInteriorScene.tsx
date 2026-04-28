@@ -10,6 +10,7 @@ import VolumetricLamp from "@/components/shaders/VolumetricLamp";
 import VaultDoor from "@/components/shaders/VaultDoor";
 import LocationGate from "@/components/world/LocationGate";
 import InteractiveProp from "@/components/world/InteractiveProp";
+import TargetPing from "@/components/world/TargetPing";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["bankManager", "secretary", "bankGuard"];
@@ -69,6 +70,7 @@ export default function BankInteriorScene() {
       </mesh>
 
       <PlayerCharacter />
+      <TargetPing />
       {NPC_LIST.map((id) => (
         <NpcActor key={id} npcId={id} sceneLocation="bankLobby" />
       ))}

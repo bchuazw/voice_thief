@@ -7,6 +7,7 @@ import { moveToward } from "@/game/pathfinding";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import LocationGate from "@/components/world/LocationGate";
+import TargetPing from "@/components/world/TargetPing";
 
 export default function ApartmentScene() {
   const player = useGame((s) => s.player);
@@ -59,6 +60,7 @@ export default function ApartmentScene() {
       </mesh>
 
       <PlayerCharacter />
+      <TargetPing />
       <NpcActor npcId="wife" sceneLocation="apartment" />
 
       <LocationGate

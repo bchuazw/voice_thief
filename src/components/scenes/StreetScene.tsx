@@ -12,6 +12,7 @@ import VolumetricLamp from "@/components/shaders/VolumetricLamp";
 import WetAsphalt from "@/components/shaders/WetAsphalt";
 import InteractiveProp from "@/components/world/InteractiveProp";
 import LocationGate from "@/components/world/LocationGate";
+import TargetPing from "@/components/world/TargetPing";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
@@ -112,6 +113,7 @@ export default function StreetScene() {
       <RainShader />
 
       <PlayerCharacter />
+      <TargetPing />
 
       {NPC_LIST.map((id) => (
         <NpcActor key={id} npcId={id} sceneLocation="street" />
