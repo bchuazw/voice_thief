@@ -29,9 +29,9 @@ export default function BankInteriorScene() {
   const { camera } = useThree();
 
   useEffect(() => {
-    camera.position.set(player.position.x, 6, player.position.z + 8);
-    camera.lookAt(player.position.x, 1, player.position.z);
-  }, [camera, player.position.x, player.position.z]);
+    camera.position.set(0, 11, 12);
+    camera.lookAt(0, 1, -3);
+  }, [camera]);
 
   useFrame((_, dt) => {
     const t = useGame.getState().player.target;

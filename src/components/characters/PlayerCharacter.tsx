@@ -28,21 +28,22 @@ export default function PlayerCharacter() {
   return (
     <group ref={ref}>
       <mesh position={[0, 1.5, 0]} castShadow>
-        <capsuleGeometry args={[0.32, 1, 6, 12]} />
-        <meshStandardMaterial color="#0a0a10" roughness={0.95} />
+        <capsuleGeometry args={[0.34, 1.1, 6, 12]} />
+        <meshStandardMaterial color="#1a1a22" roughness={0.85} emissive="#0a0a18" emissiveIntensity={0.35} />
       </mesh>
-      <mesh position={[0, 2.4, 0]} castShadow>
-        <sphereGeometry args={[0.22, 12, 12]} />
-        <meshStandardMaterial color="#0a0a10" roughness={1} />
+      <mesh position={[0, 2.45, 0]} castShadow>
+        <sphereGeometry args={[0.24, 12, 12]} />
+        <meshStandardMaterial color="#1a1a22" roughness={0.9} emissive="#0a0a18" emissiveIntensity={0.35} />
       </mesh>
-      <mesh position={[0, 2.7, 0]}>
-        <cylinderGeometry args={[0.42, 0.42, 0.05, 24]} />
-        <meshStandardMaterial color="#000" />
+      <mesh position={[0, 2.78, 0]}>
+        <cylinderGeometry args={[0.46, 0.46, 0.06, 24]} />
+        <meshStandardMaterial color="#101018" />
       </mesh>
-      <mesh position={[0, 2.55, 0]}>
-        <cylinderGeometry args={[0.27, 0.27, 0.18, 24]} />
-        <meshStandardMaterial color="#000" />
+      <mesh position={[0, 2.6, 0]}>
+        <cylinderGeometry args={[0.28, 0.28, 0.18, 24]} />
+        <meshStandardMaterial color="#101018" />
       </mesh>
+      <pointLight position={[0, 2, 0]} intensity={0.35} color="#5a72a8" distance={3} />
     </group>
   );
 }

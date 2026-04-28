@@ -15,11 +15,11 @@ export default function GameCanvas() {
     <Canvas
       shadows
       dpr={[1, 1.6]}
-      camera={{ position: [0, 8, 12], fov: 45 }}
+      camera={{ position: [2, 14, 18], fov: 38 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       className="absolute inset-0"
     >
-      <fog attach="fog" args={["#05060a", 14, 38]} />
+      <fog attach="fog" args={["#05060a", 22, 55]} />
       <color attach="background" args={["#05060a"]} />
       <Suspense fallback={null}>
         {(loc === "street" || loc === "trainStation") && <StreetScene />}

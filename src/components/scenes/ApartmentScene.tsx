@@ -17,9 +17,9 @@ export default function ApartmentScene() {
   const { camera } = useThree();
 
   useEffect(() => {
-    camera.position.set(player.position.x, 5, player.position.z + 7);
-    camera.lookAt(player.position.x, 1, player.position.z);
-  }, [camera, player.position.x, player.position.z]);
+    camera.position.set(0, 9, 10);
+    camera.lookAt(0, 1, -1);
+  }, [camera]);
 
   useFrame((_, dt) => {
     const t = useGame.getState().player.target;

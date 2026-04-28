@@ -89,7 +89,7 @@ export interface GameState {
   toasts: { id: string; text: string; expiresAt: number }[];
 }
 
-export const GAME_START_SECONDS = 6 * 3600;
-export const GAME_END_SECONDS = 9 * 3600;
+export const GAME_START_SECONDS = 18 * 3600;
+export const GAME_END_SECONDS = 21 * 3600;
 export const GAME_DURATION_SECONDS = GAME_END_SECONDS - GAME_START_SECONDS;
 export const REAL_SECONDS_PER_GAME_SECOND = 0.083;

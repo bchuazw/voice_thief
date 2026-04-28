@@ -31,9 +31,9 @@ export default function StreetScene() {
   const { camera } = useThree();
 
   useEffect(() => {
-    camera.position.set(player.position.x, 7, player.position.z + 9);
-    camera.lookAt(player.position.x, 0, player.position.z);
-  }, [camera, player.position.x, player.position.z]);
+    camera.position.set(2, 14, 18);
+    camera.lookAt(0, 1, -1);
+  }, [camera]);
 
   useFrame((_, dt) => {
     const target = useGame.getState().player.target;
@@ -54,13 +54,14 @@ export default function StreetScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.18} color="#101218" />
+      <ambientLight intensity={0.32} color="#1a2030" />
       <directionalLight
         position={[6, 14, 6]}
-        intensity={0.15}
+        intensity={0.35}
         color="#aac6ff"
         castShadow
       />
+      <hemisphereLight args={["#3a4a6a", "#0a0a14", 0.25]} />
 
       <VolumetricLamp position={[-12, 4, 4]} color="#f5a623" />
       <VolumetricLamp position={[12, 4, 4]} color="#ffe9b0" />
