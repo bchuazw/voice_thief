@@ -16,11 +16,15 @@ the office. So does the front door after closing.
 You cannot speak. But you have a tape recorder. And there are people in this
 city who do.
 
-## Screens
+## A first-person heist
+
+The game plays in first-person — WASD walk, Shift run, mouse-look, **E** to
+interact with whatever's centered in the crosshair. Press **C** to flip into
+a top-down "diorama" view if you'd rather plan the heist like a chess board.
 
 ### Landing
 
-![Landing page](docs/screenshots/01-landing.png)
+![Landing](docs/screenshots/01-landing.png)
 
 ### Intro cinematic
 
@@ -28,138 +32,104 @@ A 33-second cold open. No tutorial popups; the world tells you what it is.
 
 ![Intro cinematic](docs/screenshots/03-intro.png)
 
-### The street
+### The street, in first-person
 
-The single block where most of the heist plays out. Bank entrance on the left,
-payphone center, all-night cafe on the right, apartments at the end of the
-block. NPCs move between scenes on a real schedule from 6 PM to 9 PM. A scene
-title fades in on every location change.
+First City — Main Street at 6 PM. The streetlamps cast amber halos onto the
+wet asphalt. The bank's red neon underline glows at the corner. Out on patrol,
+the bank guard hums to himself.
 
-![Street at 6 PM with scene title](docs/screenshots/04-scene-title.png)
+![FP — Main Street](docs/screenshots/04-fp-street.png)
 
-Click anywhere on the ground to walk. A small golden ring marks the target.
+The payphone is the player's only outbound line. Pick it up to make a call
+in any voice you've stolen.
 
-![Click-to-move target ring](docs/screenshots/06-target-ping.png)
+![FP — Payphone in close-up](docs/screenshots/05-fp-payphone.png)
 
-### Notebook — three tabs
+### The bank facade
 
-Your inventory. Voices you've stolen, dossiers on every suspect, and the
-schedule of recordable moments you've uncovered.
+First City Bank by night. Stone columns, brass door fittings, two amber
+sconces, barred glowing windows, a transom over the door, a red neon strip
+under the engraved sign.
 
-![Notebook — Schedule](docs/screenshots/08-notebook-schedule.png)
+![FP — Bank facade](docs/screenshots/06-fp-bank-facade.png)
 
-![Notebook — Suspects](docs/screenshots/09-notebook-suspects.png)
+### The apartment block
 
-### The phone
+Tenements at the end of the block, fire escape running down the front, lit
+windows scattered between dark ones. Margaret Vance's apartment is on the
+ground floor.
+
+![FP — Apartments + fire escape](docs/screenshots/06b-fp-apartments.png)
+
+### Inside the bank
+
+Marble checker floor, brass chandelier, three teller windows with iron bars
+behind a long mahogany counter. The secretary's lamp glows on the counter
+end. Harold Vance the manager is doing paperwork.
+
+![FP — Bank lobby](docs/screenshots/07-fp-bank-lobby.png)
+
+### The vault
+
+Past the manager's hallway, the brass torus frame rings the open vault door.
+The deposit-box grid lines the back wall, each box with its keyhole and tiny
+glowing number plate. The briefcase sits on its pedestal in the corner.
+
+![FP — Vault chamber](docs/screenshots/08-fp-vault.png)
+
+### Margaret Vance's living room
+
+Maroon walls, picture frames, a sofa under a warm sconce, a window dressed
+with curtains looking out at the moonlight. Margaret on the phone gossiping
+with the neighbor.
+
+![FP — Apartment living room](docs/screenshots/09-fp-apartment.png)
+
+### The all-night cafe
+
+Black-and-cream checker tile, hanging Edison bulbs, espresso machine on the
+counter, red-topped stools. The secretary takes her coffee here at 6 PM
+sharp.
+
+![FP — Cafe interior](docs/screenshots/10-fp-cafe.png)
+
+### Diorama mode (press C)
+
+Same scenes, top-down. Useful for planning, for the demo trailer, and for
+anyone who finds first-person uncomfortable.
+
+![Diorama — Main Street](docs/screenshots/11-diorama-street.png)
+
+### The notebook (press N)
+
+Three tabs: **Voices** you've stolen, **Suspects** you've encountered, and
+the schedule of recordable moments. Color- and glyph-coded emotion tags
+(○ calm · ◐ stressed · ● panicked) so it reads with deuteranopia.
+
+![Notebook — Schedule](docs/screenshots/12-notebook-schedule.png)
+
+### The phone (press P)
 
 The crime. Pick a target. Pick a stolen voice. Type what you want them to
 hear. The receiving NPC reacts in character — and if your performance is
 plausible, the world bends around it.
 
-![Phone UI](docs/screenshots/10-phone.png)
-
-## A complete heist, captured frame-by-frame
-
-The screenshots below are pulled from the **end-to-end test** — Playwright
-drives the running dev server in mock mode, so this is the actual game flow
-the test verifies. **38 / 38 checks pass.**
-
-### 1. Game start
-
-Player on the rainy street at 6:00 PM. Bank front-left, cafe glowing yellow
-right, payphone red center. Eddie Cole the guard begins his beat.
-
-![Street at 6 PM](docs/test-shots/01-street-6pm.png)
-
-### 2. Voice captured → Notebook
-
-The player has just recorded the manager's calm 6:15 PM cigarette break.
-Voice card appears in the Notebook with the calm tag and a recording duration.
-
-![Notebook with first voice card](docs/test-shots/02-notebook-with-card.png)
-
-### 3. The phone
-
-Pick a target. Pick a voice. Type what you want them to hear.
-
-![Phone — initial state](docs/test-shots/03-phone-open.png)
-
-### 4. The diversion lands
-
-Calling the manager from the payphone in his **wife's** voice — *"Honey,
-there's been a break-in at the house. Come home now."* He believes it. The
-toast in the corner confirms: *"The manager rushes for the door."*
-
-![Phone call active — manager rushes home](docs/test-shots/04-phone-call-active.png)
-
-### 5. Inside the bank
-
-With the manager gone and the hallway unlocked, the player walks into the
-empty lobby. The vault intercom is at the end of the hallway.
-
-![Bank lobby](docs/test-shots/05-bank-lobby.png)
-
-### 6. Vault authentication required
-
-Click the intercom. The system asks for the phrase
-*"Authorize vault, code 7-7-1"* in the manager's voice. The Notebook lists
-every matching voice card.
-
-![Vault auth dialog open](docs/test-shots/06-vault-auth-open.png)
-
-### 7. Wrong recording — rejected
-
-The player tries the **stressed** recording from the manager's 6:45 PM phone
-fight. *"Voice too stressed — try a calmer recording."* +15 suspicion.
-
-![Stressed voice rejected](docs/test-shots/07-vault-auth-stressed-fail.png)
-
-### 8. Calm recording — accepted
-
-The cigarette-break recording passes. *"Voiceprint accepted."*
-
-![Calm voice accepted](docs/test-shots/08-vault-auth-calm-pass.png)
-
-### 9. Vault open
-
-Brass door swings. Briefcase sits inside under a single lamp.
-
-![Vault open](docs/test-shots/09-vault-open.png)
-
-### 10. WIN
-
-Briefcase in hand, the player reaches the train station before 9:00 PM.
-
-![Win screen — A clean con.](docs/test-shots/10-win.png)
-
-### 11. Failure paths
-
-Get caught — too many failed auths, too many bad calls, suspicion crosses 100
-and the alarm goes. End of evening.
-
-![Lost — alarm raised](docs/test-shots/11-lost.png)
-
-…or just run out the clock past 9:00 PM.
-
-![Lost — last train](docs/test-shots/12-lost-timeout.png)
-
-### 12. Solution C kicks off
-
-Calling the manager *as the secretary* — *"Sir, I left the safe-deposit ledger
-at the cafe. Could you grab it on your way back?"* Manager pivots to the cafe;
-the player can now record him there, calm, in person.
-
-![Solution C — secretary call lures the manager to the cafe](docs/test-shots/13-solution-c-call.png)
+![Phone UI](docs/screenshots/13-phone.png)
 
 ## Controls
 
-| Key / action | What it does |
+| Key | What it does |
 | --- | --- |
-| Click ground | Walk to that point |
-| **Hold E** | Record a nearby NPC who is speaking |
+| **WASD** / arrows | Walk |
+| **Shift** | Run |
+| Mouse | Look around (FP only — click the canvas to engage pointer-lock) |
+| Click ground | Walk to that point (Diorama only) |
+| **E** | Interact with what's centered in the crosshair: record an NPC, use the payphone, open a door, authenticate at a voice-locked intercom, take the briefcase |
 | **N** | Toggle the Notebook |
 | **P** | Toggle the Phone |
-| Click a door / intercom | Voice authentication dialog |
+| **M** | Mute / unmute audio |
+| **C** | Toggle First-person ↔ Diorama view |
+| **Esc** | Close any open modal |
 
 ## How a heist plays out
 
@@ -167,15 +137,15 @@ There are three valid solution paths to the vault. None of them require
 combat or stealth in the traditional sense — only careful timing and good
 casting.
 
-1. **Direct:** record the manager during his calm 6:15 PM cigarette break,
+1. **Direct.** Record the manager during his calm 6:15 PM cigarette break,
    wait until the bank empties, walk in and play it at the vault.
-2. **Diversion:** record the manager's wife gossiping at home. Call the
+2. **Diversion.** Record the manager's wife gossiping at home. Call the
    manager from the payphone in her voice. Tell him there's a break-in.
    Watch him flee. Steal his panicked voice on the way out (useful for
    tricking the secretary, not the vault). You'll still need the calm
    cigarette recording for the vault itself.
-3. **Insider:** record the secretary at the cafe at 6:00 PM. Use her voice to
-   call the manager about a "lost ledger." He detours to the cafe. You
+3. **Insider.** Record the secretary at the cafe at 6:00 PM. Use her voice
+   to call the manager about a "lost ledger." He detours to the cafe. You
    record him, calm, in person at the cafe. Then call the secretary in his
    voice and send her on an errand. Bank is empty.
 
@@ -214,19 +184,17 @@ npm run dev
 
 ## Tests
 
-The end-to-end run that produced the screenshots above lives at
-`vt-e2e.cjs`. With the dev server running in mock mode:
-
-```bash
-node vt-e2e.cjs
-```
-
+The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev server in mock mode
+in one terminal and run `node vt-e2e.cjs` in another. **38 / 38 checks pass.**
 It exercises every gameplay primitive — phase transitions, recording,
 notebook inventory, phone diversion (wife→manager break-in flips the manager
 to `rushedHome` and unlocks the hallway), voice auth (stressed fails, calm
 passes), briefcase, train-station win, suspicion-driven loss, time-out loss,
 and the Solution C secretary→manager pivot — plus 9 direct API contract
-checks. Full transcript is in [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
+checks. Full transcript: [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
+
+The screenshots above are captured by `vt-fp-shots.cjs` against the running
+dev server in mock mode.
 
 ## Architecture
 
@@ -238,6 +206,25 @@ The ElevenLabs API key never reaches the browser — every external call goes
 through `app/api/*` route handlers backed by `src/elevenlabs/*` modules
 tagged `import "server-only"`. A single `isMockMode()` check short-circuits
 all four APIs so the game is fully playable without any keys.
+
+## Accessibility
+
+- Color is never the only channel. Emotion tags carry glyphs (○ ◐ ●).
+  Suspicion shows numeric `XX / 100 · clean / noticed / hunted` alongside
+  the color bar. Suspicion + recording bars expose proper `role="progressbar"`
+  with aria values.
+- Recording works via mouse, keyboard, switch, or screen reader: an on-screen
+  Record button with `aria-label`, focus ring, and `aria-live` updates plus
+  the Hold-E hotkey.
+- Every modal is `role="dialog" aria-modal="true"` with an `aria-labelledby`
+  heading; **Esc** closes everything.
+- Game time auto-pauses while any modal is open so slow readers and
+  screen-reader users don't lose real-time. A `paused` badge announces the
+  state.
+- **M** toggles a global mute that's respected by all synthesized speech
+  playback (TTS calls, voice-auth playback, scripted NPC dialogue).
+- All HUD label text is at least 11px; transcript captions render alongside
+  audio playback.
 
 ## Credits
 
