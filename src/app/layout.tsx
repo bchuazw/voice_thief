@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import { Crimson_Pro, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const crimson = Crimson_Pro({ subsets: ["latin"], variable: "--font-crimson" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 export const metadata: Metadata = {
   title: "Voice Thief",
@@ -19,15 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${inter.variable} ${crimson.variable} ${jetbrains.variable}`}>
       <body>{children}</body>
     </html>
   );

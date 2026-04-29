@@ -25,10 +25,10 @@ const FRAG = /* glsl */ `
   void main() {
     vec2 uv = vWorldPos.xz;
     // Plank size: 0.18 wide × ~1.6 long
-    float plankRow = floor(uv.z / 1.6);
+    float plankRow = floor(uv.y / 1.6);
     // Stagger — every other row offset
     float offset = mod(plankRow, 2.0) * 0.8;
-    vec2 plankUv = vec2(uv.x + offset, uv.z);
+    vec2 plankUv = vec2(uv.x + offset, uv.y);
     vec2 cell = floor(plankUv * vec2(1.0/0.18, 1.0/1.6));
     float h = hash(cell);
     vec3 base = mix(vec3(0.32, 0.18, 0.10), vec3(0.5, 0.30, 0.15), h);

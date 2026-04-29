@@ -63,7 +63,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       priority: 3,
       build: () => {
         if (s.bankFrontUnlocked)
-          return { kind: "enterLocation", target: "bankLobby", label: "Enter the bank" };
+          return {
+            kind: "enterLocation",
+            target: "bankLobby",
+            label: "Enter the bank",
+            entryPosition: { x: 0, y: 0, z: 3.8 },
+          };
         return {
           kind: "auth",
           device: "bankFront",
@@ -75,7 +80,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       pos: new THREE.Vector3(10, 1.4, -0.4),
       radius: 1.2,
       priority: 3,
-      build: () => ({ kind: "enterLocation", target: "cafe", label: "Enter the cafe" }),
+      build: () => ({
+        kind: "enterLocation",
+        target: "cafe",
+        label: "Enter the cafe",
+        entryPosition: { x: 0, y: 0, z: 3.8 },
+      }),
     });
     // Apartment door
     targets.push({
@@ -86,6 +96,7 @@ function listTargets(scene: LocationId): InteractableTarget[] {
         kind: "enterLocation",
         target: "apartment",
         label: "Enter the apartments",
+        entryPosition: { x: 0, y: 0, z: 3.8 },
       }),
     });
     // Train station
@@ -106,7 +117,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       pos: new THREE.Vector3(0, 1.2, 5),
       radius: 1.2,
       priority: 3,
-      build: () => ({ kind: "enterLocation", target: "street", label: "Back to the street" }),
+      build: () => ({
+        kind: "enterLocation",
+        target: "street",
+        label: "Back to the street",
+        entryPosition: { x: -10, y: 0, z: 2.8 },
+      }),
     });
     // Hallway gate
     targets.push({
@@ -115,7 +131,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       priority: 3,
       build: () => {
         if (s.bankHallwayUnlocked)
-          return { kind: "enterLocation", target: "vault", label: "Enter the hallway" };
+          return {
+            kind: "enterLocation",
+            target: "vault",
+            label: "Enter the hallway",
+            entryPosition: { x: 0, y: 0, z: -12.8 },
+          };
         return { kind: "auth", device: "bankHallway" };
       },
     });
@@ -141,7 +162,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       pos: new THREE.Vector3(0, 1.2, 5),
       radius: 1.2,
       priority: 3,
-      build: () => ({ kind: "enterLocation", target: "bankLobby", label: "Back to the lobby" }),
+      build: () => ({
+        kind: "enterLocation",
+        target: "bankLobby",
+        label: "Back to the lobby",
+        entryPosition: { x: 0, y: 0, z: -7.2 },
+      }),
     });
   }
 
@@ -150,7 +176,13 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       pos: new THREE.Vector3(0, 1.2, 5),
       radius: 1.2,
       priority: 3,
-      build: () => ({ kind: "enterLocation", target: "street", label: "Back to the street" }),
+      build: () => ({
+        kind: "enterLocation",
+        target: "street",
+        label: "Back to the street",
+        entryPosition:
+          scene === "cafe" ? { x: 10, y: 0, z: 2.8 } : { x: 18, y: 0, z: 3.2 },
+      }),
     });
   }
 

@@ -44,6 +44,18 @@ async function setState(page, patch) {
   return await vt(page, (p) => window.__vt.setState(p), patch);
 }
 
+function browserExecutablePath() {
+  const candidates = [
+    process.env.CHROME_BIN,
+    "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  ].filter(Boolean);
+  return candidates.find((p) => fs.existsSync(p));
+}
+
 async function waitFor(page, predFn, label, timeoutMs = 8000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -55,10 +67,9 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
 }
 
 (async () => {
+  const executablePath = browserExecutablePath();
   const browser = await chromium.launch({
-    executablePath:
-      process.env.CHROME_BIN ||
-      "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+    ...(executablePath ? { executablePath } : {}),
     headless: true,
     args: [
       "--no-sandbox",
@@ -80,7 +91,8 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
 
   // ── 1. Phase transitions ────────────────────────────────────────────
   console.log("\n=== Phase 1: title → intro → playing ===");
-  await page.goto("http://localhost:3000/play", { waitUntil: "networkidle", timeout: 30000 });
+  await page.goto("http://localhost:3000/play", { waitUntil: "domcontentloaded", timeout: 30000 });
+  await page.waitForFunction(() => window.__vt?.getState, undefined, { timeout: 30000 });
   await page.waitForTimeout(2000);
 
   let state = await getState(page);

@@ -5,11 +5,13 @@ import { useGame } from "@/game/store";
 export default function TitleScreen() {
   const setPhase = useGame((s) => s.setPhase);
   return (
-    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black text-noir-paper">
+    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black px-4 text-noir-paper">
       <p className="mb-2 text-xs uppercase tracking-[0.5em] text-noir-fog">
-        First City — Thursday
+        First City - Thursday
       </p>
-      <h1 className="text-7xl font-extrabold tracking-[0.18em]">VOICE THIEF</h1>
+      <h1 className="text-center text-5xl font-extrabold leading-tight tracking-[0.08em] sm:text-6xl sm:tracking-[0.12em] md:text-7xl md:tracking-[0.18em]">
+        VOICE THIEF
+      </h1>
       <p className="mt-6 max-w-xl text-center italic text-noir-fog">
         It is 6 PM. You have until 9 to walk out with the briefcase.
       </p>
@@ -22,8 +24,8 @@ export default function TitleScreen() {
       >
         Start
       </button>
-      <p className="mt-6 text-[10px] uppercase tracking-[0.35em] text-noir-fog/70">
-        Click to walk · Hold E to record · N notebook · P phone
+      <p className="mt-6 max-w-3xl text-center text-[10px] uppercase tracking-[0.3em] text-noir-fog/70">
+        First-person: WASD move | Diorama: C then click to walk | Hold E record | N notebook | P phone
       </p>
     </div>
   );

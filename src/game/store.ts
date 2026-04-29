@@ -22,6 +22,16 @@ const NPC_START_LOCATIONS: Record<NpcId, { pos: Vec3; loc: LocationId }> = {
   wife: { pos: { x: 0, y: 0, z: 0 }, loc: "apartment" },
 };
 
+const LOCATION_ENTRY_POSITIONS: Record<LocationId, Vec3> = {
+  street: { x: 0, y: 0, z: 6 },
+  bankLobby: { x: 0, y: 0, z: 3.8 },
+  bankHallway: { x: 0, y: 0, z: -7.2 },
+  vault: { x: 0, y: 0, z: -12.8 },
+  apartment: { x: 0, y: 0, z: 3.8 },
+  cafe: { x: 0, y: 0, z: 3.8 },
+  trainStation: { x: 12, y: 0, z: 8 },
+};
+
 function makeInitialNpc(id: NpcId): NpcState {
   const start = NPC_START_LOCATIONS[id];
   return {
@@ -79,7 +89,7 @@ export interface GameActions {
   advanceTime(deltaSeconds: number): void;
   setPlayerTarget(target: Vec3 | null): void;
   setPlayerPosition(pos: Vec3): void;
-  setPlayerLocation(loc: LocationId): void;
+  setPlayerLocation(loc: LocationId, entryPosition?: Vec3): void;
   startRecording(npcId: NpcId): void;
   stopRecording(): void;
   addVoiceCard(card: VoiceCard): void;
@@ -110,7 +120,21 @@ export const useGame = create<GameState & GameActions>()(
   subscribeWithSelector((set, _get) => ({
     ...initialState,
 
-    setPhase: (phase) => set({ phase }),
+    setPhase: (phase) =>
+      set((s) => {
+        if (phase !== "playing" || s.phase === "playing") return { phase };
+        return {
+          phase,
+          toasts: [
+            ...s.toasts,
+            {
+              id: `${Date.now()}_objective`,
+              text: "Objective: check the notebook, steal a calm manager voice, open the vault.",
+              expiresAt: Date.now() + 7000,
+            },
+          ],
+        };
+      }),
 
     advanceTime: (deltaSeconds) =>
       set((s) => ({ inGameTime: s.inGameTime + deltaSeconds })),
@@ -121,8 +145,15 @@ export const useGame = create<GameState & GameActions>()(
     setPlayerPosition: (position) =>
       set((s) => ({ player: { ...s.player, position } })),
 
-    setPlayerLocation: (loc) =>
-      set((s) => ({ player: { ...s.player, currentLocation: loc } })),
+    setPlayerLocation: (loc, entryPosition) =>
+      set((s) => ({
+        player: {
+          ...s.player,
+          currentLocation: loc,
+          position: entryPosition ?? LOCATION_ENTRY_POSITIONS[loc],
+          target: null,
+        },
+      })),
 
     startRecording: (npcId) =>
       set((s) => ({

@@ -22,7 +22,7 @@ export function useInteractionHotkey(): void {
             s.pushToast("Locked. Try authenticating.");
             return;
           }
-          s.setPlayerLocation(current.target as never);
+          s.setPlayerLocation(current.target as never, current.entryPosition);
           return;
         case "auth":
           s.setActiveAuth({

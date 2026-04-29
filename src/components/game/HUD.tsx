@@ -51,19 +51,21 @@ export default function HUD() {
     return () => window.removeEventListener("keydown", onKey);
   }, [toggleMute, toggleNotebook, togglePhone, toggleViewMode]);
 
-  const [now, setNow] = useState(Date.now());
+  const [recordedMs, setRecordedMs] = useState(0);
   useEffect(() => {
-    if (!isRecording) return;
-    const id = setInterval(() => setNow(Date.now()), 100);
+    if (!isRecording || !recordingStartedAt) return;
+    const id = setInterval(() => {
+      setRecordedMs(Date.now() - recordingStartedAt);
+    }, 100);
     return () => clearInterval(id);
-  }, [isRecording]);
+  }, [isRecording, recordingStartedAt]);
 
   const minutesLeft = Math.max(0, (GAME_END_SECONDS - time) / 60);
   const timeUrgent = minutesLeft < 30;
 
-  const recordedMs = isRecording && recordingStartedAt ? now - recordingStartedAt : 0;
-  const recordPct = Math.min(1, recordedMs / RECORD_MAX_MS);
-  const recordGood = recordedMs >= RECORD_GOOD_MS;
+  const visibleRecordedMs = isRecording ? recordedMs : 0;
+  const recordPct = Math.min(1, visibleRecordedMs / RECORD_MAX_MS);
+  const recordGood = visibleRecordedMs >= RECORD_GOOD_MS;
 
   const tier = suspicionTier(suspicion);
   const suspColor = tier.color;
@@ -75,11 +77,6 @@ export default function HUD() {
     const t = setTimeout(() => setHintDismissed(true), 4500);
     return () => clearTimeout(t);
   }, [viewMode, pointerLocked]);
-  // Reset dismissal state when leaving FP mode
-  useEffect(() => {
-    if (viewMode !== "fp" || pointerLocked) setHintDismissed(false);
-  }, [viewMode, pointerLocked]);
-
   const fpHintVisible =
     viewMode === "fp" && !pointerLocked && !isPaused && !isRecording && !hintDismissed;
 
@@ -238,7 +235,7 @@ export default function HUD() {
               >
                 <span>
                   {isRecording
-                    ? `● Recording ${(recordedMs / 1000).toFixed(1)}s`
+                    ? `● Recording ${(visibleRecordedMs / 1000).toFixed(1)}s`
                     : `Hold E to record ${focus.npcName}`}
                 </span>
                 {isRecording && (
@@ -247,7 +244,7 @@ export default function HUD() {
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={30}
-                    aria-valuenow={recordedMs / 1000}
+                    aria-valuenow={visibleRecordedMs / 1000}
                     aria-label="Recording progress"
                   >
                     <div

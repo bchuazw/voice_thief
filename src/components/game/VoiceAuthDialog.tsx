@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
-import { AUTH_REQUIREMENTS } from "@/game/solutionValidator";
+import { AUTH_REQUIREMENTS, validateVaultOpening } from "@/game/solutionValidator";
 import { emotionGlyph } from "@/game/emotionDisplay";
 import { playAudio } from "@/audio/play";
 import type { AuthAttempt } from "@/game/types";
@@ -60,8 +60,15 @@ export default function VoiceAuthDialog() {
         audio: string | null;
       };
       if (data.audio) playAudio(data.audio);
-      setVerdict({ passes: data.passes, reason: data.reason });
-      if (data.passes) {
+      let passes = data.passes;
+      let reason = data.reason;
+      if (passes && auth.device === "vault") {
+        const localVerdict = validateVaultOpening(useGame.getState(), card);
+        passes = localVerdict.passes;
+        reason = localVerdict.reason;
+      }
+      setVerdict({ passes, reason });
+      if (passes) {
         setTimeout(() => {
           if (auth.device === "vault") openVault();
           if (auth.device === "bankFront") openBankFront(true);

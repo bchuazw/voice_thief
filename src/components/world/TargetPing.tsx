@@ -1,19 +1,25 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import * as THREE from "three";
 import { useGame } from "@/game/store";
+import type { Vec3 } from "@/game/types";
 
 export default function TargetPing() {
   const target = useGame((s) => s.player.target);
-  const [active, setActive] = useState<{ pos: THREE.Vector3; t: number } | null>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
+  if (!target) return null;
+  return <TargetPingRing key={`${target.x}:${target.z}`} target={target} />;
+}
 
-  useEffect(() => {
-    if (!target) return;
-    setActive({ pos: new THREE.Vector3(target.x, 0.05, target.z), t: 0 });
-  }, [target?.x, target?.z]);
+function TargetPingRing({ target }: { target: Vec3 }) {
+  const [active, setActive] = useState<{ pos: THREE.Vector3; t: number } | null>(
+    () => ({
+      pos: new THREE.Vector3(target.x, 0.05, target.z),
+      t: 0,
+    }),
+  );
+  const ringRef = useRef<THREE.Mesh>(null);
 
   useFrame((_, dt) => {
     if (!active || !ringRef.current) return;

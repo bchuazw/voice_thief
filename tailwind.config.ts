@@ -16,9 +16,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["Crimson Pro", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        serif: ["var(--font-crimson)", "Georgia", "serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-jetbrains)", "monospace"],
       },
       animation: {
         "rain-fall": "rain-fall 0.6s linear infinite",

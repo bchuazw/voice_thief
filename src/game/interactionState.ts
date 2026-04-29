@@ -1,12 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import type { NpcId } from "./types";
+import type { NpcId, Vec3 } from "./types";
 
 export type InteractionAction =
   | { kind: "record"; npcId: NpcId; npcName: string; momentId: string }
   | { kind: "phone" }
-  | { kind: "enterLocation"; target: string; label: string; locked?: boolean }
+  | { kind: "enterLocation"; target: string; label: string; locked?: boolean; entryPosition?: Vec3 }
   | { kind: "auth"; device: "bankFront" | "bankHallway" | "vault" }
   | { kind: "briefcase" }
   | { kind: "trainStation" };

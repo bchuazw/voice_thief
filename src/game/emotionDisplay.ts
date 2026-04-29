@@ -19,5 +19,6 @@ export function emotionColorClass(e: Emotion): string {
 export function suspicionTier(score: number): { label: string; color: string } {
   if (score >= 70) return { label: "hunted", color: "#ff3c3c" };
   if (score >= 40) return { label: "noticed", color: "#f5a623" };
+  if (score > 0) return { label: "watched", color: "#f5a623" };
   return { label: "clean", color: "#3affa6" };
 }

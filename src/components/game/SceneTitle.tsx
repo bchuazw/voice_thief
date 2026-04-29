@@ -19,8 +19,7 @@ const TOTAL_MS = 1800;
 export default function SceneTitle() {
   const phase = useGame((s) => s.phase);
   const location = useGame((s) => s.player.currentLocation);
-  const [tick, setTick] = useState(0);
-  const shownRef = useRef<{ id: LocationId; at: number } | null>(null);
+  const [shown, setShown] = useState<{ id: LocationId; elapsed: number } | null>(null);
   const lastShownLocation = useRef<LocationId | null>(null);
 
   useEffect(() => {
@@ -28,27 +27,31 @@ export default function SceneTitle() {
     // Only retrigger when the location actually changes
     if (lastShownLocation.current === location) return;
     lastShownLocation.current = location;
-    shownRef.current = { id: location, at: Date.now() };
-    setTick((t) => t + 1);
-    const interval = setInterval(() => setTick((t) => t + 1), 80);
+    const startedAt = Date.now();
+    const show = setTimeout(() => {
+      setShown({ id: location, elapsed: 0 });
+    }, 0);
+    const interval = setInterval(() => {
+      setShown((current) =>
+        current?.id === location
+          ? { id: location, elapsed: Date.now() - startedAt }
+          : current,
+      );
+    }, 80);
     const stopAt = setTimeout(() => {
-      shownRef.current = null;
       clearInterval(interval);
-      setTick((t) => t + 1);
+      setShown(null);
     }, TOTAL_MS);
     return () => {
+      clearTimeout(show);
       clearInterval(interval);
       clearTimeout(stopAt);
     };
   }, [location, phase]);
 
-  // Read from ref so re-renders triggered by tick recompute opacity
-  void tick;
-  const shown = shownRef.current;
   if (!shown) return null;
-  const elapsed = Date.now() - shown.at;
-  const fadeIn = Math.min(1, elapsed / 200);
-  const fadeOut = Math.max(0, Math.min(1, (TOTAL_MS - elapsed) / 600));
+  const fadeIn = Math.min(1, shown.elapsed / 200);
+  const fadeOut = Math.max(0, Math.min(1, (TOTAL_MS - shown.elapsed) / 600));
   const opacity = Math.min(fadeIn, fadeOut);
 
   return (

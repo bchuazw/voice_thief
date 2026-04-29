@@ -9,7 +9,7 @@ const BEATS = [
   { t: 9500, line: "A folded note on the bed. One word. ONE JOB." },
   { t: 14500, line: "You don't speak. You haven't, since the war." },
   { t: 19500, line: "But the city is full of voices." },
-  { t: 23500, line: "Hold E to record. Use the notebook. Use the phone." },
+  { t: 23500, line: "Press N for schedules. Hold E when a voice is worth stealing." },
   { t: 28500, line: "Be at the station by 9." },
 ];
 

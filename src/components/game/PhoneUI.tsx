@@ -38,10 +38,7 @@ export default function PhoneUI() {
   const [voiceCardId, setVoiceCardId] = useState<string>(inventory[0]?.id ?? "");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
-
-  useEffect(() => {
-    if (!voiceCardId && inventory[0]) setVoiceCardId(inventory[0].id);
-  }, [inventory, voiceCardId]);
+  const selectedVoiceCardId = voiceCardId || inventory[0]?.id || "";
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -55,7 +52,7 @@ export default function PhoneUI() {
   }, [setActiveCall, togglePhone]);
 
   async function placeCall() {
-    const card = inventory.find((v) => v.id === voiceCardId);
+    const card = inventory.find((v) => v.id === selectedVoiceCardId);
     if (!card) {
       useGame.getState().pushToast("Pick a voice card first.");
       return;
@@ -122,6 +119,9 @@ export default function PhoneUI() {
 
   function applyCallEffects(targetNpc: NpcId, callerNpc: NpcId, text: string) {
     const lower = text.toLowerCase();
+    const pushDelayedToast = (toast: string) => {
+      setTimeout(() => useGame.getState().pushToast(toast), 1800);
+    };
     if (
       targetNpc === "bankManager" &&
       callerNpc === "wife" &&
@@ -130,7 +130,7 @@ export default function PhoneUI() {
     ) {
       setBranch("bankManager", "rushedHome");
       useGame.getState().openHallway(true);
-      useGame.getState().pushToast("The manager rushes for the door.");
+      pushDelayedToast("The manager rushes for the door.");
     }
     if (
       targetNpc === "bankManager" &&
@@ -138,7 +138,7 @@ export default function PhoneUI() {
       /(ledger|cafe|coffee|left it)/.test(lower)
     ) {
       setBranch("bankManager", "atCafe");
-      useGame.getState().pushToast("The manager grumbles, heads to the cafe.");
+      pushDelayedToast("The manager grumbles, heads to the cafe.");
     }
     if (
       targetNpc === "secretary" &&
@@ -147,7 +147,7 @@ export default function PhoneUI() {
     ) {
       setBranch("secretary", "runningErrand");
       useGame.getState().openHallway(true);
-      useGame.getState().pushToast("Lillian leaves to run the errand.");
+      pushDelayedToast("Lillian leaves to run the errand.");
     }
   }
 
@@ -157,8 +157,9 @@ export default function PhoneUI() {
   }
 
   // Pick a placeholder hint based on (caller voice → target) combo.
-  const callerVoiceNpcId = inventory.find((c) => c.id === voiceCardId)?.npcId ?? null;
+  const callerVoiceNpcId = inventory.find((c) => c.id === selectedVoiceCardId)?.npcId ?? null;
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
+  const hasVoices = inventory.length > 0;
 
   return (
     <div
@@ -203,11 +204,11 @@ export default function PhoneUI() {
           <label className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
             Speak as
             <select
-              value={voiceCardId}
+              value={selectedVoiceCardId}
               onChange={(e) => setVoiceCardId(e.target.value)}
               className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper"
             >
-              {inventory.length === 0 && <option value="">— no voices yet —</option>}
+              {!hasVoices && <option value="">-- no voices yet --</option>}
               {inventory.map((card) => (
                 <option key={card.id} value={card.id}>
                   {NPC_PROFILES[card.npcId].displayName} ({emotionGlyph(card.emotionalState)} {card.emotionalState})
@@ -217,12 +218,19 @@ export default function PhoneUI() {
           </label>
         </div>
 
+        {!hasVoices && (
+          <div className="mt-4 rounded border border-noir-amber/30 bg-black/35 px-3 py-3 text-sm text-noir-fog">
+            Record someone first. The best leads are in the notebook schedule.
+          </div>
+        )}
+
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={placeholder}
+          placeholder={hasVoices ? placeholder : "No stolen voices yet."}
           rows={3}
-          className="mt-3 w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog/70 placeholder:italic focus:outline-none"
+          disabled={!hasVoices}
+          className="mt-3 w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog/70 placeholder:italic focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         <div className="mt-2 flex items-center justify-between">
@@ -230,7 +238,7 @@ export default function PhoneUI() {
             {message.length}/280
           </span>
           <button
-            disabled={pending || !message.trim() || !voiceCardId}
+            disabled={pending || !message.trim() || !selectedVoiceCardId || !hasVoices}
             onClick={placeCall}
             className="rounded border border-noir-neon bg-noir-neon/10 px-5 py-2 text-[11px] uppercase tracking-[0.3em] text-noir-neon hover:bg-noir-neon hover:text-black disabled:opacity-40"
           >
