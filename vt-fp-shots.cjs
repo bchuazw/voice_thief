@@ -1,11 +1,23 @@
 // @ts-nocheck
 const { chromium } = require("playwright");
+const fs = require("fs");
+
+function browserExecutablePath() {
+  const candidates = [
+    process.env.CHROME_BIN,
+    "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  ].filter(Boolean);
+  return candidates.find((p) => fs.existsSync(p));
+}
 
 (async () => {
+  const executablePath = browserExecutablePath();
   const browser = await chromium.launch({
-    executablePath:
-      process.env.CHROME_BIN ||
-      "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+    ...(executablePath ? { executablePath } : {}),
     headless: true,
     args: [
       "--no-sandbox",
@@ -132,21 +144,82 @@ const { chromium } = require("playwright");
   await page.screenshot({ path: `${out}/11-diorama-street.png` });
 
   // Notebook
-  await page.keyboard.press("n");
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    s.addVoiceCard({
+      id: "shot_mgr_calm",
+      npcId: "bankManager",
+      elevenLabsVoiceId: "mock_voice_bankManager_calm",
+      capturedAtInGameTime: 18 * 3600 + 15 * 60,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "manager-cigarette-6_15",
+      mock: true,
+    });
+    s.addVoiceCard({
+      id: "shot_wife",
+      npcId: "wife",
+      elevenLabsVoiceId: "mock_voice_wife_calm",
+      capturedAtInGameTime: 18 * 3600 + 30 * 60,
+      emotionalState: "calm",
+      durationSeconds: 5,
+      sourceMomentId: "wife-gossip-6_30",
+      mock: true,
+    });
+    window.__vt.setState({ notebookOpen: true, phoneOpen: false, menuOpen: false });
+  });
   await page.waitForTimeout(500);
+  const leads = page.locator("text=leads").first();
+  if (await leads.count()) {
+    await leads.click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${out}/12-notebook-leads.png` });
+  }
+  const voices = page.locator("text=voices").first();
+  if (await voices.count()) {
+    await voices.click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${out}/13-notebook-voices.png` });
+  }
   const sched = page.locator("text=schedule").first();
   if (await sched.count()) {
     await sched.click();
     await page.waitForTimeout(400);
-    await page.screenshot({ path: `${out}/12-notebook-schedule.png` });
+    await page.screenshot({ path: `${out}/14-notebook-schedule.png` });
   }
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
 
   // Phone
-  await page.keyboard.press("p");
+  await page.evaluate(() => {
+    window.__vt.setState({ phoneOpen: true, notebookOpen: false, menuOpen: false });
+  });
   await page.waitForTimeout(700);
-  await page.screenshot({ path: `${out}/13-phone.png` });
+  await page.screenshot({ path: `${out}/15-phone.png` });
+
+  // Pause menu
+  await page.evaluate(() => {
+    window.__vt.setState({ phoneOpen: false, menuOpen: true });
+  });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${out}/16-pause-menu.png` });
+
+  // Ending card
+  await page.evaluate(() => {
+    window.__vt.setState({
+      phase: "won",
+      menuOpen: false,
+      phoneOpen: false,
+      notebookOpen: false,
+      briefcaseTaken: true,
+      player: {
+        ...window.__vt.getState().player,
+        hasBriefcase: true,
+      },
+    });
+  });
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `${out}/17-ending-win.png` });
 
   await browser.close();
   console.log("done");

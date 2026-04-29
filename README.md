@@ -102,11 +102,22 @@ anyone who finds first-person uncomfortable.
 
 ### The notebook (press N)
 
-Three tabs: **Voices** you've stolen, **Suspects** you've encountered, and
-the schedule of recordable moments. Color- and glyph-coded emotion tags
-(○ calm · ◐ stressed · ● panicked) so it reads with deuteranopia.
+The notebook now works like an in-game case board. **Leads** react to your
+current run state, **Voices** stores stolen samples you can replay, **Suspects**
+tracks who you know, and **Schedule** lists every recordable window. Emotion
+tags stay readable without relying on color alone.
 
-![Notebook — Schedule](docs/screenshots/12-notebook-schedule.png)
+![Notebook - Leads](docs/screenshots/12-notebook-leads.png)
+
+Voice cards keep their source moment, emotional state, and replay button so the
+player can hear what they actually stole before trying an intercom or call.
+
+![Notebook - Voice inventory](docs/screenshots/13-notebook-voices.png)
+
+The schedule remains the planning layer for players who want to solve the route
+instead of following only the live leads.
+
+![Notebook - Schedule](docs/screenshots/14-notebook-schedule.png)
 
 ### The phone (press P)
 
@@ -114,7 +125,22 @@ The crime. Pick a target. Pick a stolen voice. Type what you want them to
 hear. The receiving NPC reacts in character — and if your performance is
 plausible, the world bends around it.
 
-![Phone UI](docs/screenshots/13-phone.png)
+![Phone UI](docs/screenshots/15-phone.png)
+
+### Pause and replay
+
+Esc opens a pause menu when no modal is active. It freezes the clock, shows the
+current heat/voice count, and gives the player clean resume, restart, and title
+actions.
+
+![Pause menu](docs/screenshots/16-pause-menu.png)
+
+### Ending
+
+The ending now reports the route, number of stolen voices, final heat, and run
+time, then offers an immediate replay.
+
+![Win ending](docs/screenshots/17-ending-win.png)
 
 ## Controls
 
@@ -129,7 +155,7 @@ plausible, the world bends around it.
 | **P** | Toggle the Phone |
 | **M** | Mute / unmute audio |
 | **C** | Toggle First-person ↔ Diorama view |
-| **Esc** | Close any open modal |
+| **Esc** | Close any open modal; open the pause menu during play |
 
 ## How a heist plays out
 
@@ -195,7 +221,12 @@ and the Solution C secretary→manager pivot — plus 9 direct API contract
 checks. Full transcript: [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
 The screenshots above are captured by `vt-fp-shots.cjs` against the running
-dev server in mock mode.
+dev server in mock mode:
+
+```bash
+npm run dev
+node vt-fp-shots.cjs
+```
 
 ## Architecture
 
