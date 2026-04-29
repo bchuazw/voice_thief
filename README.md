@@ -187,9 +187,15 @@ cd voice_thief
 cp .env.local.example .env.local
 # Default mock mode (VT_MOCK_AI=1) lets you play without any API keys.
 npm install
+npm run generate-assets
 npm run dev
 # Open http://localhost:3000
 ```
+
+`npm run generate-assets` rebuilds the first-pass GLB noir kit in
+`public/models/noir-kit/`. The generated assets are deliberately modular so
+they can be replaced later by Blender-authored exports without rewriting
+gameplay code.
 
 The repo ships with ElevenLabs-rendered NPC dialogue in
 `public/audio/npc-scripts/`, so ambient voices and replayed samples sound
@@ -219,13 +225,13 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev server in mock mode
-in one terminal and run `node vt-e2e.cjs` in another. **38 / 38 checks pass.**
-It exercises every gameplay primitive — phase transitions, recording,
-notebook inventory, phone diversion (wife→manager break-in flips the manager
-to `rushedHome` and unlocks the hallway), voice auth (stressed fails, calm
-passes), briefcase, train-station win, suspicion-driven loss, time-out loss,
-and the Solution C secretary→manager pivot — plus 9 direct API contract
-checks. Full transcript: [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
+in one terminal and run `node vt-e2e.cjs` in another. **53 / 53 checks pass.**
+It exercises first-person startup and WASD movement, phase transitions,
+recording, notebook inventory, phone diversion, voice auth, briefcase,
+train-station win, suspicion-driven loss, time-out loss, Solution C,
+weak-call failure regressions, guard back-exit diversion, recording-awareness
+busts, and direct API contracts. Full transcript:
+[docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
 The screenshots above are captured by `vt-fp-shots.cjs` against the running
 dev server in mock mode:
@@ -238,6 +244,7 @@ node vt-fp-shots.cjs
 ## Architecture
 
 See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md),
+[docs/ASSET_PIPELINE.md](./docs/ASSET_PIPELINE.md),
 [docs/ELEVENLABS_INTEGRATION.md](./docs/ELEVENLABS_INTEGRATION.md), and
 [docs/DEPLOY.md](./docs/DEPLOY.md).
 
