@@ -323,8 +323,8 @@ export const useGame = create<GameState & GameActions>()(
         toasts: [
           {
             id: `${Date.now()}_objective`,
-            text: "Objective: check the notebook, steal a calm manager voice, open the vault.",
-            expiresAt: Date.now() + 7000,
+            text: "Run it again. The block resets. The clock doesn't.",
+            expiresAt: Date.now() + 5000,
           },
         ],
       })),

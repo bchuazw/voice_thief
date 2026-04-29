@@ -11,17 +11,27 @@ interface Props {
 export default function ApartmentBlock({ position }: Props) {
   return (
     <group position={position}>
-      {/* Body — taller than the others; front face at local z=0 */}
+      {/* Body — taller than the others; front face at local z=0.
+          Warm-tinted dark brown so the silhouette doesn't crush to black against
+          the dusk sky. */}
       <mesh position={[0, 4.0, -3]} castShadow receiveShadow>
         <boxGeometry args={[6.0, 8.0, 6]} />
-        <meshStandardMaterial color="#1a1a24" roughness={0.9} />
+        <meshStandardMaterial color="#2a2230" roughness={0.9} />
       </mesh>
 
       {/* Brick stripe at base */}
       <mesh position={[0, 0.6, 0.06]} receiveShadow>
         <boxGeometry args={[6.2, 1.2, 0.4]} />
-        <meshStandardMaterial color="#3a1818" roughness={0.95} />
+        <meshStandardMaterial color="#4a2218" roughness={0.95} />
       </mesh>
+
+      {/* Roofline rim light — narrow warm strip so the building reads against sky */}
+      <mesh position={[0, 8.05, 0.05]}>
+        <boxGeometry args={[6.05, 0.05, 0.05]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.45} />
+      </mesh>
+      {/* Sodium-lamp point light on the building face for environmental fill */}
+      <pointLight position={[0, 5, 1.5]} intensity={0.5} color="#7aa6cc" distance={5} />
 
       {/* Lit window grid: 3 cols × 4 rows */}
       {[0, 1, 2].map((cx) =>

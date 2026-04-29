@@ -39,15 +39,18 @@ export default function CafeScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.85} color="#f5d6a0" />
-      <hemisphereLight args={["#5a6b8c", "#3a2818", 0.35]} />
+      <ambientLight intensity={0.95} color="#f5d6a0" />
+      <hemisphereLight args={["#5a6b8c", "#3a2818", 0.45]} />
       <pointLight position={[-3, 3.4, -1]} intensity={2.1} color="#ffb968" distance={9} />
       <pointLight position={[3, 3.4, -1]} intensity={2.1} color="#ffb968" distance={9} />
       <pointLight position={[0, 3.0, 2]} intensity={1.25} color="#ffd9a0" distance={7} />
       {/* Back-bar wall wash — brightened so the espresso machine reads */}
-      <pointLight position={[0, 2.0, -3.0]} intensity={2.0} color="#ffb060" distance={6} />
-      {/* Cool window-side moonlight for counter-tone */}
-      <pointLight position={[-5, 2.8, 4]} intensity={0.6} color="#aac6ff" distance={6} />
+      <pointLight position={[0, 2.0, -3.0]} intensity={2.6} color="#ffb060" distance={7} />
+      {/* Cool window-side moonlight — strong counter-tone now (0.6 → 1.6) */}
+      <pointLight position={[5, 2.8, 4]} intensity={1.6} color="#aac6ff" distance={7} />
+      <pointLight position={[-5, 2.8, 4]} intensity={1.4} color="#aac6ff" distance={6} />
+      {/* Right-side cold rim hitting the back wall to break up the warm wash */}
+      <pointLight position={[6, 1.8, -3]} intensity={0.85} color="#7aa6cc" distance={5} />
 
       {/* Checker tile floor */}
       <CheckerFloor

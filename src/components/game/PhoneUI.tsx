@@ -16,7 +16,7 @@ function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
   if (caller === "wife" && target === "bankManager")
     return "What does Margaret only say when she's actually scared?";
   if (caller === "secretary" && target === "bankManager")
-    return "Lillian sighs that Harold always loses things. What did she leave where?";
+    return "Lillian sighs that Harold always loses things.";
   if (caller === "bankManager" && target === "secretary")
     return "Lillian only obeys ordinary requests in his voice.";
   if (caller === "bankManager" && target === "wife")
