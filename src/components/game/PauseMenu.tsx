@@ -28,23 +28,23 @@ export default function PauseMenu() {
       aria-modal="true"
       aria-labelledby="pause-title"
     >
-      <div className="w-[min(520px,92vw)] rounded border border-noir-paper/25 bg-noir-smoke p-6 text-noir-paper shadow-2xl">
+      <div className="w-[min(520px,92vw)] rounded border border-noir-paper/25 bg-noir-smoke p-5 text-noir-paper shadow-2xl sm:p-6">
         <p className="text-[10px] uppercase tracking-[0.4em] text-noir-fog">Paused</p>
         <h2 id="pause-title" className="mt-1 font-serif text-4xl italic">
           The job waits.
         </h2>
         <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-          <div className="rounded border border-noir-paper/10 bg-black/35 px-3 py-2">
+          <div className="rounded border border-noir-paper/10 bg-black/35 px-2 py-2 sm:px-3">
             <p className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">Time</p>
-            <p className="mt-1 font-mono text-lg">{clockLabel(inGameTime)}</p>
+            <p className="mt-1 whitespace-nowrap font-mono text-base sm:text-lg">{clockLabel(inGameTime)}</p>
           </div>
-          <div className="rounded border border-noir-paper/10 bg-black/35 px-3 py-2">
+          <div className="rounded border border-noir-paper/10 bg-black/35 px-2 py-2 sm:px-3">
             <p className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">Voices</p>
-            <p className="mt-1 font-mono text-lg">{voiceCount}</p>
+            <p className="mt-1 font-mono text-base sm:text-lg">{voiceCount}</p>
           </div>
-          <div className="rounded border border-noir-paper/10 bg-black/35 px-3 py-2">
+          <div className="rounded border border-noir-paper/10 bg-black/35 px-2 py-2 sm:px-3">
             <p className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">Heat</p>
-            <p className="mt-1 font-mono text-lg">{Math.round(suspicion)}</p>
+            <p className="mt-1 font-mono text-base sm:text-lg">{Math.round(suspicion)}</p>
           </div>
         </div>
         <p className="mt-4 text-sm text-noir-fog">

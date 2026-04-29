@@ -166,7 +166,15 @@ function browserExecutablePath() {
       sourceMomentId: "wife-gossip-6_30",
       mock: true,
     });
-    window.__vt.setState({ notebookOpen: true, phoneOpen: false, menuOpen: false });
+    window.__vt.setState({
+      inGameTime: 18 * 3600 + 40 * 60,
+      vaultOpen: false,
+      briefcaseTaken: false,
+      bankHallwayUnlocked: false,
+      notebookOpen: true,
+      phoneOpen: false,
+      menuOpen: false,
+    });
   });
   await page.waitForTimeout(500);
   const leads = page.locator("text=leads").first();
@@ -199,21 +207,38 @@ function browserExecutablePath() {
 
   // Pause menu
   await page.evaluate(() => {
-    window.__vt.setState({ phoneOpen: false, menuOpen: true });
+    window.__vt.setState({
+      inGameTime: 19 * 3600 + 5 * 60,
+      suspicion: 15,
+      phoneOpen: false,
+      menuOpen: true,
+    });
   });
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${out}/16-pause-menu.png` });
 
   // Ending card
   await page.evaluate(() => {
+    const state = window.__vt.getState();
     window.__vt.setState({
       phase: "won",
+      inGameTime: 20 * 3600 + 52 * 60,
+      suspicion: 15,
       menuOpen: false,
       phoneOpen: false,
       notebookOpen: false,
       briefcaseTaken: true,
+      vaultOpen: true,
+      bankHallwayUnlocked: true,
+      npcs: {
+        ...state.npcs,
+        bankManager: {
+          ...state.npcs.bankManager,
+          branch: "rushedHome",
+        },
+      },
       player: {
-        ...window.__vt.getState().player,
+        ...state.player,
         hasBriefcase: true,
       },
     });

@@ -255,8 +255,9 @@ all four APIs so the game is fully playable without any keys.
   state.
 - **M** toggles a global mute that's respected by all synthesized speech
   playback (TTS calls, voice-auth playback, scripted NPC dialogue).
-- All HUD label text is at least 11px; transcript captions render alongside
-  audio playback.
+- HUD controls compress on mobile instead of overlapping. Phone calls render
+  transcript text; ambient and replayed voice lines are represented in the
+  notebook and schedule text.
 
 ## Credits
 

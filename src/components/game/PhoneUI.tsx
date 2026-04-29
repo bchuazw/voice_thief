@@ -36,10 +36,13 @@ export default function PhoneUI() {
   const inGameTime = useGame((s) => s.inGameTime);
 
   const [target, setTarget] = useState<NpcId>("bankManager");
-  const [voiceCardId, setVoiceCardId] = useState<string>(inventory[0]?.id ?? "");
+  const [voiceCardId, setVoiceCardId] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
-  const selectedVoiceCardId = voiceCardId || inventory[0]?.id || "";
+  const storedVoiceCard = inventory.find((card) => card.id === voiceCardId);
+  const selectedVoiceCard =
+    storedVoiceCard ?? inventory.find((card) => card.npcId !== target) ?? inventory[0] ?? null;
+  const selectedVoiceCardId = selectedVoiceCard?.id ?? "";
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -170,7 +173,7 @@ export default function PhoneUI() {
   }
 
   // Pick a placeholder hint based on (caller voice → target) combo.
-  const callerVoiceNpcId = inventory.find((c) => c.id === selectedVoiceCardId)?.npcId ?? null;
+  const callerVoiceNpcId = selectedVoiceCard?.npcId ?? null;
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
   const hasVoices = inventory.length > 0;
 
@@ -181,8 +184,8 @@ export default function PhoneUI() {
       aria-modal="true"
       aria-labelledby="phone-title"
     >
-      <div className="w-[min(720px,92vw)] rounded border border-noir-amber/40 bg-noir-smoke p-6 text-noir-paper shadow-2xl ring-1 ring-noir-amber/10">
-        <div className="mb-4 flex items-baseline justify-between">
+      <div className="w-[min(720px,94vw)] rounded border border-noir-amber/40 bg-noir-smoke p-4 text-noir-paper shadow-2xl ring-1 ring-noir-amber/10 sm:p-6">
+        <div className="mb-4 flex items-baseline justify-between gap-4">
           <div className="flex items-baseline gap-3">
             <span aria-hidden className="text-noir-amber text-xl">☎</span>
             <h2 id="phone-title" className="font-serif text-2xl italic">The Phone</h2>
@@ -198,13 +201,13 @@ export default function PhoneUI() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
             Call
             <select
               value={target}
               onChange={(e) => setTarget(e.target.value as NpcId)}
-              className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper"
+              className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-xs text-noir-paper sm:text-sm"
             >
               {TARGETS.map((t) => (
                 <option key={t} value={t}>
@@ -219,7 +222,7 @@ export default function PhoneUI() {
             <select
               value={selectedVoiceCardId}
               onChange={(e) => setVoiceCardId(e.target.value)}
-              className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper"
+              className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-xs text-noir-paper sm:text-sm"
             >
               {!hasVoices && <option value="">-- no voices yet --</option>}
               {inventory.map((card) => (

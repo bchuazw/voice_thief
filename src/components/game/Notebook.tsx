@@ -39,7 +39,7 @@ export default function Notebook() {
       aria-labelledby="notebook-title"
     >
       <div
-        className="relative h-[80%] w-[min(900px,90vw)] overflow-hidden rounded border border-noir-paper/25 text-noir-paper shadow-2xl"
+        className="relative flex h-[88dvh] w-[min(900px,94vw)] flex-col overflow-hidden rounded border border-noir-paper/25 text-noir-paper shadow-2xl sm:h-[80%] sm:w-[min(900px,90vw)]"
         style={{
           backgroundColor: "#221d18",
           backgroundImage:
@@ -47,10 +47,10 @@ export default function Notebook() {
             "repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(244,241,234,0.025) 28px, rgba(244,241,234,0.025) 29px)",
         }}
       >
-        <div className="flex items-center justify-between border-b border-noir-paper/15 px-6 py-3">
-          <div className="flex items-baseline gap-3">
+        <div className="flex flex-col gap-2 border-b border-noir-paper/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex min-w-0 items-baseline gap-3">
             <h2 id="notebook-title" className="font-serif text-2xl italic">Notebook</h2>
-            <span className="text-[10px] uppercase tracking-[0.4em] text-noir-fog">
+            <span className="truncate text-[10px] uppercase tracking-[0.25em] text-noir-fog sm:tracking-[0.4em]">
               First City — Thursday
             </span>
           </div>
@@ -62,12 +62,12 @@ export default function Notebook() {
           </button>
         </div>
 
-        <div className="flex border-b border-noir-paper/10">
+        <div className="grid grid-cols-2 border-b border-noir-paper/10 sm:flex">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-[11px] uppercase tracking-[0.4em] ${
+              className={`py-3 text-[10px] uppercase tracking-[0.25em] sm:flex-1 sm:text-[11px] sm:tracking-[0.4em] ${
                 tab === t ? "bg-noir-ash text-noir-paper" : "text-noir-fog hover:text-noir-paper"
               }`}
             >
@@ -76,7 +76,7 @@ export default function Notebook() {
           ))}
         </div>
 
-        <div className="h-[calc(100%-100px)] overflow-y-auto scrollbar-thin px-6 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin px-4 py-4 sm:px-6">
           {tab === "leads" && (
             <div className="space-y-3">
               {leads.map((lead) => (

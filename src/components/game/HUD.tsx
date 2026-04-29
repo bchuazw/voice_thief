@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 import { clockLabel } from "@/game/timeFormat";
 import { GAME_END_SECONDS } from "@/game/types";
@@ -8,6 +8,8 @@ import { beginRecording, endRecording } from "@/game/recordingManager";
 import { useInteractionHotkey } from "@/game/interactionHotkey";
 import { useInteraction, describeAction } from "@/game/interactionState";
 import { suspicionTier } from "@/game/emotionDisplay";
+import { stopAllUiAudio } from "@/audio/play";
+import { stopAllNpcAudio } from "@/audio/npcSpeech";
 
 const RECORD_GOOD_MS = 5000;
 const RECORD_MAX_MS = 30000;
@@ -35,6 +37,15 @@ export default function HUD() {
 
   useInteractionHotkey();
 
+  const handleToggleMute = useCallback(() => {
+    const willMute = !useGame.getState().audioMuted;
+    toggleMute();
+    if (willMute) {
+      stopAllUiAudio();
+      stopAllNpcAudio();
+    }
+  }, [toggleMute]);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const t = e.target as HTMLElement | null;
@@ -44,7 +55,7 @@ export default function HUD() {
       ) {
         return;
       }
-      if (e.key === "m" || e.key === "M") toggleMute();
+      if (e.key === "m" || e.key === "M") handleToggleMute();
       if (e.key === "n" || e.key === "N") toggleNotebook();
       if (e.key === "p" || e.key === "P") togglePhone();
       if (e.key === "c" || e.key === "C") toggleViewMode();
@@ -57,10 +68,10 @@ export default function HUD() {
     return () => window.removeEventListener("keydown", onKey);
   }, [
     activeAuth,
+    handleToggleMute,
     notebookOpen,
     phoneOpen,
     toggleMenu,
-    toggleMute,
     toggleNotebook,
     togglePhone,
     toggleViewMode,
@@ -120,16 +131,16 @@ export default function HUD() {
       )}
 
       {/* Clock */}
-      <div className="absolute left-4 top-4 flex items-baseline gap-3 rounded bg-black/60 px-3 py-2 text-noir-paper backdrop-blur">
-        <span className="text-[11px] uppercase tracking-[0.4em] text-noir-fog">Now</span>
+      <div className="absolute left-2 top-2 flex items-baseline gap-2 rounded bg-black/60 px-2 py-1.5 text-noir-paper backdrop-blur sm:left-4 sm:top-4 sm:gap-3 sm:px-3 sm:py-2">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-noir-fog sm:text-[11px] sm:tracking-[0.4em]">Now</span>
         <span
-          className={`font-mono text-2xl ${timeUrgent ? "animate-neon-flicker text-noir-neon" : ""}`}
+          className={`font-mono text-xl sm:text-2xl ${timeUrgent ? "animate-neon-flicker text-noir-neon" : ""}`}
         >
           {clockLabel(time)}
         </span>
         {isPaused && (
           <span
-            className="ml-1 rounded border border-noir-amber/60 px-2 py-0.5 text-[11px] uppercase tracking-[0.3em] text-noir-amber"
+            className="ml-1 rounded border border-noir-amber/60 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.25em] text-noir-amber sm:px-2 sm:text-[11px] sm:tracking-[0.3em]"
             role="status"
             aria-live="polite"
           >
@@ -139,9 +150,9 @@ export default function HUD() {
       </div>
 
       {/* Suspicion */}
-      <div className="absolute right-4 top-4 flex flex-col items-end gap-1 rounded bg-black/60 px-3 py-2 backdrop-blur">
+      <div className="absolute right-2 top-2 flex flex-col items-end gap-1 rounded bg-black/60 px-2 py-1.5 backdrop-blur sm:right-4 sm:top-4 sm:px-3 sm:py-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-[11px] uppercase tracking-[0.4em] text-noir-fog">Suspicion</span>
+          <span className="hidden text-[11px] uppercase tracking-[0.4em] text-noir-fog sm:inline">Suspicion</span>
           <span
             className="font-mono text-xs"
             style={{ color: suspColor }}
@@ -151,7 +162,7 @@ export default function HUD() {
           </span>
         </div>
         <div
-          className="h-2.5 w-44 overflow-hidden rounded bg-noir-ash"
+          className="h-2 w-32 overflow-hidden rounded bg-noir-ash sm:h-2.5 sm:w-44"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -166,67 +177,72 @@ export default function HUD() {
       </div>
 
       {/* Bottom-left button rail */}
-      <div className="pointer-events-auto absolute bottom-4 left-4 flex flex-col gap-2">
+      <div className="pointer-events-auto absolute bottom-2 left-2 right-2 grid grid-cols-5 gap-1 sm:bottom-4 sm:left-4 sm:right-auto sm:flex sm:flex-col sm:gap-2">
         <button
           onClick={() => toggleNotebook()}
           aria-label="Open notebook"
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
+          className="rounded border border-noir-paper/30 bg-black/60 px-2 py-2 text-[10px] uppercase tracking-[0.15em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber sm:px-4 sm:text-xs sm:tracking-[0.3em]"
         >
-          Notebook ({inventory.length}) | N
+          <span className="sm:hidden">Notes</span>
+          <span className="hidden sm:inline">Notebook ({inventory.length}) | N</span>
         </button>
         <button
           onClick={() => togglePhone()}
           aria-label="Open phone"
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
+          className="rounded border border-noir-paper/30 bg-black/60 px-2 py-2 text-[10px] uppercase tracking-[0.15em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber sm:px-4 sm:text-xs sm:tracking-[0.3em]"
         >
-          Phone | P
+          <span className="sm:hidden">Phone</span>
+          <span className="hidden sm:inline">Phone | P</span>
         </button>
         <button
-          onClick={() => toggleMute()}
+          onClick={handleToggleMute}
           aria-label={audioMuted ? "Unmute audio" : "Mute audio"}
           aria-pressed={audioMuted}
-          className={`rounded border bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber ${
+          className={`rounded border bg-black/60 px-2 py-2 text-[10px] uppercase tracking-[0.15em] hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber sm:px-4 sm:text-xs sm:tracking-[0.3em] ${
             audioMuted
               ? "border-noir-amber text-noir-amber"
               : "border-noir-paper/30 text-noir-paper"
           }`}
         >
-          {audioMuted ? "Muted | M" : "Sound | M"}
+          <span className="sm:hidden">{audioMuted ? "Mute" : "Sound"}</span>
+          <span className="hidden sm:inline">{audioMuted ? "Muted | M" : "Sound | M"}</span>
         </button>
         <button
           onClick={() => toggleViewMode()}
           aria-label={viewMode === "fp" ? "Switch to diorama view" : "Switch to first-person view"}
           aria-pressed={viewMode === "diorama"}
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
+          className="rounded border border-noir-paper/30 bg-black/60 px-2 py-2 text-[10px] uppercase tracking-[0.15em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber sm:px-4 sm:text-xs sm:tracking-[0.3em]"
         >
-          {viewMode === "fp" ? "Diorama | C" : "First-person | C"}
+          <span className="sm:hidden">View</span>
+          <span className="hidden sm:inline">{viewMode === "fp" ? "Diorama | C" : "First-person | C"}</span>
         </button>
         <button
           onClick={() => toggleMenu(true)}
           aria-label="Open pause menu"
-          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
+          className="rounded border border-noir-paper/30 bg-black/60 px-2 py-2 text-[10px] uppercase tracking-[0.15em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber sm:px-4 sm:text-xs sm:tracking-[0.3em]"
         >
-          Menu | Esc
+          <span className="sm:hidden">Menu</span>
+          <span className="hidden sm:inline">Menu | Esc</span>
         </button>
       </div>
 
       {/* Persistent control strip */}
-      <div className="pointer-events-none absolute bottom-2 right-4 text-right">
+      <div className="pointer-events-none absolute bottom-2 right-4 hidden text-right sm:block">
         <p className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
           {viewMode === "fp" ? (
             <>
-              <kbd className="text-noir-amber">WASD</kbd> walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> close
+              <kbd className="text-noir-amber">WASD</kbd> walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> menu
             </>
           ) : (
             <>
-              Click to walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> close
+              Click to walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> menu
             </>
           )}
         </p>
       </div>
 
       {/* Centered interaction prompt (FP) / Record indicator */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 transform">
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 transform sm:bottom-20">
         {focus && (
           <div className="flex flex-col items-center gap-2">
             {focus.kind === "record" ? (
