@@ -70,6 +70,8 @@ export const initialState: GameState = {
   toasts: [],
   audioMuted: false,
   audioVolume: 0.85,
+  viewMode: "fp",
+  pointerLocked: false,
 };
 
 export interface GameActions {
@@ -99,6 +101,8 @@ export interface GameActions {
   pruneToasts(now: number): void;
   toggleMute(value?: boolean): void;
   setVolume(value: number): void;
+  toggleViewMode(): void;
+  setPointerLocked(value: boolean): void;
   reset(): void;
 }
 
@@ -250,13 +254,19 @@ export const useGame = create<GameState & GameActions>()(
     setVolume: (value) =>
       set({ audioVolume: Math.max(0, Math.min(1, value)) }),
 
+    toggleViewMode: () =>
+      set((s) => ({ viewMode: s.viewMode === "fp" ? "diorama" : "fp" })),
+
+    setPointerLocked: (value) => set({ pointerLocked: value }),
+
     reset: () =>
       set((s) => ({
         ...initialState,
         phase: "title",
-        // Preserve user audio prefs across resets
+        // Preserve user audio + view prefs across resets
         audioMuted: s.audioMuted,
         audioVolume: s.audioVolume,
+        viewMode: s.viewMode,
       })),
   })),
 );

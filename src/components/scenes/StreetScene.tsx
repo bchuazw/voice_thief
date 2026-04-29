@@ -5,15 +5,20 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useGame } from "@/game/store";
 import { clampToWalkable, moveToward } from "@/game/pathfinding";
+import { Html } from "@react-three/drei";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import RainShader from "@/components/shaders/RainShader";
 import VolumetricLamp from "@/components/shaders/VolumetricLamp";
 import WetAsphalt from "@/components/shaders/WetAsphalt";
-import { Html } from "@react-three/drei";
-import InteractiveProp from "@/components/world/InteractiveProp";
-import LocationGate from "@/components/world/LocationGate";
 import TargetPing from "@/components/world/TargetPing";
+import BankFacade from "@/components/props/BankFacade";
+import CafeFacade from "@/components/props/CafeFacade";
+import ApartmentBlock from "@/components/props/ApartmentBlock";
+import StreetLamp from "@/components/props/StreetLamp";
+import Payphone from "@/components/props/Payphone";
+import StreetFurniture from "@/components/props/StreetFurniture";
+import TrainStation from "@/components/props/TrainStation";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
@@ -22,22 +27,20 @@ export default function StreetScene() {
   const player = useGame((s) => s.player);
   const setPlayerPosition = useGame((s) => s.setPlayerPosition);
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
-  const setPlayerLocation = useGame((s) => s.setPlayerLocation);
-  const setActiveAuth = useGame((s) => s.setActiveAuth);
-  const togglePhone = useGame((s) => s.togglePhone);
-  const bankFrontUnlocked = useGame((s) => s.bankFrontUnlocked);
+  const viewMode = useGame((s) => s.viewMode);
   const briefcaseTaken = useGame((s) => s.briefcaseTaken);
-
   const lastPos = useRef(player.position);
-  const groundRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
 
   useEffect(() => {
+    if (viewMode !== "diorama") return;
     camera.position.set(2, 14, 18);
     camera.lookAt(0, 1, -1);
-  }, [camera]);
+  }, [camera, viewMode]);
 
+  // Diorama mode keeps the click-to-walk system
   useFrame((_, dt) => {
+    if (viewMode !== "diorama") return;
     const target = useGame.getState().player.target;
     if (!target) return;
     const next = moveToward(lastPos.current, target, dt * 4);
@@ -49,60 +52,86 @@ export default function StreetScene() {
     }
   });
 
-  function handleGroundClick(e: React.MouseEvent | { point: THREE.Vector3 }) {
-    const point = "point" in e ? e.point : (e as unknown as { point: THREE.Vector3 }).point;
+  function handleGroundClick(e: { point: THREE.Vector3 }) {
+    if (viewMode !== "diorama") return;
+    const point = e.point;
     setPlayerTarget(clampToWalkable({ x: point.x, y: 0, z: point.z }, "street"));
   }
 
   return (
     <group>
-      <ambientLight intensity={0.55} color="#3a4665" />
+      {/* Sky-ish blue tinge from above */}
+      <ambientLight intensity={0.42} color="#3a4665" />
       <directionalLight
-        position={[6, 14, 6]}
-        intensity={0.55}
+        position={[6, 18, 6]}
+        intensity={0.45}
         color="#aac6ff"
         castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
       />
-      <hemisphereLight args={["#5b6f9a", "#1a1a26", 0.4]} />
+      <hemisphereLight args={["#5b6f9a", "#0f0f18", 0.4]} />
 
+      {/* Volumetric lamp halos — three on the block */}
       <VolumetricLamp position={[-12, 4, 4]} color="#f5a623" />
       <VolumetricLamp position={[12, 4, 4]} color="#ffe9b0" />
       <VolumetricLamp position={[0, 4, -8]} color="#f5a623" />
 
+      {/* Road plane — wet asphalt shader */}
       <mesh
-        ref={groundRef}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]}
         receiveShadow
         onClick={(e) => handleGroundClick(e)}
       >
-        <planeGeometry args={[60, 40]} />
-        <meshStandardMaterial color="#0e1118" roughness={0.55} metalness={0.4} />
-      </mesh>
-      {/* Wet-asphalt overlay layer (no click handler — events pass through) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 0]} raycast={() => null}>
-        <planeGeometry args={[60, 40]} />
+        <planeGeometry args={[80, 30]} />
         <WetAsphalt />
       </mesh>
 
-      <mesh position={[-10, 3, -4]} castShadow>
-        <boxGeometry args={[8, 6, 8]} />
-        <meshStandardMaterial color="#1a1a22" roughness={0.85} />
+      {/* Sidewalks (slightly elevated, lighter color) */}
+      <Sidewalk position={[-10, 0.05, 4]} size={[18, 0.1, 5]} />
+      <Sidewalk position={[10, 0.05, 4]} size={[18, 0.1, 5]} />
+      <Sidewalk position={[0, 0.05, -4.5]} size={[80, 0.1, 3]} />
+
+      {/* Curbs */}
+      <mesh position={[-10, 0.16, 1.5]}>
+        <boxGeometry args={[18, 0.16, 0.18]} />
+        <meshStandardMaterial color="#16161e" />
       </mesh>
-      <mesh position={[-10, 1.4, 0.05]}>
-        <boxGeometry args={[2.2, 2.8, 0.1]} />
-        <meshStandardMaterial color="#3a2a18" emissive="#22150a" emissiveIntensity={0.4} />
+      <mesh position={[10, 0.16, 1.5]}>
+        <boxGeometry args={[18, 0.16, 0.18]} />
+        <meshStandardMaterial color="#16161e" />
       </mesh>
-      {/* Bank facade neon underline */}
-      <mesh position={[-10, 6.2, -4]}>
-        <boxGeometry args={[5.6, 0.18, 0.1]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#ff3c3c" emissiveIntensity={1.4} />
+
+      {/* Street furniture */}
+      <StreetFurniture />
+
+      {/* Three streetlamp posts (geometry; halos already above) */}
+      <StreetLamp position={[-12, 0, 4]} />
+      <StreetLamp position={[12, 0, 4]} />
+      <StreetLamp position={[0, 0, -8]} />
+
+      {/* The buildings */}
+      <BankFacade position={[-10, 0, -4]} />
+      <CafeFacade position={[10, 0, -4]} />
+      <ApartmentBlock position={[18, 0, -2]} />
+
+      {/* Payphone */}
+      <Payphone position={[2, 0, 4]} />
+
+      {/* Train station marker / archway at end of block */}
+      <TrainStation position={[12, 0, 8]} active={briefcaseTaken} />
+
+      {/* Bank's red neon underline above the facade */}
+      <mesh position={[-10, 6.6, 0.06]}>
+        <boxGeometry args={[6.4, 0.16, 0.08]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#ff3c3c" emissiveIntensity={1.6} />
       </mesh>
-      {/* In-world serif signage as an Html overlay (drei Text needs remote
-          font load which is unreliable; Html is rock-solid). */}
+
+      {/* Serif signage as Html overlays */}
       <Html
         center
-        position={[-10, 5.8, 0.06]}
+        position={[-10, 6.0, 0.08]}
         distanceFactor={6}
         zIndexRange={[8, 0]}
         occlude={false}
@@ -118,84 +147,34 @@ export default function StreetScene() {
         zIndexRange={[8, 0]}
         occlude={false}
       >
-        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[18px] tracking-[0.08em] text-[#f5d6a0]">
+        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[18px] tracking-[0.08em] text-[#f5d6a0] drop-shadow-[0_0_6px_rgba(245,166,35,0.5)]">
           the all-night
         </div>
       </Html>
 
-      <mesh position={[10, 2.5, -4]} castShadow>
-        <boxGeometry args={[6, 5, 6]} />
-        <meshStandardMaterial color="#22191a" roughness={0.9} />
-      </mesh>
-      <mesh position={[10, 1.5, -1.05]}>
-        <boxGeometry args={[3, 2.2, 0.1]} />
-        <meshStandardMaterial color="#2a1a10" emissive="#f5a623" emissiveIntensity={0.65} />
-      </mesh>
-
-      <mesh position={[18, 2.5, -2]} castShadow>
-        <boxGeometry args={[6, 5, 6]} />
-        <meshStandardMaterial color="#161620" roughness={0.85} />
-      </mesh>
-      <mesh position={[18, 1.4, 1.05]}>
-        <boxGeometry args={[1.8, 2, 0.1]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#aac6ff" emissiveIntensity={0.3} />
-      </mesh>
-
       <RainShader />
 
-      <PlayerCharacter />
-      <TargetPing />
+      {viewMode === "diorama" && <PlayerCharacter />}
+      {viewMode === "diorama" && <TargetPing />}
 
       {NPC_LIST.map((id) => (
         <NpcActor key={id} npcId={id} sceneLocation="street" />
       ))}
-
-      <InteractiveProp
-        position={[2, 1.2, 4]}
-        label="Payphone"
-        color="#ff3c3c"
-        onClick={() => togglePhone(true)}
-      />
-
-      <LocationGate
-        position={[-10, 1.4, 0.6]}
-        label={bankFrontUnlocked ? "Bank — enter" : "Bank — locked"}
-        color={bankFrontUnlocked ? "#f5a623" : "#444"}
-        onClick={() => {
-          if (bankFrontUnlocked) setPlayerLocation("bankLobby");
-          else setActiveAuth({ device: "bankFront", voiceCardId: "", result: "pending" });
-        }}
-      />
-
-      <LocationGate
-        position={[10, 1.4, -0.4]}
-        label="Cafe"
-        color="#f5d6a0"
-        onClick={() => setPlayerLocation("cafe")}
-      />
-
-      <LocationGate
-        position={[18, 1.4, 1.6]}
-        label="Apartments"
-        color="#aac6ff"
-        onClick={() => setPlayerLocation("apartment")}
-      />
-
-      <LocationGate
-        position={[12, 1.4, 8]}
-        label={briefcaseTaken ? "Train station — ESCAPE" : "Train station"}
-        color={briefcaseTaken ? "#3affa6" : "#666"}
-        onClick={() => {
-          if (briefcaseTaken) {
-            setPlayerPosition({ x: 12, y: 0, z: 8 });
-            setPlayerTarget(null);
-          } else {
-            useGame
-              .getState()
-              .pushToast("Nothing to flee with yet. Get the briefcase first.");
-          }
-        }}
-      />
     </group>
+  );
+}
+
+function Sidewalk({
+  position,
+  size,
+}: {
+  position: [number, number, number];
+  size: [number, number, number];
+}) {
+  return (
+    <mesh position={position} receiveShadow>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color="#262630" roughness={0.85} />
+    </mesh>
   );
 }

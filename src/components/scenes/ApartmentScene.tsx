@@ -6,23 +6,26 @@ import { useGame } from "@/game/store";
 import { moveToward } from "@/game/pathfinding";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
-import LocationGate from "@/components/world/LocationGate";
 import TargetPing from "@/components/world/TargetPing";
+import HardwoodFloor from "@/components/props/HardwoodFloor";
+import LivingRoom from "@/components/props/LivingRoom";
 
 export default function ApartmentScene() {
   const player = useGame((s) => s.player);
   const setPlayerPosition = useGame((s) => s.setPlayerPosition);
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
-  const setPlayerLocation = useGame((s) => s.setPlayerLocation);
+  const viewMode = useGame((s) => s.viewMode);
   const lastPos = useRef(player.position);
   const { camera } = useThree();
 
   useEffect(() => {
+    if (viewMode !== "diorama") return;
     camera.position.set(0, 9, 10);
     camera.lookAt(0, 1, -1);
-  }, [camera]);
+  }, [camera, viewMode]);
 
   useFrame((_, dt) => {
+    if (viewMode !== "diorama") return;
     const t = useGame.getState().player.target;
     if (!t) return;
     const next = moveToward(lastPos.current, t, dt * 4);
@@ -33,42 +36,75 @@ export default function ApartmentScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.3} color="#f8d8a8" />
-      <pointLight position={[2, 4, 2]} intensity={1.6} color="#ffb060" />
+      <ambientLight intensity={0.32} color="#f8d8a8" />
+      <pointLight position={[2, 3.4, 2]} intensity={1.6} color="#ffb060" distance={9} />
+      <pointLight position={[-3, 3, -2]} intensity={0.65} color="#aac6ff" distance={5} />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z })}>
-        <planeGeometry args={[14, 12]} />
-        <meshStandardMaterial color="#3a2218" roughness={0.6} />
-      </mesh>
-
-      <mesh position={[0, 1, -5]}>
-        <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#28181a" />
-      </mesh>
-
-      <mesh position={[-3, 0.8, -3]}>
-        <boxGeometry args={[3, 1.2, 1.5]} />
-        <meshStandardMaterial color="#5a2828" roughness={0.7} />
-      </mesh>
-      <mesh position={[3, 0.5, -3]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#3a2418" />
-      </mesh>
-      <mesh position={[3, 1.2, -3]}>
-        <cylinderGeometry args={[0.25, 0.4, 0.4]} />
-        <meshStandardMaterial color="#000" emissive="#ffb060" emissiveIntensity={0.8} />
-      </mesh>
-
-      <PlayerCharacter />
-      <TargetPing />
-      <NpcActor npcId="wife" sceneLocation="apartment" />
-
-      <LocationGate
-        position={[0, 1.2, 5]}
-        label="← Street"
-        color="#aac6ff"
-        onClick={() => setPlayerLocation("street")}
+      {/* Hardwood floor */}
+      <HardwoodFloor
+        size={[14, 12]}
+        onClick={(e) => {
+          if (viewMode !== "diorama") return;
+          setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z });
+        }}
       />
+
+      {/* Wallpapered back wall */}
+      <mesh position={[0, 2, -5]} receiveShadow>
+        <boxGeometry args={[14, 4, 0.2]} />
+        <meshStandardMaterial color="#3a2018" roughness={0.85} />
+      </mesh>
+      {/* Crown molding */}
+      <mesh position={[0, 3.95, -4.95]}>
+        <boxGeometry args={[14, 0.15, 0.15]} />
+        <meshStandardMaterial color="#f4eccd" roughness={0.7} />
+      </mesh>
+      {/* Baseboard */}
+      <mesh position={[0, 0.16, -4.85]}>
+        <boxGeometry args={[14, 0.18, 0.1]} />
+        <meshStandardMaterial color="#f4eccd" roughness={0.85} />
+      </mesh>
+
+      {/* Side walls */}
+      <mesh position={[-7, 2, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 4, 12]} />
+        <meshStandardMaterial color="#3a2018" roughness={0.85} />
+      </mesh>
+      <mesh position={[7, 2, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 4, 12]} />
+        <meshStandardMaterial color="#3a2018" roughness={0.85} />
+      </mesh>
+
+      {/* Front wall with door back to street */}
+      <mesh position={[0, 2, 5.9]}>
+        <boxGeometry args={[14, 4, 0.2]} />
+        <meshStandardMaterial color="#3a2018" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 1.4, 5.78]}>
+        <boxGeometry args={[1.4, 2.4, 0.04]} />
+        <meshStandardMaterial color="#28181c" />
+      </mesh>
+
+      {/* Window with curtains on left wall */}
+      <mesh position={[-6.85, 2.4, -2]}>
+        <boxGeometry args={[0.04, 1.5, 1.6]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#aac6ff" emissiveIntensity={0.18} />
+      </mesh>
+      <mesh position={[-6.7, 2.4, -1.0]}>
+        <boxGeometry args={[0.04, 1.6, 0.5]} />
+        <meshStandardMaterial color="#7a1818" roughness={0.85} />
+      </mesh>
+      <mesh position={[-6.7, 2.4, -3.0]}>
+        <boxGeometry args={[0.04, 1.6, 0.5]} />
+        <meshStandardMaterial color="#7a1818" roughness={0.85} />
+      </mesh>
+
+      {/* Living room: sofa, side table, lamp, photo wall */}
+      <LivingRoom />
+
+      {viewMode === "diorama" && <PlayerCharacter />}
+      {viewMode === "diorama" && <TargetPing />}
+      <NpcActor npcId="wife" sceneLocation="apartment" />
     </group>
   );
 }

@@ -96,6 +96,10 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   await page.waitForTimeout(2000);
   state = await getState(page);
   check("after Skip: phase = playing", state.phase === "playing", `got ${state.phase}`);
+  // Force diorama for headless E2E (FP needs pointer lock which doesn't work
+  // in headless reliably). The viewMode toggle is exposed on the store hook.
+  await page.evaluate(() => window.__vt.setState({ viewMode: "diorama" }));
+  await page.waitForTimeout(500);
   check(
     "initial in-game time near 6:00 PM",
     state.inGameTime >= 18 * 3600 && state.inGameTime < 18 * 3600 + 60,

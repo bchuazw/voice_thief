@@ -8,9 +8,10 @@ import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import VolumetricLamp from "@/components/shaders/VolumetricLamp";
 import VaultDoor from "@/components/shaders/VaultDoor";
-import LocationGate from "@/components/world/LocationGate";
-import InteractiveProp from "@/components/world/InteractiveProp";
 import TargetPing from "@/components/world/TargetPing";
+import MarbleFloor from "@/components/props/MarbleFloor";
+import TellerCounter from "@/components/props/TellerCounter";
+import Chandelier from "@/components/props/Chandelier";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["bankManager", "secretary", "bankGuard"];
@@ -19,22 +20,19 @@ export default function BankInteriorScene() {
   const player = useGame((s) => s.player);
   const setPlayerPosition = useGame((s) => s.setPlayerPosition);
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
-  const setPlayerLocation = useGame((s) => s.setPlayerLocation);
-  const setActiveAuth = useGame((s) => s.setActiveAuth);
-  const hallwayUnlocked = useGame((s) => s.bankHallwayUnlocked);
+  const viewMode = useGame((s) => s.viewMode);
   const vaultOpen = useGame((s) => s.vaultOpen);
-  const briefcaseTaken = useGame((s) => s.briefcaseTaken);
-  const takeBriefcase = useGame((s) => s.takeBriefcase);
-
   const lastPos = useRef(player.position);
   const { camera } = useThree();
 
   useEffect(() => {
+    if (viewMode !== "diorama") return;
     camera.position.set(0, 11, 12);
     camera.lookAt(0, 1, -3);
-  }, [camera]);
+  }, [camera, viewMode]);
 
   useFrame((_, dt) => {
+    if (viewMode !== "diorama") return;
     const t = useGame.getState().player.target;
     if (!t) return;
     const next = moveToward(lastPos.current, t, dt * 4);
@@ -45,75 +43,108 @@ export default function BankInteriorScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.4} color="#f8e8c8" />
-      <pointLight position={[0, 5, 2]} intensity={1.2} color="#ffd9a0" />
-      <VolumetricLamp position={[-6, 5, -6]} color="#f0c878" />
+      {/* Warm interior lighting */}
+      <ambientLight intensity={0.42} color="#f8e8c8" />
+      <pointLight position={[-3, 4, 2]} intensity={1.4} color="#ffd9a0" distance={10} />
+      <pointLight position={[3, 4, 2]} intensity={1.4} color="#ffd9a0" distance={10} />
+      <pointLight position={[0, 3.5, -8]} intensity={1.0} color="#ffb060" distance={6} />
+      <VolumetricLamp position={[-6, 4, -6]} color="#f0c878" />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow
-        onClick={(e) => setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z })}>
-        <planeGeometry args={[24, 18]} />
-        <meshStandardMaterial color="#3a2a1a" roughness={0.4} metalness={0.2} />
-      </mesh>
-
-      <mesh position={[0, 1.2, -8]} castShadow>
-        <boxGeometry args={[18, 2.4, 0.4]} />
-        <meshStandardMaterial color="#5a3a22" roughness={0.55} />
-      </mesh>
-
-      <mesh position={[-9, 2.5, -4]} castShadow>
-        <boxGeometry args={[0.4, 5, 8]} />
-        <meshStandardMaterial color="#1a1a22" />
-      </mesh>
-      <mesh position={[9, 2.5, -4]} castShadow>
-        <boxGeometry args={[0.4, 5, 8]} />
-        <meshStandardMaterial color="#1a1a22" />
-      </mesh>
-
-      <PlayerCharacter />
-      <TargetPing />
-      {NPC_LIST.map((id) => (
-        <NpcActor key={id} npcId={id} sceneLocation="bankLobby" />
-      ))}
-
-      <LocationGate
-        position={[0, 1.2, 5]}
-        label="← Street"
-        color="#aac6ff"
-        onClick={() => setPlayerLocation("street")}
-      />
-
-      <LocationGate
-        position={[0, 1.2, -7.7]}
-        label={hallwayUnlocked ? "Hallway →" : "Hallway — locked"}
-        color={hallwayUnlocked ? "#f5a623" : "#444"}
-        onClick={() => {
-          if (hallwayUnlocked) setPlayerLocation("vault");
-          else setActiveAuth({ device: "bankHallway", voiceCardId: "", result: "pending" });
+      {/* Marble floor with checker pattern */}
+      <MarbleFloor
+        position={[0, 0, 0]}
+        size={[24, 18]}
+        onClick={(e) => {
+          if (viewMode !== "diorama") return;
+          setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z });
         }}
       />
 
-      <VaultDoor open={vaultOpen} position={[0, 2, -10]} />
+      {/* Wood-paneled side walls */}
+      <mesh position={[-12, 2.5, -2]} receiveShadow>
+        <boxGeometry args={[0.4, 5, 16]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.55} />
+      </mesh>
+      <mesh position={[12, 2.5, -2]} receiveShadow>
+        <boxGeometry args={[0.4, 5, 16]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.55} />
+      </mesh>
+      {/* Wainscoting */}
+      <mesh position={[-11.78, 1, -2]} receiveShadow>
+        <boxGeometry args={[0.05, 2, 16]} />
+        <meshStandardMaterial color="#2a1810" />
+      </mesh>
+      <mesh position={[11.78, 1, -2]} receiveShadow>
+        <boxGeometry args={[0.05, 2, 16]} />
+        <meshStandardMaterial color="#2a1810" />
+      </mesh>
 
-      {!vaultOpen && (
-        <InteractiveProp
-          position={[0, 2, -9.7]}
-          label="Vault intercom"
-          color="#ff3c3c"
-          onClick={() => setActiveAuth({ device: "vault", voiceCardId: "", result: "pending" })}
-        />
+      {/* Front wall + entrance back to street */}
+      <mesh position={[0, 2.5, 6]} receiveShadow>
+        <boxGeometry args={[24, 5, 0.4]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 1.4, 5.85]}>
+        <boxGeometry args={[2.0, 2.4, 0.04]} />
+        <meshStandardMaterial color="#28181c" />
+      </mesh>
+      {/* Top lit transom */}
+      <mesh position={[0, 3.3, 5.85]}>
+        <boxGeometry args={[2.4, 0.4, 0.04]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.6} />
+      </mesh>
+
+      {/* Teller counter with brass detailing */}
+      <TellerCounter position={[0, 0, -5]} />
+
+      {/* Hallway opening at back wall */}
+      <mesh position={[-4.5, 2.5, -8]}>
+        <boxGeometry args={[7, 5, 0.4]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.6} />
+      </mesh>
+      <mesh position={[4.5, 2.5, -8]}>
+        <boxGeometry args={[7, 5, 0.4]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 4.4, -8]}>
+        <boxGeometry args={[2, 1.2, 0.4]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.6} />
+      </mesh>
+
+      {/* Chandelier */}
+      <Chandelier position={[0, 4.6, -2]} />
+
+      {/* Vault chamber further back */}
+      <mesh position={[0, 2.5, -12]}>
+        <boxGeometry args={[8, 5, 0.4]} />
+        <meshStandardMaterial color="#222024" roughness={0.6} />
+      </mesh>
+      <VaultDoor open={vaultOpen} position={[0, 2, -11.6]} />
+
+      {/* Briefcase pedestal inside vault, visible after open */}
+      {vaultOpen && (
+        <group position={[0, 0, -13]}>
+          <mesh position={[0, 0.45, 0]} castShadow>
+            <boxGeometry args={[0.7, 0.9, 0.6]} />
+            <meshStandardMaterial color="#2a1810" />
+          </mesh>
+          <mesh position={[0, 1, 0]} castShadow>
+            <boxGeometry args={[0.6, 0.18, 0.4]} />
+            <meshStandardMaterial color="#5a3a22" roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 1.05, 0.21]}>
+            <boxGeometry args={[0.18, 0.06, 0.02]} />
+            <meshStandardMaterial color="#a07020" metalness={1} roughness={0.3} />
+          </mesh>
+          <pointLight position={[0, 1.5, 0]} intensity={1.4} color="#ffd9a0" distance={3} />
+        </group>
       )}
 
-      {vaultOpen && !briefcaseTaken && (
-        <InteractiveProp
-          position={[0, 1.4, -11]}
-          label="Briefcase"
-          color="#f5d6a0"
-          onClick={() => {
-            takeBriefcase();
-            useGame.getState().pushToast("Briefcase secured. Get to the train station.");
-          }}
-        />
-      )}
+      {viewMode === "diorama" && <PlayerCharacter />}
+      {viewMode === "diorama" && <TargetPing />}
+      {NPC_LIST.map((id) => (
+        <NpcActor key={id} npcId={id} sceneLocation="bankLobby" />
+      ))}
     </group>
   );
 }

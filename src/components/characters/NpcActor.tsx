@@ -9,19 +9,16 @@ import { distance } from "@/game/pathfinding";
 import { findActiveMoment } from "@/game/npcSchedules";
 import { NPC_PROFILES } from "@/config/voices";
 import { startNpcAudio, stopNpcAudio } from "@/audio/npcSpeech";
+import BankManagerBody from "./bodies/BankManagerBody";
+import SecretaryBody from "./bodies/SecretaryBody";
+import BankGuardBody from "./bodies/BankGuardBody";
+import WifeBody from "./bodies/WifeBody";
 import type { LocationId, NpcId } from "@/game/types";
 
 interface Props {
   npcId: NpcId;
   sceneLocation: LocationId;
 }
-
-const NPC_COLORS: Record<NpcId, string> = {
-  bankManager: "#c08868",
-  secretary: "#d8a8c8",
-  bankGuard: "#7a8aa8",
-  wife: "#e0a890",
-};
 
 export default function NpcActor({ npcId, sceneLocation }: Props) {
   const npc = useGame((s) => s.npcs[npcId]);
@@ -69,18 +66,14 @@ export default function NpcActor({ npcId, sceneLocation }: Props) {
 
   return (
     <group ref={ref}>
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <capsuleGeometry args={[0.34, 1, 6, 12]} />
-        <meshStandardMaterial color={NPC_COLORS[npcId]} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 2.4, 0]} castShadow>
-        <sphereGeometry args={[0.24, 12, 12]} />
-        <meshStandardMaterial color="#f4d8b0" />
-      </mesh>
+      {npcId === "bankManager" && <BankManagerBody />}
+      {npcId === "secretary" && <SecretaryBody />}
+      {npcId === "bankGuard" && <BankGuardBody />}
+      {npcId === "wife" && <WifeBody />}
 
       {isSpeaking && (
         <mesh position={[0, 3.0, 0]}>
-          <sphereGeometry args={[0.08, 12, 12]} />
+          <sphereGeometry args={[0.07, 12, 12]} />
           <meshStandardMaterial color="#ff3c3c" emissive="#ff3c3c" emissiveIntensity={2} />
         </mesh>
       )}

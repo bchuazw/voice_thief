@@ -6,8 +6,9 @@ import { useGame } from "@/game/store";
 import { moveToward } from "@/game/pathfinding";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
-import LocationGate from "@/components/world/LocationGate";
 import TargetPing from "@/components/world/TargetPing";
+import CheckerFloor from "@/components/props/CheckerFloor";
+import CafeInterior from "@/components/props/CafeInterior";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["secretary", "bankManager"];
@@ -16,16 +17,18 @@ export default function CafeScene() {
   const player = useGame((s) => s.player);
   const setPlayerPosition = useGame((s) => s.setPlayerPosition);
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
-  const setPlayerLocation = useGame((s) => s.setPlayerLocation);
+  const viewMode = useGame((s) => s.viewMode);
   const lastPos = useRef(player.position);
   const { camera } = useThree();
 
   useEffect(() => {
+    if (viewMode !== "diorama") return;
     camera.position.set(0, 9, 10);
     camera.lookAt(0, 1, -1);
-  }, [camera]);
+  }, [camera, viewMode]);
 
   useFrame((_, dt) => {
+    if (viewMode !== "diorama") return;
     const t = useGame.getState().player.target;
     if (!t) return;
     const next = moveToward(lastPos.current, t, dt * 4);
@@ -36,39 +39,51 @@ export default function CafeScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.35} color="#f5d6a0" />
-      <pointLight position={[0, 4, 0]} intensity={1.3} color="#ffb968" />
+      <ambientLight intensity={0.42} color="#f5d6a0" />
+      <pointLight position={[-3, 3.4, -1]} intensity={1.2} color="#ffb968" distance={6} />
+      <pointLight position={[3, 3.4, -1]} intensity={1.2} color="#ffb968" distance={6} />
+      <pointLight position={[0, 3.0, 2]} intensity={0.6} color="#ffd9a0" distance={5} />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z })}>
-        <planeGeometry args={[14, 12]} />
-        <meshStandardMaterial color="#3a2818" roughness={0.5} />
+      {/* Checker tile floor */}
+      <CheckerFloor
+        size={[14, 12]}
+        onClick={(e) => {
+          if (viewMode !== "diorama") return;
+          setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z });
+        }}
+      />
+
+      {/* Back wall */}
+      <mesh position={[0, 2, -5]} receiveShadow>
+        <boxGeometry args={[14, 4, 0.2]} />
+        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+      </mesh>
+      {/* Side walls */}
+      <mesh position={[-7, 2, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 4, 12]} />
+        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+      </mesh>
+      <mesh position={[7, 2, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 4, 12]} />
+        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+      </mesh>
+      {/* Front wall + door */}
+      <mesh position={[0, 2, 5.9]}>
+        <boxGeometry args={[14, 4, 0.2]} />
+        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 1.4, 5.78]}>
+        <boxGeometry args={[1.2, 2.4, 0.04]} />
+        <meshStandardMaterial color="#28181c" />
       </mesh>
 
-      <mesh position={[-4, 0.5, -1]}>
-        <cylinderGeometry args={[0.6, 0.6, 1, 8]} />
-        <meshStandardMaterial color="#5a3a22" />
-      </mesh>
-      <mesh position={[4, 0.5, -1]}>
-        <cylinderGeometry args={[0.6, 0.6, 1, 8]} />
-        <meshStandardMaterial color="#5a3a22" />
-      </mesh>
-      <mesh position={[0, 1.2, -4]}>
-        <boxGeometry args={[8, 2.4, 0.4]} />
-        <meshStandardMaterial color="#3a2418" />
-      </mesh>
+      <CafeInterior />
 
-      <PlayerCharacter />
-      <TargetPing />
+      {viewMode === "diorama" && <PlayerCharacter />}
+      {viewMode === "diorama" && <TargetPing />}
       {NPC_LIST.map((id) => (
         <NpcActor key={id} npcId={id} sceneLocation="cafe" />
       ))}
-
-      <LocationGate
-        position={[0, 1.2, 5]}
-        label="← Street"
-        color="#aac6ff"
-        onClick={() => setPlayerLocation("street")}
-      />
     </group>
   );
 }

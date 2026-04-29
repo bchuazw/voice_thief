@@ -89,6 +89,8 @@ export interface GameState {
   toasts: { id: string; text: string; expiresAt: number }[];
   audioMuted: boolean;
   audioVolume: number;
+  viewMode: "fp" | "diorama";
+  pointerLocked: boolean;
 }
 
 export const GAME_START_SECONDS = 18 * 3600;
