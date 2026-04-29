@@ -61,16 +61,16 @@ export default function StreetScene() {
   return (
     <group>
       {/* Sky-ish blue tinge from above */}
-      <ambientLight intensity={0.42} color="#3a4665" />
+      <ambientLight intensity={0.52} color="#465678" />
       <directionalLight
         position={[6, 18, 6]}
-        intensity={0.45}
+        intensity={0.58}
         color="#aac6ff"
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
-      <hemisphereLight args={["#5b6f9a", "#0f0f18", 0.4]} />
+      <hemisphereLight args={["#677dac", "#171722", 0.5]} />
 
       {/* Volumetric lamp halos — three on the block */}
       <VolumetricLamp position={[-12, 4, 4]} color="#f5a623" />
@@ -96,11 +96,11 @@ export default function StreetScene() {
       {/* Curbs */}
       <mesh position={[-10, 0.16, 1.5]}>
         <boxGeometry args={[18, 0.16, 0.18]} />
-        <meshStandardMaterial color="#16161e" />
+        <meshStandardMaterial color="#20212b" />
       </mesh>
       <mesh position={[10, 0.16, 1.5]}>
         <boxGeometry args={[18, 0.16, 0.18]} />
-        <meshStandardMaterial color="#16161e" />
+        <meshStandardMaterial color="#20212b" />
       </mesh>
 
       {/* Street furniture */}
@@ -174,7 +174,7 @@ function Sidewalk({
   return (
     <mesh position={position} receiveShadow>
       <boxGeometry args={size} />
-      <meshStandardMaterial color="#262630" roughness={0.85} />
+      <meshStandardMaterial color="#30323d" roughness={0.85} />
     </mesh>
   );
 }

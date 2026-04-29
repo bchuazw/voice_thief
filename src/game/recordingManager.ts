@@ -7,6 +7,7 @@ import { findActiveMoment } from "./npcSchedules";
 import { makeMockRecordingBlob } from "@/audio/mockRecorder";
 import type { Emotion, NpcId, VoiceCard } from "./types";
 
+const MIN_DURATION_MS = 3_000;
 const MAX_DURATION_MS = 30_000;
 
 interface ActiveRecorder {
@@ -95,8 +96,8 @@ export async function endRecording(): Promise<void> {
   useGame.getState().stopRecording();
 
   const durationMs = Date.now() - local.startedAt;
-  if (durationMs < 600) {
-    useGame.getState().pushToast("Recording too short. Hold longer.");
+  if (durationMs < MIN_DURATION_MS) {
+    useGame.getState().pushToast("Recording too short. Hold at least three seconds.");
     if (local.recorder) {
       local.recorder.stop();
       local.stream?.getTracks().forEach((t) => t.stop());
@@ -141,9 +142,13 @@ export async function endRecording(): Promise<void> {
     useGame.getState().pushToast(`Voice captured: ${local.npcId} (${local.emotion}).`);
 
     const npc = useGame.getState().npcs[local.npcId];
-    if (npc.noticedRecording === false && Math.random() < 0.18) {
+    if (durationMs > 12_000) {
+      useGame.getState().raiseSuspicion(6, "long recording drew attention");
+    }
+
+    if (npc.noticedRecording === false && Math.random() < 0.24) {
       useGame.getState().updateNpc(local.npcId, { noticedRecording: true });
-      useGame.getState().raiseSuspicion(5, "noticed during recording");
+      useGame.getState().raiseSuspicion(8, "noticed during recording");
     }
   } catch (err) {
     useGame.getState().pushToast(`Recording failed: ${(err as Error).message}`);

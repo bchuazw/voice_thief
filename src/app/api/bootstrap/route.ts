@@ -1,4 +1,4 @@
-import { ensureAgents } from "@/elevenlabs/agents";
+import { convaiAgentsEnabled, ensureAgents } from "@/elevenlabs/agents";
 import { isMockMode } from "@/elevenlabs/client";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ export async function GET(): Promise<Response> {
     const agents = await ensureAgents();
     return Response.json({
       ok: true,
-      mock: isMockMode(),
+      mock: isMockMode() || !convaiAgentsEnabled(),
       agents,
       gameVersion: process.env.NEXT_PUBLIC_GAME_VERSION ?? "0.0.0",
     });

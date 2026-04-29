@@ -39,12 +39,12 @@ export default function CafeScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.6} color="#f5d6a0" />
-      <pointLight position={[-3, 3.4, -1]} intensity={1.6} color="#ffb968" distance={8} />
-      <pointLight position={[3, 3.4, -1]} intensity={1.6} color="#ffb968" distance={8} />
-      <pointLight position={[0, 3.0, 2]} intensity={0.8} color="#ffd9a0" distance={6} />
+      <ambientLight intensity={0.72} color="#f5d6a0" />
+      <pointLight position={[-3, 3.4, -1]} intensity={1.85} color="#ffb968" distance={8} />
+      <pointLight position={[3, 3.4, -1]} intensity={1.85} color="#ffb968" distance={8} />
+      <pointLight position={[0, 3.0, 2]} intensity={1.05} color="#ffd9a0" distance={6} />
       {/* Back-bar wall wash */}
-      <pointLight position={[0, 2.5, -3.5]} intensity={1.0} color="#ffb060" distance={5} />
+      <pointLight position={[0, 2.5, -3.5]} intensity={1.25} color="#ffb060" distance={5} />
 
       {/* Checker tile floor */}
       <CheckerFloor
@@ -58,26 +58,26 @@ export default function CafeScene() {
       {/* Back wall */}
       <mesh position={[0, 2, -5]} receiveShadow>
         <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+        <meshStandardMaterial color="#4a3522" roughness={0.85} />
       </mesh>
       {/* Side walls */}
       <mesh position={[-7, 2, 0]} receiveShadow>
         <boxGeometry args={[0.2, 4, 12]} />
-        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+        <meshStandardMaterial color="#4a3522" roughness={0.85} />
       </mesh>
       <mesh position={[7, 2, 0]} receiveShadow>
         <boxGeometry args={[0.2, 4, 12]} />
-        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+        <meshStandardMaterial color="#4a3522" roughness={0.85} />
       </mesh>
       {/* Front wall + door */}
       <mesh position={[0, 2, 5.9]}>
         <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#3a2818" roughness={0.85} />
+        <meshStandardMaterial color="#4a3522" roughness={0.85} />
       </mesh>
       {/* Ceiling — pressed-tin cream */}
       <mesh position={[0, 4, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[14, 12]} />
-        <meshStandardMaterial color="#5a4838" roughness={0.85} />
+        <meshStandardMaterial color="#675440" roughness={0.85} />
       </mesh>
       {/* Crown molding */}
       <mesh position={[0, 3.95, -4.95]}>

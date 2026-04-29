@@ -1,16 +1,19 @@
 # ElevenLabs Integration
 
-Voice Thief uses three ElevenLabs APIs as load-bearing gameplay primitives:
-**TTS**, **Instant Voice Cloning (IVC)**, and **Conversational AI**. Each is
-wrapped in a server-only module under `src/elevenlabs/`, and routed through
-`app/api/*` so the API key never reaches the browser.
+Voice Thief uses ElevenLabs voice APIs as load-bearing gameplay primitives:
+**TTS** and **Instant Voice Cloning (IVC)**. Phone conversations use
+deterministic game rules for puzzle reliability; optional ConvAI agent
+scaffolding is kept behind an explicit opt-in so local/dev runs do not create
+unused agents. API calls are wrapped in server-only modules under
+`src/elevenlabs/`, and routed through `app/api/*` so the API key never reaches
+the browser.
 
 ## Mock mode (default)
 
 If `VT_MOCK_AI=1` or `ELEVENLABS_API_KEY` is unset:
 - TTS returns a silent MP3 of approximate duration.
 - IVC returns a synthetic voice id `mock_voice_<npcId>_<timestamp>`.
-- ConvAI replies are scripted by keyword in `config/mockResponses.ts`.
+- Phone replies are scripted by keyword in `config/mockResponses.ts`.
 - Voice delete is a no-op.
 
 The game still ships real ElevenLabs-rendered ambient NPC clips in
@@ -46,21 +49,20 @@ Limits:
 Server uploads to `POST /v1/voices/add` with `remove_background_noise=true`.
 The returned `voice_id` is stored client-side as a `VoiceCard`.
 
-## Conversational AI — `/api/conversation`
+## Phone Conversations — `/api/conversation`
 
 POST `{ npcId, callerVoiceId, callerVoiceNpcId, callerText, history,
 inGameTime }` → `{ npcText, raisedSuspicion, hangUp, callerAudio,
 npcAudio, mock }`.
 
-Agents are created at boot via `ensureAgents()` (`/api/bootstrap`) using the
-system prompts in `src/config/agents/*`. Their IDs are cached in
-`.vt-agents.json` so subsequent boots don't re-create them. The agents are
-stable-named (`vt_bank_manager_v1`, etc.) so they're easy to find in the
-dashboard.
-
-In mock mode (and currently with real keys until ConvAI WebSocket streaming
-is wired), turn responses are produced by `mockResponses.ts` rules, then
-TTS'd with the caller voice and the target NPC voice for playback.
+The shipped game uses deterministic response rules in
+`src/config/mockResponses.ts` so solutions, suspicion, and hangups remain
+testable. The checked-in `src/config/agents/*` prompts are retained as optional
+ConvAI scaffolding. If you explicitly set `ELEVENLABS_ENABLE_CONVAI_AGENTS=1`,
+`/api/bootstrap` can create/reuse the four ElevenLabs ConvAI agents and cache
+their IDs in `.vt-agents.json`. The live phone turn still routes through
+deterministic rules, then TTSs the caller voice and target NPC voice for
+playback.
 
 ## Voice authentication — `/api/auth-voice`
 

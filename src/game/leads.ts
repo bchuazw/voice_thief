@@ -26,7 +26,7 @@ export function buildLeads(state: GameState): Lead[] {
     leads.push({
       id: "first-voice",
       title: "Find a voice worth stealing",
-      body: "The schedule marks recordable moments. Lillian is at the cafe right at 6:00. Harold steps outside calm at 6:15.",
+      body: "People only give you clean material when they are relaxed and talking. Watch the first half hour carefully.",
       urgency: state.inGameTime >= inGameTimeFromClock(18, 8) ? "active" : "note",
     });
   }
@@ -35,7 +35,7 @@ export function buildLeads(state: GameState): Lead[] {
     leads.push({
       id: "calm-manager",
       title: "The vault wants calm",
-      body: "Harold's stressed phone fight might fool a person, but not the vault. His cigarette break is the cleanest voiceprint.",
+      body: "Harold's stressed phone fight might fool a person, but not the vault. You need him calm, away from the counter noise.",
       urgency: state.inGameTime >= inGameTimeFromClock(18, 15) ? "active" : "note",
     });
   } else {

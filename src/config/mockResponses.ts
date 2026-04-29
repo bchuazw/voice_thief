@@ -40,6 +40,7 @@ const RULES: Record<NpcId, ResponseRule[]> = {
     {
       match: () => true,
       reply: "Vance speaking. Who is this?",
+      effect: { raisedSuspicion: 5 },
     },
   ],
 

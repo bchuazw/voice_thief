@@ -47,10 +47,14 @@ function envAgentId(def: AgentDefinition): string | undefined {
   return process.env[key];
 }
 
+export function convaiAgentsEnabled(): boolean {
+  return process.env.ELEVENLABS_ENABLE_CONVAI_AGENTS === "1";
+}
+
 export async function ensureAgents(): Promise<Record<NpcId, string>> {
   const result: Partial<Record<NpcId, string>> = {};
 
-  if (isMockMode()) {
+  if (isMockMode() || !convaiAgentsEnabled()) {
     for (const def of AGENT_DEFINITIONS) {
       result[def.npcId] = `mock_agent_${def.npcId}`;
     }

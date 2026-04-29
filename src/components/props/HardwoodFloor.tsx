@@ -31,7 +31,7 @@ const FRAG = /* glsl */ `
     vec2 plankUv = vec2(uv.x + offset, uv.y);
     vec2 cell = floor(plankUv * vec2(1.0/0.18, 1.0/1.6));
     float h = hash(cell);
-    vec3 base = mix(vec3(0.32, 0.18, 0.10), vec3(0.5, 0.30, 0.15), h);
+    vec3 base = mix(vec3(0.38, 0.22, 0.12), vec3(0.58, 0.35, 0.18), h);
     // Subtle wood grain via long-axis noise
     float grain = sin(uv.x * 25.0 + h * 6.28);
     base *= 0.95 + 0.05 * grain;

@@ -17,9 +17,8 @@ Service.
    Anything else can stay blank in mock mode.
 
 4. Click **Create Web Service**. The first build takes ~3–4 minutes.
-5. The health check probes `/api/bootstrap`, which doubles as the agent
-   bootstrapper — first hit creates the four ConvAI agents (when keys exist)
-   and writes their IDs to `.vt-agents.json` in the workspace.
+5. The health check probes `/api/bootstrap`, which warms the app without
+   creating ConvAI agents unless `ELEVENLABS_ENABLE_CONVAI_AGENTS=1`.
 
 ## With real keys
 
@@ -29,8 +28,9 @@ To switch from mock to live ElevenLabs:
 | --- | --- |
 | `ELEVENLABS_API_KEY` | <https://elevenlabs.io/app/settings/api-keys> |
 | `ELEVENLABS_VOICE_ID_*` | Voice Library — pin one voice per NPC |
-| `ELEVENLABS_AGENT_ID_*` | Optional. Leave blank to have `/api/bootstrap` create agents on first hit |
-| `ANTHROPIC_API_KEY` | Optional fallback for NPC reactions |
+| `ELEVENLABS_ENABLE_CONVAI_AGENTS` | Optional experimental agent provisioning; leave `0` for normal play |
+| `ELEVENLABS_AGENT_ID_*` | Optional. Used only when ConvAI agent provisioning is enabled |
+| `ANTHROPIC_API_KEY` | Reserved; not required for the shipped puzzle path |
 
 Set `VT_MOCK_AI=0` (or remove it) to make the server use real APIs.
 

@@ -3,15 +3,15 @@
 ```
                         Browser (R3F + Zustand)
                                 │
-         click-to-move ▲        │        ▼ TTS / IVC / ConvAI
+         click-to-move ▲        │        ▼ TTS / IVC
                        │        │
                        │   Next.js App Router
                        │        │
                        │   /api/tts ──▶ ElevenLabs TTS
                        │   /api/clone ──▶ ElevenLabs IVC
-                       │   /api/conversation ──▶ Mock (or ConvAI)
+                       │   /api/conversation ──▶ deterministic phone rules
                        │   /api/auth-voice ──▶ TTS + stress score
-                       │   /api/bootstrap ──▶ ensures ConvAI agents
+                       │   /api/bootstrap ──▶ health + optional agent provisioning
                        │   /api/cleanup ──▶ deletes cloned voices
                        │
                        ▼
@@ -60,11 +60,13 @@ mode when `VT_MOCK_AI=1` or no API key is present:
 | --- | --- |
 | TTS | Synthesized silent MP3 of approximate duration |
 | IVC | Returns a fake voice id `mock_voice_<npcId>_<ts>` |
-| ConvAI | Static rule-based replies in `config/mockResponses.ts` |
+| Phone conversation | Static rule-based replies in `config/mockResponses.ts` |
 | Voice delete | No-op |
 
-`/api/bootstrap` calls `ensureAgents()`, which creates ConvAI agents on
-first run and caches their IDs in `.vt-agents.json` (gitignored).
+`/api/bootstrap` calls `ensureAgents()`. By default it returns mock agent IDs
+so warmup checks do not create unused remote agents. Set
+`ELEVENLABS_ENABLE_CONVAI_AGENTS=1` only if you want to provision the optional
+ConvAI scaffolding and cache IDs in `.vt-agents.json` (gitignored).
 
 ## Voice authentication
 

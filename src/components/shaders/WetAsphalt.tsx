@@ -77,11 +77,11 @@ const FRAG = /* glsl */ `
     float puddleMask = smoothstep(0.4, 0.7, puddle);
 
     // Base asphalt — slightly warmer near puddles
-    vec3 base = mix(vec3(0.07, 0.08, 0.10), vec3(0.12, 0.14, 0.20), puddleMask);
+    vec3 base = mix(vec3(0.09, 0.10, 0.13), vec3(0.16, 0.18, 0.25), puddleMask);
 
     // Diagonal sheen sweep so the ground always has SOMETHING moving
     float sheen = smoothstep(0.6, 1.0, fract(worldXZ.x * 0.04 + worldXZ.y * 0.06 + uTime * 0.04));
-    base += vec3(0.04, 0.05, 0.08) * sheen * 0.6;
+    base += vec3(0.05, 0.06, 0.09) * sheen * 0.75;
 
     // Ripple animation, brighter inside puddles
     float ripple = sin(worldXZ.x * 4.0 + uTime * 1.6) * cos(worldXZ.y * 4.0 - uTime * 1.2);

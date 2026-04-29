@@ -14,16 +14,16 @@ const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
 function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
   if (!caller) return "Pick a stolen voice, then dial.";
   if (caller === "wife" && target === "bankManager")
-    return 'e.g. "Honey, there\'s been a break-in. Come home now."';
+    return "A domestic emergency might pull Harold away from the bank.";
   if (caller === "secretary" && target === "bankManager")
-    return 'e.g. "Sir, I left the ledger at the cafe. Could you grab it?"';
+    return "Give Harold a work reason to leave without making him panic.";
   if (caller === "bankManager" && target === "secretary")
-    return 'e.g. "Lillian — I left something upstairs. Go check, would you?"';
+    return "Ask Lillian to step away on an ordinary bank errand.";
   if (caller === "bankManager" && target === "wife")
-    return 'e.g. "Maggie — I\'ll be home late again. Don\'t wait up."';
+    return "Keep it personal. Margaret knows when Harold sounds wrong.";
   if (target === "bankGuard")
     return "Eddie won't leave his post. Don't bother trying.";
-  return "What do you want them to hear…";
+  return "What do you want them to hear...";
 }
 
 export default function PhoneUI() {

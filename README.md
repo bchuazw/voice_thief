@@ -3,7 +3,8 @@
 A noir heist puzzle where the player has no voice — but everyone else does.
 
 > **Submission for the Zed × ElevenLabs Hackathon — Hack #6.**
-> Built in Zed. Powered by ElevenLabs (TTS + Instant Voice Cloning + Conversational AI).
+> Built in Zed. Powered by ElevenLabs voice tech: human TTS, rendered NPC
+> dialogue, and Instant Voice Cloning-ready phone/auth flows.
 
 ![Title screen](docs/screenshots/02-title.png)
 

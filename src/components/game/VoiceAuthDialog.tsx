@@ -82,7 +82,7 @@ export default function VoiceAuthDialog() {
           setActiveAuth(null);
         }, 1500);
       } else {
-        raiseSuspicion(15, "failed voice auth");
+        raiseSuspicion(20, "failed voice auth");
       }
     } finally {
       setBusy(false);

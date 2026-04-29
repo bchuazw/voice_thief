@@ -194,8 +194,7 @@ export default function Notebook() {
                               <span aria-hidden className="mr-1">{emotionGlyph(m.emotion)}</span>
                               {m.emotion}
                             </span>
-                            {m.recordable ? " · recordable" : ""}
-                            {m.vaultClueLeak ? " · clue" : ""}
+                            {m.recordable ? " · voice window" : ""}
                           </span>
                         </li>
                       ))}

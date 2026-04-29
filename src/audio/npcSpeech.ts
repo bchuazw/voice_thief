@@ -2,6 +2,7 @@
 
 import { Howl } from "howler";
 import { useGame } from "@/game/store";
+import { NPC_SCHEDULES } from "@/game/npcSchedules";
 import bankManagerScripts from "@/config/scripts/bankManager.json";
 import secretaryScripts from "@/config/scripts/secretary.json";
 import bankGuardScripts from "@/config/scripts/bankGuard.json";
@@ -44,6 +45,7 @@ const SPEECH_MOMENTS = new Map<
   string,
   { npcId: NpcId; emotion: Emotion; lines: ScriptLine[] }
 >();
+const AUDIO_ID_BY_MOMENT_ID = new Map<string, string>();
 
 for (const file of SCRIPT_FILES) {
   for (const moment of file.moments) {
@@ -55,11 +57,21 @@ for (const file of SCRIPT_FILES) {
   }
 }
 
+for (const moments of Object.values(NPC_SCHEDULES)) {
+  for (const moment of moments) {
+    AUDIO_ID_BY_MOMENT_ID.set(moment.id, moment.scriptId);
+  }
+}
+
 let speechToken = 0;
 let activeSpeech: ActiveSpeech | null = null;
 
+function audioIdForMoment(momentId: string): string {
+  return AUDIO_ID_BY_MOMENT_ID.get(momentId) ?? momentId;
+}
+
 function urlForMoment(momentId: string): string {
-  return `/audio/npc-scripts/${momentId}.mp3`;
+  return `/audio/npc-scripts/${audioIdForMoment(momentId)}.mp3`;
 }
 
 function canSpeakInBrowser(): boolean {
@@ -177,7 +189,7 @@ export function startNpcAudio(npcId: NpcId, momentId: string): void {
   stopNpcAudio(npcId);
   const { audioMuted, audioVolume } = useGame.getState();
   if (audioMuted) return;
-  const speechMoment = SPEECH_MOMENTS.get(momentId);
+  const speechMoment = SPEECH_MOMENTS.get(audioIdForMoment(momentId));
   if (FORCE_BROWSER_SPEECH && speechMoment) {
     speakLines(speechMoment.npcId, speechMoment.lines, speechMoment.emotion);
     return;
