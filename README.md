@@ -192,10 +192,13 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-`npm run generate-assets` rebuilds the first-pass GLB noir kit in
-`public/models/noir-kit/`. The generated assets are deliberately modular so
-they can be replaced later by Blender-authored exports without rewriting
-gameplay code.
+`npm run generate-assets` runs Blender 4.5 LTS in background mode and
+rebuilds the semi-realistic GLB noir kit in `public/models/noir-kit/`. The
+assets are deliberately modular so the game can keep simple, reliable
+gameplay volumes while the visible set pieces improve through Blender.
+Use `npm run verify-blender` to confirm the local Blender executable. If
+Blender is installed outside the normal path, set `BLENDER_EXE` before
+running the generator.
 
 The repo ships with ElevenLabs-rendered NPC dialogue in
 `public/audio/npc-scripts/`, so ambient voices and replayed samples sound

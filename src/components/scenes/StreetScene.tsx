@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useGame } from "@/game/store";
 import { clampToWalkable, moveToward } from "@/game/pathfinding";
-import { Html } from "@react-three/drei";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import RainShader from "@/components/shaders/RainShader";
@@ -121,36 +120,6 @@ export default function StreetScene() {
 
       {/* Train station marker / archway at end of block */}
       <TrainStation position={[12, 0, 8]} active={briefcaseTaken} />
-
-      {/* Bank's red neon underline above the facade */}
-      <mesh position={[-10, 6.6, 0.06]}>
-        <boxGeometry args={[6.4, 0.16, 0.08]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#ff3c3c" emissiveIntensity={1.6} />
-      </mesh>
-
-      {/* Serif signage as Html overlays */}
-      <Html
-        center
-        position={[-10, 6.0, 0.08]}
-        distanceFactor={6}
-        zIndexRange={[8, 0]}
-        occlude={false}
-      >
-        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[28px] tracking-[0.12em] text-[#f4eccd] drop-shadow-[0_0_8px_rgba(255,60,60,0.45)]">
-          First City Bank
-        </div>
-      </Html>
-      <Html
-        center
-        position={[10, 4.7, -0.95]}
-        distanceFactor={7}
-        zIndexRange={[8, 0]}
-        occlude={false}
-      >
-        <div className="pointer-events-none whitespace-nowrap font-serif italic text-[18px] tracking-[0.08em] text-[#f5d6a0] drop-shadow-[0_0_6px_rgba(245,166,35,0.5)]">
-          the all-night
-        </div>
-      </Html>
 
       <RainShader />
 

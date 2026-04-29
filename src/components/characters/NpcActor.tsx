@@ -78,7 +78,7 @@ export default function NpcActor({ npcId, sceneLocation }: Props) {
         </mesh>
       )}
 
-      <Html center distanceFactor={8} position={[0, 3.2, 0]} occlude={false} zIndexRange={[12, 0]}>
+      <Html center distanceFactor={8} position={[0, 3.2, 0]} occlude zIndexRange={[12, 0]}>
         <div className="pointer-events-none flex flex-col items-center gap-1 text-center text-[10px] uppercase tracking-[0.25em] text-noir-paper">
           <span>{profile.displayName}</span>
           {showRecordHint && (

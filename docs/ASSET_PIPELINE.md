@@ -1,17 +1,19 @@
 # Asset Pipeline
 
-Voice Thief now has a GLB-first asset path for the main noir set pieces.
-The current kit is generated locally so the game is not blocked on Blender
-being installed in every environment, but the runtime path is the same one
-we should use for Blender-authored assets.
+Voice Thief now has a Blender-backed GLB asset path for the main noir set
+pieces. The runtime loads static GLBs, while the source generator is a
+Blender Python script that can rebuild the kit whenever the art direction
+changes.
 
 ## Commands
 
 ```bash
+npm run verify-blender
 npm run generate-assets
 ```
 
-This writes the current modular kit into:
+`npm run generate-assets` runs Blender 4.5 LTS in background mode and writes
+the modular kit into:
 
 ```text
 public/models/noir-kit/
@@ -23,11 +25,25 @@ The React side loads those files through:
 src/components/assets/NoirAsset.tsx
 ```
 
+If Blender is installed somewhere unusual, set `BLENDER_EXE`:
+
+```bash
+BLENDER_EXE="C:/Program Files/Blender Foundation/Blender 4.5/blender.exe" npm run generate-assets
+```
+
+The legacy Three.js generator is still available as a fallback:
+
+```bash
+npm run generate-assets:legacy
+```
+
 ## Current Kit
 
 - `bank-facade.glb`
 - `cafe-facade.glb`
+- `cafe-interior.glb`
 - `apartment-block.glb`
+- `living-room.glb`
 - `payphone.glb`
 - `train-station.glb`
 - `teller-counter.glb`
@@ -35,14 +51,16 @@ src/components/assets/NoirAsset.tsx
 These replace the most visible primitive-heavy props while preserving the
 existing gameplay interaction points and collision logic.
 
-## Blender Handoff
+## Art Direction
 
-When Blender is available, export replacement assets as GLB files with the
-same filenames and approximate origins/scales. That lets the game upgrade
-from generated low-poly kit pieces to hand-authored art without changing the
-scene code.
+The kit targets semi-realistic noir rather than literal photorealism:
+recognizable bank, diner, apartments, apartment interior, payphone, station,
+and teller counter forms; bevels and weighted normals; smoky glass;
+brass/wood/stone materials; and a small amount of grime and rain streaking.
+The goal is to remove the "random shapes" feeling while staying lightweight
+enough for browser play.
 
-Recommended conventions:
+## Authoring Conventions
 
 - Put the asset origin at the gameplay anchor used by the current component.
 - Keep scale in meters-ish scene units.

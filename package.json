@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "generate-assets": "node scripts/generate-noir-kit.mjs",
+    "generate-assets": "node scripts/generate-noir-kit-blender.mjs",
+    "generate-assets:legacy": "node scripts/generate-noir-kit.mjs",
+    "verify-blender": "node scripts/generate-noir-kit-blender.mjs --check",
     "render-scripts": "tsx scripts/render-npc-scripts.ts",
     "verify-eleven": "tsx scripts/verify-eleven.ts"
   },

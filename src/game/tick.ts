@@ -23,7 +23,13 @@ export function useGameTick(): void {
 
   useEffect(() => {
     if (phase !== "playing") return;
+    let lastTickAt = Date.now();
     const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsedSec = Math.max(TICK_MS / 1000, (now - lastTickAt) / 1000);
+      const clockDtSec = Math.min(1, elapsedSec);
+      const awarenessDtSec = Math.min(10, elapsedSec);
+      lastTickAt = now;
       const state = useGame.getState();
       // Accessibility: pause the in-game clock while any modal is open so
       // slow readers (or screen-reader users) can study the notebook,
@@ -32,10 +38,10 @@ export function useGameTick(): void {
         state.notebookOpen || state.phoneOpen || state.menuOpen || state.activeAuth !== null;
       const prevTime = state.inGameTime;
       if (!paused) {
-        const deltaInGame = (TICK_MS / 1000) / REAL_SECONDS_PER_GAME_SECOND;
+        const deltaInGame = clockDtSec / REAL_SECONDS_PER_GAME_SECOND;
         state.advanceTime(deltaInGame);
       }
-      state.pruneToasts(Date.now());
+      state.pruneToasts(now);
 
       const next = useGame.getState();
       if (prevTime < BANK_CLOSE_TIME && next.inGameTime >= BANK_CLOSE_TIME && next.bankFrontUnlocked) {
@@ -85,13 +91,12 @@ export function useGameTick(): void {
           if (d < nearestOther) nearestOther = d;
         }
         // Fill rate scales with closeness. <3 units = full alarm in ~5s.
-        const dtSec = TICK_MS / 1000;
         let delta = 0;
         if (nearestOther < 6) {
           const closeness = Math.max(0, (6 - nearestOther) / 6); // 0..1
-          delta = closeness * dtSec * 0.4;
+          delta = closeness * awarenessDtSec * 0.4;
         } else {
-          delta = -dtSec * 0.25; // drain when nobody close
+          delta = -awarenessDtSec * 0.25; // drain when nobody close
         }
         const newAwareness = Math.max(0, Math.min(1, next.player.recordingAwareness + delta));
         next.setRecordingAwareness(newAwareness);

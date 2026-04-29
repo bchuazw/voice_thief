@@ -8,7 +8,9 @@ import type * as THREE from "three";
 const ASSETS = {
   apartmentBlock: "/models/noir-kit/apartment-block.glb",
   bankFacade: "/models/noir-kit/bank-facade.glb",
+  cafeInterior: "/models/noir-kit/cafe-interior.glb",
   cafeFacade: "/models/noir-kit/cafe-facade.glb",
+  livingRoom: "/models/noir-kit/living-room.glb",
   payphone: "/models/noir-kit/payphone.glb",
   tellerCounter: "/models/noir-kit/teller-counter.glb",
   trainStation: "/models/noir-kit/train-station.glb",
