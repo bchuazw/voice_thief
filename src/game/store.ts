@@ -77,6 +77,7 @@ export const initialState: GameState = {
   activeAuth: null,
   notebookOpen: false,
   phoneOpen: false,
+  menuOpen: false,
   toasts: [],
   audioMuted: false,
   audioVolume: 0.85,
@@ -107,12 +108,14 @@ export interface GameActions {
   setActiveAuth(auth: AuthAttempt | null): void;
   toggleNotebook(open?: boolean): void;
   togglePhone(open?: boolean): void;
+  toggleMenu(open?: boolean): void;
   pushToast(text: string, ttlMs?: number): void;
   pruneToasts(now: number): void;
   toggleMute(value?: boolean): void;
   setVolume(value: number): void;
   toggleViewMode(): void;
   setPointerLocked(value: boolean): void;
+  restartRun(): void;
   reset(): void;
 }
 
@@ -125,6 +128,7 @@ export const useGame = create<GameState & GameActions>()(
         if (phase !== "playing" || s.phase === "playing") return { phase };
         return {
           phase,
+          menuOpen: false,
           toasts: [
             ...s.toasts,
             {
@@ -268,6 +272,9 @@ export const useGame = create<GameState & GameActions>()(
     togglePhone: (open) =>
       set((s) => ({ phoneOpen: open !== undefined ? open : !s.phoneOpen })),
 
+    toggleMenu: (open) =>
+      set((s) => ({ menuOpen: open !== undefined ? open : !s.menuOpen })),
+
     pushToast: (text, ttlMs = 3500) =>
       set((s) => ({
         toasts: [
@@ -289,6 +296,22 @@ export const useGame = create<GameState & GameActions>()(
       set((s) => ({ viewMode: s.viewMode === "fp" ? "diorama" : "fp" })),
 
     setPointerLocked: (value) => set({ pointerLocked: value }),
+
+    restartRun: () =>
+      set((s) => ({
+        ...initialState,
+        phase: "playing",
+        audioMuted: s.audioMuted,
+        audioVolume: s.audioVolume,
+        viewMode: s.viewMode,
+        toasts: [
+          {
+            id: `${Date.now()}_objective`,
+            text: "Objective: check the notebook, steal a calm manager voice, open the vault.",
+            expiresAt: Date.now() + 7000,
+          },
+        ],
+      })),
 
     reset: () =>
       set((s) => ({

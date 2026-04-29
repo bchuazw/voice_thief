@@ -164,9 +164,10 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-The placeholder NPC dialogue MP3s ship in `public/audio/npc-scripts/` so the
-mock-mode demo works out of the box. To regenerate them with real
-ElevenLabs voices:
+Mock mode uses the browser's speech synthesis for audible NPC lines and
+stolen-voice replay, with silent placeholder MP3s kept in
+`public/audio/npc-scripts/` as build-safe assets. To regenerate those files
+with real ElevenLabs voices:
 
 ```bash
 # .env.local
@@ -179,7 +180,7 @@ ELEVENLABS_VOICE_ID_WIFE=...
 
 npm run verify-eleven       # 30s smoke test against the live API
 npm run render-scripts      # render all 14 NPC dialogue clips
-npm run dev
+NEXT_PUBLIC_VT_NPC_AUDIO=mp3 npm run dev
 ```
 
 ## Tests

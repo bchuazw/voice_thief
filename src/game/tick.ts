@@ -22,7 +22,7 @@ export function useGameTick(): void {
       // slow readers (or screen-reader users) can study the notebook,
       // phone, or auth dialog without losing real-time.
       const paused =
-        state.notebookOpen || state.phoneOpen || state.activeAuth !== null;
+        state.notebookOpen || state.phoneOpen || state.menuOpen || state.activeAuth !== null;
       const prevTime = state.inGameTime;
       if (!paused) {
         const deltaInGame = (TICK_MS / 1000) / REAL_SECONDS_PER_GAME_SECOND;

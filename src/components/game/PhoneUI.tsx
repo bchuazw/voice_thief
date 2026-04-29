@@ -6,6 +6,7 @@ import { NPC_PROFILES } from "@/config/voices";
 import { setBranch } from "@/game/npcSchedules";
 import { emotionGlyph } from "@/game/emotionDisplay";
 import { playAudio } from "@/audio/play";
+import { speakStolenText } from "@/audio/npcSpeech";
 import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
@@ -88,13 +89,25 @@ export default function PhoneUI() {
         npcText: string;
         raisedSuspicion: number;
         hangUp: boolean;
+        mock: boolean;
         callerAudio: string | null;
         npcAudio: string | null;
       };
 
-      if (data.callerAudio) playAudio(data.callerAudio);
+      const callerIsMock = card.mock || card.elevenLabsVoiceId.startsWith("mock_voice_");
+      if (callerIsMock || !data.callerAudio) {
+        speakStolenText(card.npcId, message, card.emotionalState);
+      } else {
+        playAudio(data.callerAudio);
+      }
       pushCallTurn({ role: "npc", text: data.npcText });
-      if (data.npcAudio) setTimeout(() => playAudio(data.npcAudio!), 600);
+      setTimeout(() => {
+        if (data.mock || !data.npcAudio) {
+          speakStolenText(target, data.npcText, "calm");
+        } else {
+          playAudio(data.npcAudio);
+        }
+      }, 600);
 
       if (data.raisedSuspicion > 0) {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);

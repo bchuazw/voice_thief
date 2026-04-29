@@ -86,6 +86,7 @@ export interface GameState {
   activeAuth: AuthAttempt | null;
   notebookOpen: boolean;
   phoneOpen: boolean;
+  menuOpen: boolean;
   toasts: { id: string; text: string; expiresAt: number }[];
   audioMuted: boolean;
   audioVolume: number;

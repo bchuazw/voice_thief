@@ -14,11 +14,13 @@ import EndCard from "./EndCard";
 import ToastStack from "./ToastStack";
 import TitleScreen from "./TitleScreen";
 import SceneTitle from "./SceneTitle";
+import PauseMenu from "./PauseMenu";
 
 export default function GameRoot() {
   const phase = useGame((s) => s.phase);
   const notebookOpen = useGame((s) => s.notebookOpen);
   const phoneOpen = useGame((s) => s.phoneOpen);
+  const menuOpen = useGame((s) => s.menuOpen);
   const activeAuth = useGame((s) => s.activeAuth);
 
   useGameTick();
@@ -47,6 +49,7 @@ export default function GameRoot() {
           <ToastStack />
           {notebookOpen && <Notebook />}
           {phoneOpen && <PhoneUI />}
+          {menuOpen && <PauseMenu />}
           {activeAuth && <VoiceAuthDialog />}
         </>
       )}

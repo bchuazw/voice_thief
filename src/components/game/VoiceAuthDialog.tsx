@@ -6,6 +6,7 @@ import { NPC_PROFILES } from "@/config/voices";
 import { AUTH_REQUIREMENTS, validateVaultOpening } from "@/game/solutionValidator";
 import { emotionGlyph } from "@/game/emotionDisplay";
 import { playAudio } from "@/audio/play";
+import { speakStolenText } from "@/audio/npcSpeech";
 import type { AuthAttempt } from "@/game/types";
 
 const DEVICE_LABELS: Record<AuthAttempt["device"], string> = {
@@ -57,9 +58,14 @@ export default function VoiceAuthDialog() {
       const data = (await res.json()) as {
         passes: boolean;
         reason: string;
+        phrase: string;
         audio: string | null;
       };
-      if (data.audio) playAudio(data.audio);
+      if (card.mock || card.elevenLabsVoiceId.startsWith("mock_voice_") || !data.audio) {
+        speakStolenText(card.npcId, data.phrase ?? requirement.phrase, card.emotionalState);
+      } else {
+        playAudio(data.audio);
+      }
       let passes = data.passes;
       let reason = data.reason;
       if (passes && auth.device === "vault") {

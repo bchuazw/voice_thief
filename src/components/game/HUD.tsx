@@ -22,14 +22,16 @@ export default function HUD() {
   const recordingStartedAt = useGame((s) => s.player.recordingStartedAt);
   const notebookOpen = useGame((s) => s.notebookOpen);
   const phoneOpen = useGame((s) => s.phoneOpen);
+  const menuOpen = useGame((s) => s.menuOpen);
   const activeAuth = useGame((s) => s.activeAuth);
   const audioMuted = useGame((s) => s.audioMuted);
   const toggleMute = useGame((s) => s.toggleMute);
   const viewMode = useGame((s) => s.viewMode);
   const toggleViewMode = useGame((s) => s.toggleViewMode);
+  const toggleMenu = useGame((s) => s.toggleMenu);
   const pointerLocked = useGame((s) => s.pointerLocked);
   const focus = useInteraction((s) => s.current);
-  const isPaused = notebookOpen || phoneOpen || activeAuth !== null;
+  const isPaused = notebookOpen || phoneOpen || menuOpen || activeAuth !== null;
 
   useInteractionHotkey();
 
@@ -46,10 +48,23 @@ export default function HUD() {
       if (e.key === "n" || e.key === "N") toggleNotebook();
       if (e.key === "p" || e.key === "P") togglePhone();
       if (e.key === "c" || e.key === "C") toggleViewMode();
+      if (e.key === "Escape") {
+        if (notebookOpen || phoneOpen || activeAuth !== null) return;
+        toggleMenu();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleMute, toggleNotebook, togglePhone, toggleViewMode]);
+  }, [
+    activeAuth,
+    notebookOpen,
+    phoneOpen,
+    toggleMenu,
+    toggleMute,
+    toggleNotebook,
+    togglePhone,
+    toggleViewMode,
+  ]);
 
   const [recordedMs, setRecordedMs] = useState(0);
   useEffect(() => {
@@ -98,7 +113,7 @@ export default function HUD() {
           <div className="rounded border border-noir-paper/30 bg-black/80 px-6 py-4 text-center text-noir-paper">
             <p className="font-serif text-lg italic">Click to look around</p>
             <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-noir-fog">
-              WASD walk · Shift run · E interact · C diorama view
+              WASD walk | Shift run | E interact | C diorama view
             </p>
           </div>
         </div>
@@ -132,7 +147,7 @@ export default function HUD() {
             style={{ color: suspColor }}
             title="At 100, the alarm goes off."
           >
-            {Math.round(suspicion)} / 100 · {tier.label}
+            {Math.round(suspicion)} / 100 | {tier.label}
           </span>
         </div>
         <div
@@ -157,14 +172,14 @@ export default function HUD() {
           aria-label="Open notebook"
           className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
         >
-          Notebook ({inventory.length}) · N
+          Notebook ({inventory.length}) | N
         </button>
         <button
           onClick={() => togglePhone()}
           aria-label="Open phone"
           className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
         >
-          Phone · P
+          Phone | P
         </button>
         <button
           onClick={() => toggleMute()}
@@ -176,7 +191,7 @@ export default function HUD() {
               : "border-noir-paper/30 text-noir-paper"
           }`}
         >
-          {audioMuted ? "Muted · M" : "Sound · M"}
+          {audioMuted ? "Muted | M" : "Sound | M"}
         </button>
         <button
           onClick={() => toggleViewMode()}
@@ -184,7 +199,14 @@ export default function HUD() {
           aria-pressed={viewMode === "diorama"}
           className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
         >
-          {viewMode === "fp" ? "Diorama · C" : "First-person · C"}
+          {viewMode === "fp" ? "Diorama | C" : "First-person | C"}
+        </button>
+        <button
+          onClick={() => toggleMenu(true)}
+          aria-label="Open pause menu"
+          className="rounded border border-noir-paper/30 bg-black/60 px-4 py-2 text-xs uppercase tracking-[0.3em] text-noir-paper hover:bg-noir-paper hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-noir-amber"
+        >
+          Menu | Esc
         </button>
       </div>
 
@@ -193,11 +215,11 @@ export default function HUD() {
         <p className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
           {viewMode === "fp" ? (
             <>
-              <kbd className="text-noir-amber">WASD</kbd> walk · Hold <kbd className="text-noir-amber">E</kbd> record · <kbd className="text-noir-amber">N</kbd> notebook · <kbd className="text-noir-amber">P</kbd> phone · <kbd className="text-noir-amber">C</kbd> view · <kbd className="text-noir-amber">Esc</kbd> close
+              <kbd className="text-noir-amber">WASD</kbd> walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> close
             </>
           ) : (
             <>
-              Click to walk · Hold <kbd className="text-noir-amber">E</kbd> record · <kbd className="text-noir-amber">N</kbd> notebook · <kbd className="text-noir-amber">P</kbd> phone · <kbd className="text-noir-amber">C</kbd> view · <kbd className="text-noir-amber">Esc</kbd> close
+              Click to walk | Hold <kbd className="text-noir-amber">E</kbd> record | <kbd className="text-noir-amber">N</kbd> notebook | <kbd className="text-noir-amber">P</kbd> phone | <kbd className="text-noir-amber">C</kbd> view | <kbd className="text-noir-amber">Esc</kbd> close
             </>
           )}
         </p>

@@ -5,19 +5,23 @@ import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { clockLabel } from "@/game/timeFormat";
 import { NPC_SCHEDULES } from "@/game/npcSchedules";
+import { buildLeads } from "@/game/leads";
 import { emotionColorClass, emotionGlyph } from "@/game/emotionDisplay";
+import { startNpcAudio } from "@/audio/npcSpeech";
 import type { NpcId } from "@/game/types";
 
-const TABS = ["voices", "suspects", "schedule"] as const;
+const TABS = ["leads", "voices", "suspects", "schedule"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function Notebook() {
   const inventory = useGame((s) => s.voiceInventory);
   const npcs = useGame((s) => s.npcs);
   const toggleNotebook = useGame((s) => s.toggleNotebook);
+  const state = useGame();
+  const leads = buildLeads(state);
   // First-time players get the Schedule tab — it's the actual strategy
   // briefing. Once they've recorded anything, default back to Voices.
-  const [tab, setTab] = useState<Tab>(inventory.length > 0 ? "voices" : "schedule");
+  const [tab, setTab] = useState<Tab>(inventory.length > 0 ? "voices" : "leads");
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -73,6 +77,39 @@ export default function Notebook() {
         </div>
 
         <div className="h-[calc(100%-100px)] overflow-y-auto scrollbar-thin px-6 py-4">
+          {tab === "leads" && (
+            <div className="space-y-3">
+              {leads.map((lead) => (
+                <div
+                  key={lead.id}
+                  className={`rounded border bg-black/40 p-3 ${
+                    lead.urgency === "active"
+                      ? "border-noir-amber/45"
+                      : lead.urgency === "solved"
+                        ? "border-[#3affa6]/35"
+                        : "border-noir-paper/15"
+                  }`}
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-serif text-lg">{lead.title}</h3>
+                    <span
+                      className={`text-[10px] uppercase tracking-[0.3em] ${
+                        lead.urgency === "active"
+                          ? "text-noir-amber"
+                          : lead.urgency === "solved"
+                            ? "text-[#3affa6]"
+                            : "text-noir-fog"
+                      }`}
+                    >
+                      {lead.urgency}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-noir-fog">{lead.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           {tab === "voices" && (
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {inventory.length === 0 && (
@@ -100,6 +137,13 @@ export default function Notebook() {
                     </span>{" "}
                     · {card.durationSeconds.toFixed(1)}s
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => startNpcAudio(card.npcId, card.sourceMomentId)}
+                    className="pointer-events-auto relative z-10 mt-3 block w-full rounded border border-noir-paper/20 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-noir-paper hover:bg-noir-paper hover:text-black"
+                  >
+                    Replay sample
+                  </button>
                 </div>
               ))}
             </div>
