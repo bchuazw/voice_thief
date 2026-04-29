@@ -12,26 +12,47 @@ export default function ApartmentBlock({ position }: Props) {
   return (
     <group position={position}>
       {/* Body — taller than the others; front face at local z=0.
-          Warm-tinted dark brown so the silhouette doesn't crush to black against
-          the dusk sky. */}
+          Warm self-emit so the silhouette has presence at every angle, not just
+          when a point-light catches it. */}
       <mesh position={[0, 4.0, -3]} castShadow receiveShadow>
         <boxGeometry args={[6.0, 8.0, 6]} />
-        <meshStandardMaterial color="#2a2230" roughness={0.9} />
+        <meshStandardMaterial
+          color="#2a2230"
+          roughness={0.9}
+          emissive="#1a1428"
+          emissiveIntensity={0.45}
+        />
       </mesh>
 
-      {/* Brick stripe at base */}
+      {/* Brick stripe at base — warmer + slight emit for definition */}
       <mesh position={[0, 0.6, 0.06]} receiveShadow>
         <boxGeometry args={[6.2, 1.2, 0.4]} />
-        <meshStandardMaterial color="#4a2218" roughness={0.95} />
+        <meshStandardMaterial
+          color="#4a2218"
+          roughness={0.95}
+          emissive="#2a0e08"
+          emissiveIntensity={0.35}
+        />
       </mesh>
 
-      {/* Roofline rim light — narrow warm strip so the building reads against sky */}
-      <mesh position={[0, 8.05, 0.05]}>
-        <boxGeometry args={[6.05, 0.05, 0.05]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.45} />
+      {/* Cornice rim light — wider band on the front face, lower on the building so
+          the camera at street level catches it */}
+      <mesh position={[0, 7.7, 0.06]}>
+        <boxGeometry args={[6.1, 0.18, 0.08]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.85} />
+      </mesh>
+      {/* Vertical edge accents — warm column on each corner so the building outline
+          reads against the dusk sky */}
+      <mesh position={[-3.0, 4, 0.06]}>
+        <boxGeometry args={[0.08, 7.4, 0.06]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#5a3a18" emissiveIntensity={0.6} />
+      </mesh>
+      <mesh position={[3.0, 4, 0.06]}>
+        <boxGeometry args={[0.08, 7.4, 0.06]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#5a3a18" emissiveIntensity={0.6} />
       </mesh>
       {/* Sodium-lamp point light on the building face for environmental fill */}
-      <pointLight position={[0, 5, 1.5]} intensity={0.5} color="#7aa6cc" distance={5} />
+      <pointLight position={[0, 5, 1.5]} intensity={0.6} color="#7aa6cc" distance={6} />
 
       {/* Lit window grid: 3 cols × 4 rows */}
       {[0, 1, 2].map((cx) =>

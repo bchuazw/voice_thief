@@ -61,10 +61,27 @@ export default function CafeScene() {
         }}
       />
 
-      {/* Back wall */}
+      {/* Back wall — slight self-emit so it never crushes to black at the
+          camera angles the player actually uses */}
       <mesh position={[0, 2, -5]} receiveShadow>
         <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#6a4d2c" roughness={0.85} />
+        <meshStandardMaterial
+          color="#6a4d2c"
+          roughness={0.85}
+          emissive="#3a2a1c"
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+      {/* Tile of warm tin tile detail at the top of the back wall */}
+      <mesh position={[0, 3.65, -4.85]}>
+        <boxGeometry args={[14, 0.6, 0.05]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#a07020" emissiveIntensity={0.55} />
+      </mesh>
+      {/* Cool teal accent bar along the right back corner so the cool counter-tone
+          reads even when the moonlight isn't framed */}
+      <mesh position={[6.85, 2.5, -3]}>
+        <boxGeometry args={[0.06, 1.4, 0.04]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.85} />
       </mesh>
       {/* Side walls */}
       <mesh position={[-7, 2, 0]} receiveShadow>
