@@ -22,6 +22,7 @@ export default function HUD() {
   const togglePhone = useGame((s) => s.togglePhone);
   const isRecording = useGame((s) => s.player.isRecording);
   const recordingStartedAt = useGame((s) => s.player.recordingStartedAt);
+  const recordingAwareness = useGame((s) => s.player.recordingAwareness);
   const notebookOpen = useGame((s) => s.notebookOpen);
   const phoneOpen = useGame((s) => s.phoneOpen);
   const menuOpen = useGame((s) => s.menuOpen);
@@ -277,22 +278,49 @@ export default function HUD() {
                     : `Hold E to record ${focus.npcName}`}
                 </span>
                 {isRecording && (
-                  <div
-                    className="h-1.5 w-44 overflow-hidden rounded bg-noir-ash"
-                    role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={30}
-                    aria-valuenow={visibleRecordedMs / 1000}
-                    aria-label="Recording progress"
-                  >
+                  <>
                     <div
-                      className="h-full transition-all"
-                      style={{
-                        width: `${recordPct * 100}%`,
-                        background: recordGood ? "#3affa6" : "#f5a623",
-                      }}
-                    />
-                  </div>
+                      className="h-1.5 w-44 overflow-hidden rounded bg-noir-ash"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={30}
+                      aria-valuenow={visibleRecordedMs / 1000}
+                      aria-label="Recording progress"
+                    >
+                      <div
+                        className="h-full transition-all"
+                        style={{
+                          width: `${recordPct * 100}%`,
+                          background: recordGood ? "#3affa6" : "#f5a623",
+                        }}
+                      />
+                    </div>
+                    {/* Awareness — fills if another NPC is watching. Caps the take if it tops out. */}
+                    <div className="mt-1 flex w-44 items-center gap-2">
+                      <span className="text-[8px] uppercase tracking-[0.2em] text-noir-fog">eyes</span>
+                      <div
+                        className="h-1.5 flex-1 overflow-hidden rounded bg-noir-ash"
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={1}
+                        aria-valuenow={recordingAwareness}
+                        aria-label="Recording awareness"
+                      >
+                        <div
+                          className="h-full transition-all"
+                          style={{
+                            width: `${recordingAwareness * 100}%`,
+                            background:
+                              recordingAwareness > 0.7
+                                ? "#ff3c3c"
+                                : recordingAwareness > 0.35
+                                  ? "#f5a623"
+                                  : "#7aa6cc",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
               </button>
             ) : (

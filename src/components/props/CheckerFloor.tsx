@@ -25,8 +25,8 @@ const FRAG = /* glsl */ `
     vec2 uv = vWorldPos.xz;
     vec2 cell = floor(uv * 1.6);
     float check = mod(cell.x + cell.y, 2.0);
-    vec3 black = vec3(0.08, 0.06, 0.05);
-    vec3 cream = vec3(0.88, 0.82, 0.66);
+    vec3 black = vec3(0.16, 0.12, 0.08);
+    vec3 cream = vec3(0.82, 0.74, 0.58);
     vec3 base = mix(black, cream, check);
     // Slight grime in cracks
     vec2 cellUv = fract(uv * 1.6);

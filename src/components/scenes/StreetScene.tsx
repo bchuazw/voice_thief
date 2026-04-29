@@ -60,17 +60,17 @@ export default function StreetScene() {
 
   return (
     <group>
-      {/* Sky-ish blue tinge from above */}
-      <ambientLight intensity={0.52} color="#465678" />
+      {/* Dusk sky / blue moonlight */}
+      <ambientLight intensity={0.62} color="#5a6e92" />
       <directionalLight
         position={[6, 18, 6]}
-        intensity={0.58}
-        color="#aac6ff"
+        intensity={0.7}
+        color="#bcd0ff"
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
-      <hemisphereLight args={["#677dac", "#171722", 0.5]} />
+      <hemisphereLight args={["#7e94c2", "#1a1c28", 0.55]} />
 
       {/* Volumetric lamp halos — three on the block */}
       <VolumetricLamp position={[-12, 4, 4]} color="#f5a623" />

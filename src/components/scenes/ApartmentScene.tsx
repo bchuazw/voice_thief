@@ -36,12 +36,15 @@ export default function ApartmentScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.56} color="#f8d8a8" />
-      <pointLight position={[2, 3.4, 2]} intensity={1.85} color="#ffb060" distance={9} />
+      <ambientLight intensity={0.7} color="#f8d8a8" />
+      <hemisphereLight args={["#5a6b8c", "#3a1d18", 0.4]} />
+      <pointLight position={[2, 3.4, 2]} intensity={2.0} color="#ffb060" distance={9} />
       {/* Warm sconce above the sofa */}
-      <pointLight position={[-3, 3.6, -3]} intensity={1.65} color="#ffb060" distance={5} />
-      {/* Cool moonlight from the window */}
-      <pointLight position={[-5, 2.8, -2]} intensity={1.0} color="#aac6ff" distance={5} />
+      <pointLight position={[-3, 3.6, -3]} intensity={1.85} color="#ffb060" distance={6} />
+      {/* Cool moonlight from the window — punched up to play against the warm */}
+      <pointLight position={[-6.5, 2.8, -2]} intensity={1.6} color="#aac6ff" distance={7} />
+      {/* Key light pointed at where the wife stands so she reads against the wall */}
+      <pointLight position={[2, 2.2, 1]} intensity={0.9} color="#ffd9a0" distance={4} />
 
       {/* Hardwood floor */}
       <HardwoodFloor
@@ -55,7 +58,7 @@ export default function ApartmentScene() {
       {/* Wallpapered back wall */}
       <mesh position={[0, 2, -5]} receiveShadow>
         <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#4b2a20" roughness={0.85} />
+        <meshStandardMaterial color="#5e3328" roughness={0.85} />
       </mesh>
       {/* Crown molding */}
       <mesh position={[0, 3.95, -4.95]}>
@@ -71,17 +74,17 @@ export default function ApartmentScene() {
       {/* Side walls */}
       <mesh position={[-7, 2, 0]} receiveShadow>
         <boxGeometry args={[0.2, 4, 12]} />
-        <meshStandardMaterial color="#4b2a20" roughness={0.85} />
+        <meshStandardMaterial color="#5e3328" roughness={0.85} />
       </mesh>
       <mesh position={[7, 2, 0]} receiveShadow>
         <boxGeometry args={[0.2, 4, 12]} />
-        <meshStandardMaterial color="#4b2a20" roughness={0.85} />
+        <meshStandardMaterial color="#5e3328" roughness={0.85} />
       </mesh>
 
       {/* Front wall with door back to street */}
       <mesh position={[0, 2, 5.9]}>
         <boxGeometry args={[14, 4, 0.2]} />
-        <meshStandardMaterial color="#4b2a20" roughness={0.85} />
+        <meshStandardMaterial color="#5e3328" roughness={0.85} />
       </mesh>
       <mesh position={[0, 1.4, 5.78]}>
         <boxGeometry args={[1.4, 2.4, 0.04]} />
@@ -90,7 +93,7 @@ export default function ApartmentScene() {
       {/* Ceiling — plaster cream */}
       <mesh position={[0, 4, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[14, 12]} />
-        <meshStandardMaterial color="#342226" roughness={0.95} />
+        <meshStandardMaterial color="#4a2e2c" roughness={0.95} />
       </mesh>
 
       {/* Window with curtains on left wall */}

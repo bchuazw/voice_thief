@@ -43,8 +43,8 @@ const FRAG = /* glsl */ `
     // 1.5-unit tiles, alternating dark/light pattern
     vec2 tile = floor(uv / 1.5);
     float check = mod(tile.x + tile.y, 2.0);
-    vec3 darkMarble = vec3(0.22, 0.16, 0.12);
-    vec3 lightMarble = vec3(0.62, 0.48, 0.30);
+    vec3 darkMarble = vec3(0.32, 0.24, 0.18);
+    vec3 lightMarble = vec3(0.58, 0.46, 0.30);
     vec3 base = mix(darkMarble, lightMarble, check);
     // Veining
     float vein = fbm(uv * 1.4);

@@ -14,16 +14,18 @@ const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
 function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
   if (!caller) return "Pick a stolen voice, then dial.";
   if (caller === "wife" && target === "bankManager")
-    return "A domestic emergency might pull Harold away from the bank.";
+    return "What does Margaret only say when she's actually scared?";
   if (caller === "secretary" && target === "bankManager")
-    return "Give Harold a work reason to leave without making him panic.";
+    return "Lillian sighs that Harold always loses things. What did she leave where?";
   if (caller === "bankManager" && target === "secretary")
-    return "Ask Lillian to step away on an ordinary bank errand.";
+    return "Lillian only obeys ordinary requests in his voice.";
   if (caller === "bankManager" && target === "wife")
-    return "Keep it personal. Margaret knows when Harold sounds wrong.";
+    return "Margaret notices when he sounds rehearsed.";
+  if (caller === "bankGuard" && target === "bankManager")
+    return "Cole calls Mr. Vance about the beat. Keep it routine.";
   if (target === "bankGuard")
-    return "Eddie won't leave his post. Don't bother trying.";
-  return "What do you want them to hear...";
+    return "Eddie won't leave his post. He'd hang up on himself.";
+  return "Speak in their voice. The world will believe what it expects to hear.";
 }
 
 export default function PhoneUI() {
@@ -116,7 +118,13 @@ export default function PhoneUI() {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
       }
 
-      applyCallEffects(target, card.npcId, message);
+      const branchFired = applyCallEffects(target, card.npcId, message);
+      // A call that doesn't move anything still costs heat — the line was tied up
+      // for nothing and the receiving NPC remembers a strange voice asking for something
+      // odd.
+      if (!branchFired && data.raisedSuspicion === 0 && card.npcId !== target) {
+        raiseSuspicion(4, `awkward call to ${NPC_PROFILES[target].displayName}`);
+      }
 
       if (data.hangUp) {
         setTimeout(() => {
@@ -133,38 +141,83 @@ export default function PhoneUI() {
     }
   }
 
-  function applyCallEffects(targetNpc: NpcId, callerNpc: NpcId, text: string) {
+  // Each branch flip now requires at least 2 of 3 keyword classes (e.g. urgency +
+  // domesticity + verb). One word alone is not enough — Harold needs to be sold
+  // on the *story* before he abandons his post.
+  function applyCallEffects(
+    targetNpc: NpcId,
+    callerNpc: NpcId,
+    text: string,
+  ): boolean {
     const lower = text.toLowerCase();
     const pushDelayedToast = (toast: string) => {
       setTimeout(() => useGame.getState().pushToast(toast), 1800);
     };
+    const matches = (regexes: RegExp[]): number =>
+      regexes.reduce((n, r) => (r.test(lower) ? n + 1 : n), 0);
+
+    // Wife → Manager: break-in / domestic emergency.
+    // Needs (urgency word) + (home/break-in word) AND must NOT use "Harold" (Maggie says Harry).
     if (
       targetNpc === "bankManager" &&
       callerNpc === "wife" &&
-      /(break.?in|burgl|stranger|home now|come home|emergency)/.test(lower) &&
       !/harold/.test(lower)
     ) {
-      setBranch("bankManager", "rushedHome");
-      useGame.getState().openHallway(true);
-      pushDelayedToast("The manager rushes for the door.");
+      const urgency = matches([/break.?in/, /burgl/, /stranger/, /scared/, /please/, /now/, /hurry/]);
+      const domestic = matches([/home/, /house/, /door/, /window/, /bedroom/, /maggie|margaret/]);
+      if (urgency >= 1 && domestic >= 1 && (urgency + domestic) >= 3) {
+        setBranch("bankManager", "rushedHome");
+        useGame.getState().openHallway(true);
+        pushDelayedToast("The manager rushes for the door.");
+        return true;
+      }
     }
+
+    // Secretary → Manager: lure to cafe via lost ledger
     if (
       targetNpc === "bankManager" &&
-      callerNpc === "secretary" &&
-      /(ledger|cafe|coffee|left it)/.test(lower)
+      callerNpc === "secretary"
     ) {
-      setBranch("bankManager", "atCafe");
-      pushDelayedToast("The manager grumbles, heads to the cafe.");
+      const item = matches([/ledger/, /papers/, /folder/, /file/]);
+      const place = matches([/cafe/, /coffee/, /booth/, /counter/]);
+      const verb = matches([/left/, /forgot/, /grab/, /pick.?up/, /bring/]);
+      if (item >= 1 && place >= 1 && verb >= 1) {
+        setBranch("bankManager", "atCafe");
+        pushDelayedToast("The manager grumbles, heads to the cafe.");
+        return true;
+      }
     }
+
+    // Manager → Secretary: send her on an errand
     if (
       targetNpc === "secretary" &&
-      callerNpc === "bankManager" &&
-      /(ledger|upstairs|check|lock up|errand)/.test(lower)
+      callerNpc === "bankManager"
     ) {
-      setBranch("secretary", "runningErrand");
-      useGame.getState().openHallway(true);
-      pushDelayedToast("Lillian leaves to run the errand.");
+      const verb = matches([/check/, /go/, /look/, /lock/, /grab/, /fetch/]);
+      const place = matches([/upstairs/, /attic/, /storage/, /vault/, /office/, /supply/]);
+      const polite = matches([/lillian/, /please/, /ledger/, /errand/, /key/]);
+      if (verb >= 1 && place >= 1 && polite >= 1) {
+        setBranch("secretary", "runningErrand");
+        useGame.getState().openHallway(true);
+        pushDelayedToast("Lillian leaves to run the errand.");
+        return true;
+      }
     }
+
+    // Guard → Manager: routine beat-check that confirms Eddie is on patrol.
+    // Flag this for the back-exit unlock (handled in store/back-exit logic).
+    if (
+      targetNpc === "bankManager" &&
+      callerNpc === "bankGuard"
+    ) {
+      const beat = matches([/beat/, /patrol/, /quiet/, /clear/, /check.?in/, /round/]);
+      if (beat >= 1) {
+        useGame.getState().openBackExit?.(true);
+        pushDelayedToast("Eddie's all-clear logs in. The alley gate clicks.");
+        return true;
+      }
+    }
+    return false;
   }
 
   function endCall() {

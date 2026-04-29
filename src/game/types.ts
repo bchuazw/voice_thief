@@ -53,6 +53,8 @@ export interface PlayerState {
   recordingTargetNpc: NpcId | null;
   recordingStartedAt: number | null;
   hasBriefcase: boolean;
+  /** 0-1: how aware nearby NPCs are while you're recording. 1 → you're caught. */
+  recordingAwareness: number;
 }
 
 export interface ActiveCall {
@@ -82,6 +84,9 @@ export interface GameState {
   briefcaseTaken: boolean;
   bankFrontUnlocked: boolean;
   bankHallwayUnlocked: boolean;
+  bankBackExitUnlocked: boolean;
+  /** Wall-clock real time the in-game pressure tick last fired, for ramping checks */
+  lastPressureCheck: number;
   activeCall: ActiveCall | null;
   activeAuth: AuthAttempt | null;
   notebookOpen: boolean;

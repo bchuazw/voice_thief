@@ -140,6 +140,21 @@ function listTargets(scene: LocationId): InteractableTarget[] {
         return { kind: "auth", device: "bankHallway" };
       },
     });
+    // Back-alley exit (right side of lobby) — only appears if Eddie's beat-call
+    // unlocked it. Skips the front door entirely and dumps you near the train.
+    if (s.bankBackExitUnlocked) {
+      targets.push({
+        pos: new THREE.Vector3(10.5, 1.4, -3),
+        radius: 1.2,
+        priority: 5,
+        build: () => ({
+          kind: "enterLocation",
+          target: "street",
+          label: "Back alley exit → station",
+          entryPosition: { x: 11, y: 0, z: 7 },
+        }),
+      });
+    }
   }
 
   if (scene === "vault") {

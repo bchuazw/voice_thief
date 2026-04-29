@@ -15,34 +15,45 @@ function hasVoice(state: GameState, npcId: NpcId, emotion?: string): boolean {
   );
 }
 
+/**
+ * Notebook leads. These are observations and overheard fragments — never
+ * imperatives. The player still has to figure out what to actually do.
+ */
 export function buildLeads(state: GameState): Lead[] {
   const leads: Lead[] = [];
   const hasCalmManager = hasVoice(state, "bankManager", "calm");
   const hasAnyVoice = state.voiceInventory.length > 0;
   const hasWife = hasVoice(state, "wife");
   const hasSecretary = hasVoice(state, "secretary");
+  const hasGuard = hasVoice(state, "bankGuard");
 
   if (!hasAnyVoice) {
     leads.push({
       id: "first-voice",
-      title: "Find a voice worth stealing",
-      body: "People only give you clean material when they are relaxed and talking. Watch the first half hour carefully.",
+      title: "Heard at the cafe counter",
+      body: "Lillian — the bank's secretary — takes black coffee here every Thursday at six sharp. She's gone by ten past.",
       urgency: state.inGameTime >= inGameTimeFromClock(18, 8) ? "active" : "note",
+    });
+    leads.push({
+      id: "manager-habit",
+      title: "Harold's habit",
+      body: "The manager smokes behind the bank around quarter past six. Mutters numbers to himself. Same routine for years.",
+      urgency: state.inGameTime >= inGameTimeFromClock(18, 15) ? "active" : "note",
     });
   }
 
-  if (!hasCalmManager) {
+  if (!hasCalmManager && hasAnyVoice) {
     leads.push({
       id: "calm-manager",
-      title: "The vault wants calm",
-      body: "Harold's stressed phone fight might fool a person, but not the vault. You need him calm, away from the counter noise.",
-      urgency: state.inGameTime >= inGameTimeFromClock(18, 15) ? "active" : "note",
+      title: "The vault has a temperament",
+      body: "An auditor mentioned the new intercom won't trust a recording that sounds rattled. Hard to fake calm under pressure.",
+      urgency: "active",
     });
-  } else {
+  } else if (hasCalmManager) {
     leads.push({
       id: "calm-manager-done",
       title: "Harold's calm voice is in the notebook",
-      body: "That is the voice the hallway and vault intercoms are listening for.",
+      body: "The kind of voice the vault might believe.",
       urgency: "solved",
     });
   }
@@ -50,8 +61,8 @@ export function buildLeads(state: GameState): Lead[] {
   if (hasWife && state.npcs.bankManager.branch === "default") {
     leads.push({
       id: "wife-diversion",
-      title: `${NPC_PROFILES.wife.displayName} can move Harold`,
-      body: "Call Harold as Margaret and make the emergency sound domestic. He knows her voice better than anyone.",
+      title: `${NPC_PROFILES.wife.displayName} on the phone`,
+      body: "Margaret says Harold leaves work early on Thursdays only when she's rattled. \"He drops everything if I sound scared.\"",
       urgency: "active",
     });
   }
@@ -59,8 +70,17 @@ export function buildLeads(state: GameState): Lead[] {
   if (hasSecretary && state.npcs.bankManager.branch === "default") {
     leads.push({
       id: "secretary-diversion",
-      title: "Lillian can pull Harold to the cafe",
-      body: "A lost ledger gives Harold a reason to leave the bank without panic.",
+      title: "Lillian's complaint",
+      body: "She sighs about Harold making her run errands for him. He'll come fetch his own paperwork if pressed about it.",
+      urgency: "active",
+    });
+  }
+
+  if (hasGuard) {
+    leads.push({
+      id: "guard-back-exit",
+      title: "Eddie's beat",
+      body: "Cole hums to himself about the alley door. \"Only thing back there's the dumpster and the back gate, and the gate listens for me.\"",
       urgency: "active",
     });
   }
@@ -68,10 +88,10 @@ export function buildLeads(state: GameState): Lead[] {
   if (hasCalmManager && !state.vaultOpen) {
     leads.push({
       id: "use-manager",
-      title: "Use Harold's voice at the intercoms",
+      title: "Two intercoms remember Harold",
       body: state.bankFrontUnlocked
-        ? "The bank is still open. Get inside, reach the hallway, and let Harold's voice do the talking."
-        : "The front door has locked. Harold's calm voice can still open the bank, hallway, and vault.",
+        ? "The hallway and the vault both want his voice. The bank front is still open."
+        : "The bank's locked for the night. All three intercoms answer to the same voice now.",
       urgency: "active",
     });
   }
@@ -79,8 +99,8 @@ export function buildLeads(state: GameState): Lead[] {
   if (state.vaultOpen && !state.briefcaseTaken) {
     leads.push({
       id: "take-case",
-      title: "The briefcase is exposed",
-      body: "Take it from the vault and leave before the city decides to listen harder.",
+      title: "The briefcase",
+      body: "Inside the vault. Wood and brass. Heavier than it looks.",
       urgency: "active",
     });
   }
@@ -88,8 +108,8 @@ export function buildLeads(state: GameState): Lead[] {
   if (state.briefcaseTaken) {
     leads.push({
       id: "escape",
-      title: "Get to the train",
-      body: "Union Station is on Main Street. The briefcase only matters if you leave with it.",
+      title: "Last train at nine",
+      body: "Union Station — the archway at the east end of Main Street.",
       urgency: "active",
     });
   }
@@ -97,8 +117,17 @@ export function buildLeads(state: GameState): Lead[] {
   if (state.suspicion >= 40) {
     leads.push({
       id: "suspicion",
-      title: "Too many people are listening",
-      body: "Failed auth and strange calls raise suspicion. At 100, the alarm ends the job.",
+      title: "Eyes on you",
+      body: "A patrol car drove past slow. Voices behind windows getting quieter when you walk by.",
+      urgency: "active",
+    });
+  }
+
+  if (state.suspicion >= 70) {
+    leads.push({
+      id: "suspicion-high",
+      title: "The city is listening",
+      body: "Stick to one more move. Anything dramatic and the alarm goes for sure.",
       urgency: "active",
     });
   }

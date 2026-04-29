@@ -59,6 +59,7 @@ export const initialState: GameState = {
     recordingTargetNpc: null,
     recordingStartedAt: null,
     hasBriefcase: false,
+    recordingAwareness: 0,
   },
   npcs: {
     bankManager: makeInitialNpc("bankManager"),
@@ -73,6 +74,8 @@ export const initialState: GameState = {
   briefcaseTaken: false,
   bankFrontUnlocked: true,
   bankHallwayUnlocked: false,
+  bankBackExitUnlocked: false,
+  lastPressureCheck: 0,
   activeCall: null,
   activeAuth: null,
   notebookOpen: false,
@@ -93,6 +96,7 @@ export interface GameActions {
   setPlayerLocation(loc: LocationId, entryPosition?: Vec3): void;
   startRecording(npcId: NpcId): void;
   stopRecording(): void;
+  setRecordingAwareness(value: number): void;
   addVoiceCard(card: VoiceCard): void;
   removeVoiceCard(id: string): void;
   updateNpc(id: NpcId, patch: Partial<NpcState>): void;
@@ -101,6 +105,7 @@ export interface GameActions {
   triggerAlarm(reason: string): void;
   openBankFront(open: boolean): void;
   openHallway(open: boolean): void;
+  openBackExit(open: boolean): void;
   openVault(): void;
   takeBriefcase(): void;
   setActiveCall(call: ActiveCall | null): void;
@@ -133,8 +138,8 @@ export const useGame = create<GameState & GameActions>()(
             ...s.toasts,
             {
               id: `${Date.now()}_objective`,
-              text: "Objective: check the notebook, steal a calm manager voice, open the vault.",
-              expiresAt: Date.now() + 7000,
+              text: "6:00 PM. The block is starting to thin out.",
+              expiresAt: Date.now() + 5000,
             },
           ],
         };
@@ -166,6 +171,7 @@ export const useGame = create<GameState & GameActions>()(
           isRecording: true,
           recordingTargetNpc: npcId,
           recordingStartedAt: Date.now(),
+          recordingAwareness: 0,
         },
       })),
 
@@ -176,6 +182,15 @@ export const useGame = create<GameState & GameActions>()(
           isRecording: false,
           recordingTargetNpc: null,
           recordingStartedAt: null,
+          recordingAwareness: 0,
+        },
+      })),
+
+    setRecordingAwareness: (value) =>
+      set((s) => ({
+        player: {
+          ...s.player,
+          recordingAwareness: Math.max(0, Math.min(1, value)),
         },
       })),
 
@@ -231,6 +246,7 @@ export const useGame = create<GameState & GameActions>()(
 
     openBankFront: (open) => set({ bankFrontUnlocked: open }),
     openHallway: (open) => set({ bankHallwayUnlocked: open }),
+    openBackExit: (open) => set({ bankBackExitUnlocked: open }),
 
     openVault: () =>
       set({

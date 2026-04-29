@@ -22,6 +22,7 @@ export default function BankInteriorScene() {
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
   const viewMode = useGame((s) => s.viewMode);
   const vaultOpen = useGame((s) => s.vaultOpen);
+  const bankBackExitUnlocked = useGame((s) => s.bankBackExitUnlocked);
   const lastPos = useRef(player.position);
   const { camera } = useThree();
 
@@ -43,11 +44,14 @@ export default function BankInteriorScene() {
 
   return (
     <group>
-      {/* Warm interior lighting */}
-      <ambientLight intensity={0.42} color="#f8e8c8" />
-      <pointLight position={[-3, 4, 2]} intensity={1.4} color="#ffd9a0" distance={10} />
-      <pointLight position={[3, 4, 2]} intensity={1.4} color="#ffd9a0" distance={10} />
+      {/* Warm interior lighting + cool counter-bounce */}
+      <ambientLight intensity={0.55} color="#f5e0bc" />
+      <hemisphereLight args={["#5a6b8c", "#1a1612", 0.45]} />
+      <pointLight position={[-3, 4, 2]} intensity={1.6} color="#ffd9a0" distance={11} />
+      <pointLight position={[3, 4, 2]} intensity={1.6} color="#ffd9a0" distance={11} />
       <pointLight position={[0, 3.5, -8]} intensity={1.0} color="#ffb060" distance={6} />
+      {/* Cool teal bounce from the marble floor — counter-tone for the warm chandeliers */}
+      <pointLight position={[0, 0.9, 2]} intensity={0.6} color="#7aa6cc" distance={10} />
       <VolumetricLamp position={[-6, 4, -6]} color="#f0c878" />
 
       {/* Marble floor with checker pattern */}
@@ -63,11 +67,11 @@ export default function BankInteriorScene() {
       {/* Wood-paneled side walls */}
       <mesh position={[-12, 2.5, -2]} receiveShadow>
         <boxGeometry args={[0.4, 5, 16]} />
-        <meshStandardMaterial color="#3a2418" roughness={0.55} />
+        <meshStandardMaterial color="#4a2e1a" roughness={0.55} />
       </mesh>
       <mesh position={[12, 2.5, -2]} receiveShadow>
         <boxGeometry args={[0.4, 5, 16]} />
-        <meshStandardMaterial color="#3a2418" roughness={0.55} />
+        <meshStandardMaterial color="#4a2e1a" roughness={0.55} />
       </mesh>
       {/* Wainscoting */}
       <mesh position={[-11.78, 1, -2]} receiveShadow>
@@ -78,6 +82,24 @@ export default function BankInteriorScene() {
         <boxGeometry args={[0.05, 2, 16]} />
         <meshStandardMaterial color="#2a1810" />
       </mesh>
+
+      {/* Back-alley exit door (right side wall) */}
+      <mesh position={[11.78, 1.4, -3]}>
+        <boxGeometry args={[0.05, 2.4, 1.2]} />
+        <meshStandardMaterial color="#28181c" />
+      </mesh>
+      {/* EXIT sign — green when unlocked, dim when not */}
+      <mesh position={[11.74, 2.85, -3]}>
+        <boxGeometry args={[0.04, 0.22, 0.5]} />
+        <meshStandardMaterial
+          color="#0a0a10"
+          emissive={bankBackExitUnlocked ? "#3affa6" : "#222018"}
+          emissiveIntensity={bankBackExitUnlocked ? 1.6 : 0.18}
+        />
+      </mesh>
+      {bankBackExitUnlocked && (
+        <pointLight position={[11.4, 2.6, -3]} intensity={0.45} color="#3affa6" distance={3} />
+      )}
 
       {/* Front wall + entrance back to street */}
       <mesh position={[0, 2.5, 6]} receiveShadow>
@@ -122,16 +144,16 @@ export default function BankInteriorScene() {
       {/* Vault chamber further back — concrete walls */}
       <mesh position={[0, 2.5, -16]}>
         <boxGeometry args={[8, 5, 0.4]} />
-        <meshStandardMaterial color="#222024" roughness={0.85} />
+        <meshStandardMaterial color="#34323a" roughness={0.85} />
       </mesh>
       {/* Vault side walls */}
       <mesh position={[-4, 2.5, -14]}>
         <boxGeometry args={[0.4, 5, 4]} />
-        <meshStandardMaterial color="#222024" roughness={0.85} />
+        <meshStandardMaterial color="#34323a" roughness={0.85} />
       </mesh>
       <mesh position={[4, 2.5, -14]}>
         <boxGeometry args={[0.4, 5, 4]} />
-        <meshStandardMaterial color="#222024" roughness={0.85} />
+        <meshStandardMaterial color="#34323a" roughness={0.85} />
       </mesh>
       {/* Vault ceiling */}
       <mesh position={[0, 5, -14]} rotation={[Math.PI / 2, 0, 0]}>
@@ -156,7 +178,7 @@ export default function BankInteriorScene() {
               </mesh>
               <mesh position={[0, 0, 0.04]}>
                 <boxGeometry args={[1.3, 0.75, 0.02]} />
-                <meshStandardMaterial color="#5a3a18" metalness={0.8} roughness={0.5} />
+                <meshStandardMaterial color="#7a5028" metalness={0.65} roughness={0.55} />
               </mesh>
               {/* Keyhole */}
               <mesh position={[0, 0, 0.06]}>
