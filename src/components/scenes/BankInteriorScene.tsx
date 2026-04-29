@@ -202,7 +202,18 @@ export default function BankInteriorScene() {
         <sphereGeometry args={[0.18, 12, 12]} />
         <meshStandardMaterial color="#fff5d8" emissive="#f5a623" emissiveIntensity={2.4} />
       </mesh>
-      <pointLight position={[0, 4.0, -13]} intensity={1.3} color="#ffd9a0" distance={6} />
+      <pointLight position={[0, 4.0, -13]} intensity={2.0} color="#ffd9a0" distance={8} />
+      <pointLight position={[0, 2.4, -15.5]} intensity={1.4} color="#ffb060" distance={5} />
+      {/* Cage bars over the sconce for noir flavor */}
+      {[-Math.PI / 4, 0, Math.PI / 4].map((a, i) => (
+        <mesh
+          key={i}
+          position={[Math.sin(a) * 0.22, 4.1, -13 + Math.cos(a) * 0.22]}
+        >
+          <cylinderGeometry args={[0.012, 0.012, 0.45, 6]} />
+          <meshStandardMaterial color="#0a0a0a" />
+        </mesh>
+      ))}
 
       {/* Briefcase pedestal inside vault, visible after open */}
       {vaultOpen && (

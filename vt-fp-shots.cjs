@@ -102,9 +102,11 @@ const { chromium } = require("playwright");
   await page.evaluate(() => {
     window.__vt.setState({ vaultOpen: true });
   });
-  await fp([0, -8], [0, -16], "vault");
+  // Stand inside the vault chamber, off-axis from the door, looking at
+  // the deposit-box wall + briefcase pedestal.
+  await fp([-1.5, -13], [1, -16], "vault");
   await page.waitForTimeout(2400);
-  await fp([0, -8], [0, -16], "vault");
+  await fp([-1.5, -13], [1, -16], "vault");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${out}/08-fp-vault.png` });
 
