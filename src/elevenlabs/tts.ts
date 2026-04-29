@@ -12,9 +12,9 @@ export interface TtsRequest {
 
 function voiceSettings(emotion: Emotion = "calm") {
   return {
-    stability: emotion === "panicked" ? 0.3 : emotion === "stressed" ? 0.5 : 0.7,
-    similarity_boost: 0.75,
-    style: emotion === "panicked" ? 0.8 : emotion === "stressed" ? 0.55 : 0.3,
+    stability: emotion === "panicked" ? 0.32 : emotion === "stressed" ? 0.45 : 0.58,
+    similarity_boost: 0.82,
+    style: emotion === "panicked" ? 0.82 : emotion === "stressed" ? 0.58 : 0.38,
     use_speaker_boost: true,
   };
 }
@@ -24,7 +24,7 @@ export async function synthesizeTts(req: TtsRequest): Promise<Buffer> {
     return makeSilentMp3(Math.max(800, req.text.length * 60));
   }
 
-  const modelId = req.highQuality ? "eleven_v3" : "eleven_flash_v2_5";
+  const modelId = process.env.ELEVENLABS_TTS_MODEL || "eleven_multilingual_v2";
 
   const res = await elevenFetch(`/v1/text-to-speech/${req.voiceId}`, {
     method: "POST",

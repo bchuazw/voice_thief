@@ -6,6 +6,8 @@ import bankManager from "../src/config/scripts/bankManager.json" with { type: "j
 import secretary from "../src/config/scripts/secretary.json" with { type: "json" };
 import bankGuard from "../src/config/scripts/bankGuard.json" with { type: "json" };
 import wife from "../src/config/scripts/wife.json" with { type: "json" };
+import { DEFAULT_NPC_VOICE_IDS } from "../src/config/voices";
+import type { NpcId } from "../src/game/types";
 
 interface ScriptLine {
   text: string;
@@ -37,6 +39,7 @@ const VOICE_ENV: Record<string, string> = {
 
 const OUT_DIR = path.join(process.cwd(), "public", "audio", "npc-scripts");
 const MOCK = process.env.VT_MOCK_AI === "1" || !process.env.ELEVENLABS_API_KEY;
+const MODEL_ID = process.env.ELEVENLABS_TTS_MODEL || "eleven_multilingual_v2";
 
 function silentMp3(durationMs: number): Buffer {
   const seconds = Math.max(0.05, Math.min(60, durationMs / 1000));
@@ -48,7 +51,8 @@ function silentMp3(durationMs: number): Buffer {
 }
 
 async function renderMoment(npc: string, moment: ScriptMoment): Promise<Buffer> {
-  const voiceId = process.env[VOICE_ENV[npc]];
+  const npcId = npc as NpcId;
+  const voiceId = process.env[VOICE_ENV[npc]] || DEFAULT_NPC_VOICE_IDS[npcId];
   const text = moment.lines.map((l) => l.text).join(" ... ");
   const totalPause = moment.lines.reduce((acc, l) => acc + l.pause, 0);
   const ms = Math.max(2000, text.length * 70 + totalPause * 1000);
@@ -66,32 +70,33 @@ async function renderMoment(npc: string, moment: ScriptMoment): Promise<Buffer> 
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_flash_v2_5",
+        model_id: MODEL_ID,
         voice_settings: {
-          stability: moment.emotion === "panicked" ? 0.3 : 0.7,
-          similarity_boost: 0.75,
-          style: moment.emotion === "panicked" ? 0.8 : 0.3,
+          stability:
+            moment.emotion === "panicked" ? 0.32 : moment.emotion === "stressed" ? 0.45 : 0.58,
+          similarity_boost: 0.82,
+          style:
+            moment.emotion === "panicked" ? 0.82 : moment.emotion === "stressed" ? 0.58 : 0.38,
           use_speaker_boost: true,
         },
       }),
     },
   );
   if (!res.ok) {
-    console.warn(`render fallback (${moment.id}):`, res.status, await res.text());
-    return silentMp3(ms);
+    throw new Error(`render failed (${moment.id}): ${res.status} ${await res.text()}`);
   }
   return Buffer.from(await res.arrayBuffer());
 }
 
 async function main(): Promise<void> {
   await fs.mkdir(OUT_DIR, { recursive: true });
-  console.log(`Rendering NPC scripts to ${OUT_DIR} (mock=${MOCK})`);
+  console.log(`Rendering NPC scripts to ${OUT_DIR} (mock=${MOCK}, model=${MODEL_ID})`);
   for (const file of SCRIPTS) {
     for (const moment of file.moments) {
       const out = path.join(OUT_DIR, `${moment.id}.mp3`);
       const buf = await renderMoment(file.npc, moment);
       await fs.writeFile(out, buf);
-      console.log(`  ✓ ${moment.id}  (${(buf.length / 1024).toFixed(1)} kB)`);
+      console.log(`  ok ${moment.id}  (${(buf.length / 1024).toFixed(1)} kB)`);
     }
   }
   console.log("Done.");

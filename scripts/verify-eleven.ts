@@ -3,16 +3,17 @@
  * Standalone live-API smoke test. Run with:
  *   npx tsx scripts/verify-eleven.ts
  *
- * Reads ELEVENLABS_API_KEY and the four ELEVENLABS_VOICE_ID_* values from
+ * Reads ELEVENLABS_API_KEY and optional ELEVENLABS_VOICE_ID_* values from
  * .env.local. Confirms:
  *  1. Key is valid (200 from /v1/user)
- *  2. Each pinned voice exists (200 from /v1/voices/{id})
+ *  2. Each configured/default cast voice exists (200 from /v1/voices/{id})
  *  3. TTS works for the bank manager voice (writes /tmp/vt-live-smoke.mp3)
  *
  * Does NOT touch IVC or ConvAI. Cheap to run.
  */
 import fs from "node:fs";
 import path from "node:path";
+import { DEFAULT_NPC_VOICE_IDS } from "../src/config/voices";
 
 function loadEnvLocal(): void {
   const file = path.join(process.cwd(), ".env.local");
@@ -32,10 +33,10 @@ if (!KEY) {
 }
 
 const VOICES: Record<string, string | undefined> = {
-  bankManager: process.env.ELEVENLABS_VOICE_ID_BANK_MANAGER,
-  secretary: process.env.ELEVENLABS_VOICE_ID_SECRETARY,
-  bankGuard: process.env.ELEVENLABS_VOICE_ID_BANK_GUARD,
-  wife: process.env.ELEVENLABS_VOICE_ID_WIFE,
+  bankManager: process.env.ELEVENLABS_VOICE_ID_BANK_MANAGER || DEFAULT_NPC_VOICE_IDS.bankManager,
+  secretary: process.env.ELEVENLABS_VOICE_ID_SECRETARY || DEFAULT_NPC_VOICE_IDS.secretary,
+  bankGuard: process.env.ELEVENLABS_VOICE_ID_BANK_GUARD || DEFAULT_NPC_VOICE_IDS.bankGuard,
+  wife: process.env.ELEVENLABS_VOICE_ID_WIFE || DEFAULT_NPC_VOICE_IDS.wife,
 };
 
 async function get(url: string): Promise<Response> {
@@ -53,10 +54,6 @@ async function main(): Promise<void> {
   console.log(`✓ key OK · tier=${subs.subscription?.tier} · used=${subs.subscription?.character_count}/${subs.subscription?.character_limit}`);
 
   for (const [npc, id] of Object.entries(VOICES)) {
-    if (!id) {
-      console.warn(`! ${npc}: no voice id pinned`);
-      continue;
-    }
     const v = await get(`https://api.elevenlabs.io/v1/voices/${id}`);
     if (!v.ok) {
       console.error(`✗ ${npc} (${id}): ${v.status} ${await v.text()}`);

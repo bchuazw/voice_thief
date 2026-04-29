@@ -190,23 +190,29 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-Mock mode uses the browser's speech synthesis for audible NPC lines and
-stolen-voice replay, with silent placeholder MP3s kept in
-`public/audio/npc-scripts/` as build-safe assets. To regenerate those files
-with real ElevenLabs voices:
+The repo ships with ElevenLabs-rendered NPC dialogue in
+`public/audio/npc-scripts/`, so ambient voices and replayed samples sound
+human even when gameplay AI is running in mock mode. Browser speech synthesis
+is only a fallback if those MP3s fail to load or if you force
+`NEXT_PUBLIC_VT_NPC_AUDIO=speech`.
+
+To regenerate the clips with your own account or custom voice IDs:
 
 ```bash
 # .env.local
 VT_MOCK_AI=0
 ELEVENLABS_API_KEY=eleven_xxx
-ELEVENLABS_VOICE_ID_BANK_MANAGER=...
-ELEVENLABS_VOICE_ID_SECRETARY=...
-ELEVENLABS_VOICE_ID_BANK_GUARD=...
-ELEVENLABS_VOICE_ID_WIFE=...
+ELEVENLABS_TTS_MODEL=eleven_multilingual_v2
+
+# Optional; blank uses the premade cast in src/config/voices.ts.
+ELEVENLABS_VOICE_ID_BANK_MANAGER=
+ELEVENLABS_VOICE_ID_SECRETARY=
+ELEVENLABS_VOICE_ID_BANK_GUARD=
+ELEVENLABS_VOICE_ID_WIFE=
 
 npm run verify-eleven       # 30s smoke test against the live API
 npm run render-scripts      # render all 14 NPC dialogue clips
-NEXT_PUBLIC_VT_NPC_AUDIO=mp3 npm run dev
+npm run dev
 ```
 
 ## Tests

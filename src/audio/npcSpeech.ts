@@ -9,7 +9,7 @@ import wifeScripts from "@/config/scripts/wife.json";
 import type { Emotion, NpcId } from "@/game/types";
 
 const activeSounds = new Map<NpcId, Howl>();
-const USE_MP3_ASSETS = process.env.NEXT_PUBLIC_VT_NPC_AUDIO === "mp3";
+const FORCE_BROWSER_SPEECH = process.env.NEXT_PUBLIC_VT_NPC_AUDIO === "speech";
 
 interface ScriptLine {
   text: string;
@@ -178,7 +178,7 @@ export function startNpcAudio(npcId: NpcId, momentId: string): void {
   const { audioMuted, audioVolume } = useGame.getState();
   if (audioMuted) return;
   const speechMoment = SPEECH_MOMENTS.get(momentId);
-  if (!USE_MP3_ASSETS && speechMoment) {
+  if (FORCE_BROWSER_SPEECH && speechMoment) {
     speakLines(speechMoment.npcId, speechMoment.lines, speechMoment.emotion);
     return;
   }
@@ -187,8 +187,12 @@ export function startNpcAudio(npcId: NpcId, momentId: string): void {
     src: [url],
     volume: audioVolume,
     html5: true,
-    onloaderror: () => {},
-    onplayerror: () => {},
+    onloaderror: () => {
+      if (speechMoment) speakLines(speechMoment.npcId, speechMoment.lines, speechMoment.emotion);
+    },
+    onplayerror: () => {
+      if (speechMoment) speakLines(speechMoment.npcId, speechMoment.lines, speechMoment.emotion);
+    },
   });
   sound.play();
   activeSounds.set(npcId, sound);

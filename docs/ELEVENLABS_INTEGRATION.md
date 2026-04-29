@@ -13,18 +13,25 @@ If `VT_MOCK_AI=1` or `ELEVENLABS_API_KEY` is unset:
 - ConvAI replies are scripted by keyword in `config/mockResponses.ts`.
 - Voice delete is a no-op.
 
-This means the entire game is playable without keys — useful for builds,
-local dev, and demos.
+The game still ships real ElevenLabs-rendered ambient NPC clips in
+`public/audio/npc-scripts/`, so mock mode is playable without robotic browser
+speech. Browser speech synthesis is only the client fallback if an MP3 fails
+to load or `NEXT_PUBLIC_VT_NPC_AUDIO=speech` is set.
 
 ## TTS — `/api/tts`
 
 POST `{ text, voiceId, emotion?, highQuality? }` → `audio/mpeg`.
 
 Models:
-- `eleven_flash_v2_5` for in-game NPC dialogue (~75 ms latency).
-- `eleven_v3` only for vault-auth playback (highest quality).
+- `eleven_multilingual_v2` by default for more natural phone/auth playback.
+- Override with `ELEVENLABS_TTS_MODEL` when testing a different ElevenLabs
+  model.
 
 Voice settings vary by emotion: `panicked` lowers stability, raises style.
+
+If `ELEVENLABS_VOICE_ID_*` is unset, the game uses the premade cast in
+`src/config/voices.ts`. `npm run render-scripts` uses the same cast to render
+the 14 shipped NPC clips.
 
 ## IVC — `/api/clone`
 
