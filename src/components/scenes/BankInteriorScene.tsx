@@ -45,13 +45,13 @@ export default function BankInteriorScene() {
   return (
     <group>
       {/* Warm interior lighting + cool counter-bounce */}
-      <ambientLight intensity={0.55} color="#f5e0bc" />
-      <hemisphereLight args={["#5a6b8c", "#1a1612", 0.45]} />
-      <pointLight position={[-3, 4, 2]} intensity={1.6} color="#ffd9a0" distance={11} />
-      <pointLight position={[3, 4, 2]} intensity={1.6} color="#ffd9a0" distance={11} />
-      <pointLight position={[0, 3.5, -8]} intensity={1.0} color="#ffb060" distance={6} />
+      <ambientLight intensity={0.68} color="#f5e0bc" />
+      <hemisphereLight args={["#61749a", "#201b16", 0.54]} />
+      <pointLight position={[-3, 4, 2]} intensity={1.85} color="#ffd9a0" distance={11} />
+      <pointLight position={[3, 4, 2]} intensity={1.85} color="#ffd9a0" distance={11} />
+      <pointLight position={[0, 3.5, -8]} intensity={1.18} color="#ffb060" distance={6} />
       {/* Cool teal bounce from the marble floor — counter-tone for the warm chandeliers */}
-      <pointLight position={[0, 0.9, 2]} intensity={0.6} color="#7aa6cc" distance={10} />
+      <pointLight position={[0, 0.9, 2]} intensity={0.76} color="#7aa6cc" distance={10} />
       <VolumetricLamp position={[-6, 4, -6]} color="#f0c878" />
 
       {/* Marble floor with checker pattern */}

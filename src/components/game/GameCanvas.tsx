@@ -34,8 +34,8 @@ export default function GameCanvas() {
       gl={{ antialias: true, powerPreference: "high-performance" }}
       className="absolute inset-0"
     >
-      <fog attach="fog" args={["#0e1426", 16, 52]} />
-      <color attach="background" args={["#0e1426"]} />
+      <fog attach="fog" args={["#111a30", 18, 58]} />
+      <color attach="background" args={["#111a30"]} />
       <Suspense fallback={null}>
         {(loc === "street" || loc === "trainStation") && <StreetScene />}
         {(loc === "bankLobby" || loc === "bankHallway" || loc === "vault") && (

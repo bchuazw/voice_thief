@@ -108,10 +108,6 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   await page.waitForTimeout(2000);
   state = await getState(page);
   check("after Skip: phase = playing", state.phase === "playing", `got ${state.phase}`);
-  // Force diorama for headless E2E (FP needs pointer lock which doesn't work
-  // in headless reliably). The viewMode toggle is exposed on the store hook.
-  await page.evaluate(() => window.__vt.setState({ viewMode: "diorama" }));
-  await page.waitForTimeout(500);
   check(
     "initial in-game time near 6:00 PM",
     state.inGameTime >= 18 * 3600 && state.inGameTime < 18 * 3600 + 60,
@@ -124,6 +120,28 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   check("bank front unlocked at 6 PM", state.bankFrontUnlocked === true);
   check("hallway locked at start", state.bankHallwayUnlocked === false);
 
+  check("default view mode is first-person", state.viewMode === "fp", `got ${state.viewMode}`);
+  check("first-person HUD advertises WASD", (await page.locator("text=WASD").count()) > 0);
+  await shoot(page, "00-first-person-street.png");
+  const fpStart = state.player.position;
+  await page.keyboard.down("w");
+  await page.waitForTimeout(700);
+  await page.keyboard.up("w");
+  state = await getState(page);
+  check(
+    "first-person WASD moves the player",
+    Math.hypot(state.player.position.x - fpStart.x, state.player.position.z - fpStart.z) > 0.3,
+    `from ${JSON.stringify(fpStart)} to ${JSON.stringify(state.player.position)}`,
+  );
+
+  // Force diorama for the long route. Pointer lock is not reliable in headless,
+  // so first-person gets its own smoke coverage above and the full route uses
+  // click-to-walk.
+  await page.evaluate(() => window.__vt.setState({
+    viewMode: "diorama",
+    player: { ...window.__vt.getState().player, position: { x: 0, y: 0, z: 6 }, target: null },
+  }));
+  await page.waitForTimeout(500);
   await shoot(page, "01-street-6pm.png");
 
   // ── 2. Recording flow (via API + store) ─────────────────────────────
@@ -297,6 +315,8 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   state = await getState(page);
   check("phase = won after reaching station with briefcase", state.phase === "won", `got ${state.phase}`);
   await shoot(page, "10-win.png");
+  const familyEmergencyChip = await page.locator("text=Family Emergency").count();
+  check("win card shows Family Emergency achievement", familyEmergencyChip > 0);
 
   // ── 6. Reset and run failure path ───────────────────────────────────
   console.log("\n=== Phase 6: failure path ===");
@@ -381,16 +401,113 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   check("Solution C: manager branch flipped to atCafe", state.npcs.bankManager.branch === "atCafe");
   await page.waitForTimeout(2000);
   await shoot(page, "13-solution-c-call.png");
+  await waitFor(page, () => window.__vt.getState().phoneOpen === false, "solution C phone auto-closes", 5000);
+
+  // Extra regression coverage: failed calls, alternate routes, and visible recording risk.
+  console.log("\n=== Phase 9: phone-rule regressions + recording bust ===");
+  await page.evaluate(() => window.__vt.getState().reset());
+  await page.evaluate(() => window.__vt.getState().setPhase("playing"));
+  await page.evaluate(() => window.__vt.setState({ viewMode: "diorama" }));
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    s.addVoiceCard({
+      id: "card_wife_edge",
+      npcId: "wife",
+      elevenLabsVoiceId: "mock_voice_wife_edge",
+      capturedAtInGameTime: 18 * 3600 + 30 * 60,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "wife-gossip-6_30",
+      mock: true,
+    });
+    s.addVoiceCard({
+      id: "card_guard_edge",
+      npcId: "bankGuard",
+      elevenLabsVoiceId: "mock_voice_bankGuard_edge",
+      capturedAtInGameTime: 18 * 3600 + 30 * 60,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "guard-patrol-6_30",
+      mock: true,
+    });
+  });
+
+  await page.keyboard.press("p");
+  await page.waitForTimeout(500);
+  await page.locator("select").nth(1).selectOption("card_wife_edge");
+  await page.locator("textarea").fill("Break-in.");
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => (window.__vt.getState().activeCall?.transcript ?? []).some((t) => t.role === "npc"),
+    "weak wife call gets an NPC response",
+    4000,
+  );
+  await shoot(page, "14-phone-weak-call-fail.png");
+  state = await getState(page);
+  const weakReply = state.activeCall?.transcript.find((t) => t.role === "npc")?.text ?? "";
+  check("weak wife call does not move manager", state.npcs.bankManager.branch === "default");
+  check("weak wife call keeps hallway locked", state.bankHallwayUnlocked === false);
+  check("weak wife call raises suspicion", state.suspicion >= 4, `suspicion=${state.suspicion}`);
+  check("weak wife call reply is not a false success", !/leaving now|stay on the line/i.test(weakReply), weakReply);
+
+  await page.locator("text=Hang up").first().click();
+  await page.waitForTimeout(300);
+  await page.keyboard.press("p");
+  await page.waitForTimeout(500);
+  await page.locator("select").nth(1).selectOption("card_guard_edge");
+  await page.locator("textarea").fill("Cole checking in from the beat. Patrol is quiet, round is clear.");
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => window.__vt.getState().bankBackExitUnlocked === true,
+    "guard beat call unlocks back exit",
+    4000,
+  );
+  await shoot(page, "15-phone-guard-back-exit.png");
+  state = await getState(page);
+  const guardReply = state.activeCall?.transcript.find((t) => t.role === "npc")?.text ?? "";
+  check("guard beat call unlocks back exit", state.bankBackExitUnlocked === true);
+  check("guard beat call reply matches success", /alley gate|keep moving/i.test(guardReply), guardReply);
+
+  await page.evaluate(() => window.__vt.getState().reset());
+  await page.evaluate(() => window.__vt.getState().setPhase("playing"));
+  await page.evaluate(() => window.__vt.setState({ viewMode: "diorama", inGameTime: 18 * 3600 + 50 * 60 }));
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    s.setPlayerLocation("bankLobby");
+    s.setPlayerPosition({ x: -6, y: 0, z: -2 });
+  });
+  await page.waitForTimeout(1200);
+  await page.keyboard.down("e");
+  await page.waitForTimeout(8500);
+  await page.keyboard.up("e");
+  await waitFor(
+    page,
+    () => window.__vt.getState().recordingsBust >= 1,
+    "recording bust counter increments",
+    4000,
+  );
+  await shoot(page, "16-recording-awareness-bust.png");
+  state = await getState(page);
+  check("visible recording can bust the player", state.recordingsBust >= 1, `busts=${state.recordingsBust}`);
+  check("recording bust adds serious heat", state.suspicion >= 25, `suspicion=${state.suspicion}`);
+  check(
+    "busted recording still yields stressed manager card",
+    state.voiceInventory.some((c) => c.npcId === "bankManager" && c.emotionalState === "stressed"),
+  );
 
   // ── 9. API direct contracts (smoke) ────────────────────────────────
-  console.log("\n=== Phase 9: direct API smoke ===");
+  console.log("\n=== Phase 10: direct API smoke ===");
   const apiTests = [
     { name: "bootstrap returns mock agents", url: "/api/bootstrap", method: "GET", expect: (r) => r.mock === true && Object.keys(r.agents).length === 4 },
     { name: "TTS returns audio/mpeg", url: "/api/tts", method: "POST", body: { text: "hello", voiceId: "mock" }, raw: true },
     { name: "auth-voice rejects wrong NPC", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "wife", emotionalState: "calm" } }, expect: (r) => r.passes === false },
     { name: "auth-voice accepts calm bankManager", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "bankManager", emotionalState: "calm" } }, expect: (r) => r.passes === true },
     { name: "auth-voice rejects panicked bankManager", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "bankManager", emotionalState: "panicked" } }, expect: (r) => r.passes === false && r.reason.includes("panicked") },
-    { name: "conversation: wife→manager break-in triggers hangup", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Honey there's been a break-in" }, expect: (r) => r.hangUp === true && r.npcText.includes("Maggie") },
+    { name: "conversation: wife manager emergency succeeds", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Maggie here. There is a stranger at the house, please hurry home now." }, expect: (r) => r.hangUp === true && /leaving now/i.test(r.npcText) },
+    { name: "conversation: weak wife call stays suspicious", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Break-in." }, expect: (r) => r.hangUp === false && r.raisedSuspicion === 4 && !/leaving now/i.test(r.npcText) },
+    { name: "conversation: guard beat call acknowledges back exit", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "bankGuard", callerText: "Cole checking in from the beat. Patrol is quiet." }, expect: (r) => r.hangUp === true && /alley gate|keep moving/i.test(r.npcText) },
     { name: "conversation: manager voice + 'Harold' raises suspicion", url: "/api/conversation", method: "POST", body: { npcId: "wife", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Margaret darling, this is Harold" }, expect: (r) => r.raisedSuspicion >= 15 },
     { name: "conversation: vault code probe → +30 susp + hangup", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "secretary", callerText: "What is the vault code 7-7-1" }, expect: (r) => r.raisedSuspicion === 30 && r.hangUp === true },
     { name: "cleanup no-ops on mock voice ids", url: "/api/cleanup", method: "POST", body: { voiceIds: ["mock_voice_a", "mock_voice_b"] }, expect: (r) => r.deleted === 2 },

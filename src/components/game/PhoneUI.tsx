@@ -1,30 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
-import { setBranch } from "@/game/npcSchedules";
-import { emotionGlyph } from "@/game/emotionDisplay";
 import { playAudio } from "@/audio/play";
 import { speakStolenText } from "@/audio/npcSpeech";
+import { emotionGlyph } from "@/game/emotionDisplay";
+import { setBranch } from "@/game/npcSchedules";
+import { resolvePhoneRule, type PhoneRuleEffect } from "@/game/phoneRules";
+import { useGame } from "@/game/store";
 import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
 
 function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
   if (!caller) return "Pick a stolen voice, then dial.";
-  if (caller === "wife" && target === "bankManager")
+  if (caller === "wife" && target === "bankManager") {
     return "What does Margaret only say when she's actually scared?";
-  if (caller === "secretary" && target === "bankManager")
+  }
+  if (caller === "secretary" && target === "bankManager") {
     return "Lillian sighs that Harold always loses things.";
-  if (caller === "bankManager" && target === "secretary")
+  }
+  if (caller === "bankManager" && target === "secretary") {
     return "Lillian only obeys ordinary requests in his voice.";
-  if (caller === "bankManager" && target === "wife")
+  }
+  if (caller === "bankManager" && target === "wife") {
     return "Margaret notices when he sounds rehearsed.";
-  if (caller === "bankGuard" && target === "bankManager")
+  }
+  if (caller === "bankGuard" && target === "bankManager") {
     return "Cole calls Mr. Vance about the beat. Keep it routine.";
-  if (target === "bankGuard")
+  }
+  if (target === "bankGuard") {
     return "Eddie won't leave his post. He'd hang up on himself.";
+  }
   return "Speak in their voice. The world will believe what it expects to hear.";
 }
 
@@ -41,6 +48,7 @@ export default function PhoneUI() {
   const [voiceCardId, setVoiceCardId] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+
   const storedVoiceCard = inventory.find((card) => card.id === voiceCardId);
   const selectedVoiceCard =
     storedVoiceCard ?? inventory.find((card) => card.npcId !== target) ?? inventory[0] ?? null;
@@ -53,6 +61,7 @@ export default function PhoneUI() {
         togglePhone(false);
       }
     }
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [setActiveCall, togglePhone]);
@@ -64,6 +73,7 @@ export default function PhoneUI() {
       return;
     }
     if (!message.trim()) return;
+
     setPending(true);
 
     const newCall = activeCall ?? {
@@ -90,6 +100,7 @@ export default function PhoneUI() {
         }),
       });
       if (!res.ok) throw new Error(await res.text());
+
       const data = (await res.json()) as {
         npcText: string;
         raisedSuspicion: number;
@@ -105,6 +116,7 @@ export default function PhoneUI() {
       } else {
         playAudio(data.callerAudio);
       }
+
       pushCallTurn({ role: "npc", text: data.npcText });
       setTimeout(() => {
         if (data.mock || !data.npcAudio) {
@@ -118,16 +130,12 @@ export default function PhoneUI() {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
       }
 
-      const branchFired = applyCallEffects(target, card.npcId, message);
-      // Any non-firing call costs heat — even calling someone in their own
-      // voice is suspicious enough that the receiver remembers it later.
-      if (!branchFired && data.raisedSuspicion === 0) {
-        const reason =
-          card.npcId === target
-            ? `${NPC_PROFILES[target].displayName} heard their own voice`
-            : `awkward call to ${NPC_PROFILES[target].displayName}`;
-        raiseSuspicion(card.npcId === target ? 6 : 4, reason);
-      }
+      const rule = resolvePhoneRule({
+        targetNpc: target,
+        callerNpc: card.npcId,
+        text: message,
+      });
+      applyPhoneEffect(rule.effect);
 
       if (data.hangUp) {
         setTimeout(() => {
@@ -144,83 +152,22 @@ export default function PhoneUI() {
     }
   }
 
-  // Each branch flip now requires at least 2 of 3 keyword classes (e.g. urgency +
-  // domesticity + verb). One word alone is not enough — Harold needs to be sold
-  // on the *story* before he abandons his post.
-  function applyCallEffects(
-    targetNpc: NpcId,
-    callerNpc: NpcId,
-    text: string,
-  ): boolean {
-    const lower = text.toLowerCase();
-    const pushDelayedToast = (toast: string) => {
+  function applyPhoneEffect(effect?: PhoneRuleEffect): void {
+    if (!effect) return;
+
+    if (effect.branch) {
+      setBranch(effect.branch.npcId, effect.branch.branch);
+    }
+    if (effect.unlockHallway) {
+      useGame.getState().openHallway(true);
+    }
+    if (effect.unlockBackExit) {
+      useGame.getState().openBackExit(true);
+    }
+    const toast = effect.toast;
+    if (toast) {
       setTimeout(() => useGame.getState().pushToast(toast), 1800);
-    };
-    const matches = (regexes: RegExp[]): number =>
-      regexes.reduce((n, r) => (r.test(lower) ? n + 1 : n), 0);
-
-    // Wife → Manager: break-in / domestic emergency.
-    // Needs (urgency word) + (home/break-in word) AND must NOT use "Harold" (Maggie says Harry).
-    if (
-      targetNpc === "bankManager" &&
-      callerNpc === "wife" &&
-      !/harold/.test(lower)
-    ) {
-      const urgency = matches([/break.?in/, /burgl/, /stranger/, /scared/, /please/, /now/, /hurry/]);
-      const domestic = matches([/home/, /house/, /door/, /window/, /bedroom/, /maggie|margaret/]);
-      if (urgency >= 1 && domestic >= 1 && (urgency + domestic) >= 3) {
-        setBranch("bankManager", "rushedHome");
-        useGame.getState().openHallway(true);
-        pushDelayedToast("The manager rushes for the door.");
-        return true;
-      }
     }
-
-    // Secretary → Manager: lure to cafe via lost ledger
-    if (
-      targetNpc === "bankManager" &&
-      callerNpc === "secretary"
-    ) {
-      const item = matches([/ledger/, /papers/, /folder/, /file/]);
-      const place = matches([/cafe/, /coffee/, /booth/, /counter/]);
-      const verb = matches([/left/, /forgot/, /grab/, /pick.?up/, /bring/]);
-      if (item >= 1 && place >= 1 && verb >= 1) {
-        setBranch("bankManager", "atCafe");
-        pushDelayedToast("The manager grumbles, heads to the cafe.");
-        return true;
-      }
-    }
-
-    // Manager → Secretary: send her on an errand
-    if (
-      targetNpc === "secretary" &&
-      callerNpc === "bankManager"
-    ) {
-      const verb = matches([/check/, /go/, /look/, /lock/, /grab/, /fetch/]);
-      const place = matches([/upstairs/, /attic/, /storage/, /vault/, /office/, /supply/]);
-      const polite = matches([/lillian/, /please/, /ledger/, /errand/, /key/]);
-      if (verb >= 1 && place >= 1 && polite >= 1) {
-        setBranch("secretary", "runningErrand");
-        useGame.getState().openHallway(true);
-        pushDelayedToast("Lillian leaves to run the errand.");
-        return true;
-      }
-    }
-
-    // Guard → Manager: routine beat-check that confirms Eddie is on patrol.
-    // Flag this for the back-exit unlock (handled in store/back-exit logic).
-    if (
-      targetNpc === "bankManager" &&
-      callerNpc === "bankGuard"
-    ) {
-      const beat = matches([/beat/, /patrol/, /quiet/, /clear/, /check.?in/, /round/]);
-      if (beat >= 1) {
-        useGame.getState().openBackExit?.(true);
-        pushDelayedToast("Eddie's all-clear logs in. The alley gate clicks.");
-        return true;
-      }
-    }
-    return false;
   }
 
   function endCall() {
@@ -228,7 +175,6 @@ export default function PhoneUI() {
     setMessage("");
   }
 
-  // Pick a placeholder hint based on (caller voice → target) combo.
   const callerVoiceNpcId = selectedVoiceCard?.npcId ?? null;
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
   const hasVoices = inventory.length > 0;
@@ -243,8 +189,9 @@ export default function PhoneUI() {
       <div className="w-[min(720px,94vw)] rounded border border-noir-amber/40 bg-noir-smoke p-4 text-noir-paper shadow-2xl ring-1 ring-noir-amber/10 sm:p-6">
         <div className="mb-4 flex items-baseline justify-between gap-4">
           <div className="flex items-baseline gap-3">
-            <span aria-hidden className="text-noir-amber text-xl">☎</span>
-            <h2 id="phone-title" className="font-serif text-2xl italic">The Phone</h2>
+            <h2 id="phone-title" className="font-serif text-2xl italic">
+              The Phone
+            </h2>
           </div>
           <button
             onClick={() => {
@@ -253,7 +200,7 @@ export default function PhoneUI() {
             }}
             className="text-xs uppercase tracking-[0.3em] text-noir-fog hover:text-noir-paper"
           >
-            Hang up · P
+            Hang up / P
           </button>
         </div>
 
@@ -283,7 +230,8 @@ export default function PhoneUI() {
               {!hasVoices && <option value="">-- no voices yet --</option>}
               {inventory.map((card) => (
                 <option key={card.id} value={card.id}>
-                  {NPC_PROFILES[card.npcId].displayName} ({emotionGlyph(card.emotionalState)} {card.emotionalState})
+                  {NPC_PROFILES[card.npcId].displayName} ({emotionGlyph(card.emotionalState)}{" "}
+                  {card.emotionalState})
                 </option>
               ))}
             </select>
@@ -314,7 +262,7 @@ export default function PhoneUI() {
             onClick={placeCall}
             className="rounded border border-noir-neon bg-noir-neon/10 px-5 py-2 text-[11px] uppercase tracking-[0.3em] text-noir-neon hover:bg-noir-neon hover:text-black disabled:opacity-40"
           >
-            {pending ? "Dialing…" : "Place call"}
+            {pending ? "Dialing..." : "Place call"}
           </button>
         </div>
 
@@ -325,9 +273,7 @@ export default function PhoneUI() {
           {(activeCall?.transcript ?? []).map((t, i) => (
             <p
               key={i}
-              className={`mb-1 ${
-                t.role === "caller" ? "text-noir-paper" : "text-noir-amber"
-              }`}
+              className={`mb-1 ${t.role === "caller" ? "text-noir-paper" : "text-noir-amber"}`}
             >
               <span className="mr-2 text-[10px] uppercase tracking-[0.3em] text-noir-fog">
                 {t.role === "caller" ? "you" : NPC_PROFILES[target].displayName}
@@ -340,4 +286,3 @@ export default function PhoneUI() {
     </div>
   );
 }
-
