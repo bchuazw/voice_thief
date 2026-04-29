@@ -1,5 +1,7 @@
 "use client";
 
+import Arms from "./Arms";
+
 /**
  * Harold Vance — late 50s. Three-piece pinstripe with a bowler hat.
  */
@@ -40,15 +42,7 @@ export default function BankManagerBody() {
         <boxGeometry args={[0.13, 0.02, 0.02]} />
         <meshStandardMaterial color="#a07020" metalness={1} roughness={0.4} />
       </mesh>
-      {/* Hands at sides */}
-      <mesh position={[-0.34, 1.0, 0]} castShadow>
-        <sphereGeometry args={[0.08, 10, 10]} />
-        <meshStandardMaterial color="#e0b48a" roughness={0.85} />
-      </mesh>
-      <mesh position={[0.34, 1.0, 0]} castShadow>
-        <sphereGeometry args={[0.08, 10, 10]} />
-        <meshStandardMaterial color="#e0b48a" roughness={0.85} />
-      </mesh>
+      <Arms sleeveColor="#22222e" cuffColor="#f4eccd" skinColor="#e0b48a" />
       {/* Head */}
       <mesh position={[0, 1.96, 0]} castShadow>
         <sphereGeometry args={[0.21, 14, 14]} />

@@ -30,7 +30,7 @@ const { chromium } = require("playwright");
   await page.screenshot({ path: `${out}/01-landing.png` });
 
   await page.goto("http://localhost:3000/play", { waitUntil: "networkidle" });
-  await page.waitForTimeout(2200);
+  await page.waitForTimeout(2400);
   await page.screenshot({ path: `${out}/02-title.png` });
 
   await page.locator("text=Start").first().click();
@@ -94,7 +94,7 @@ const { chromium } = require("playwright");
   await page.screenshot({ path: `${out}/06b-fp-apartments.png` });
 
   await fp([0, 4], [0, -5], "bankLobby");
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2400);
   await fp([0, 4], [0, -5], "bankLobby");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${out}/07-fp-bank-lobby.png` });
@@ -102,21 +102,21 @@ const { chromium } = require("playwright");
   await page.evaluate(() => {
     window.__vt.setState({ vaultOpen: true });
   });
-  await fp([0, -5], [0, -12], "vault");
-  await page.waitForTimeout(1000);
-  await fp([0, -5], [0, -12], "vault");
+  await fp([0, -8], [0, -16], "vault");
+  await page.waitForTimeout(2400);
+  await fp([0, -8], [0, -16], "vault");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${out}/08-fp-vault.png` });
 
   await fp([2, 2], [-3, -3], "apartment");
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2400);
   await fp([2, 2], [-3, -3], "apartment");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${out}/09-fp-apartment.png` });
 
-  await fp([0, 1], [0, -4], "cafe");
-  await page.waitForTimeout(1200);
-  await fp([0, 1], [0, -4], "cafe");
+  await fp([1, 0.5], [-3, -3.5], "cafe");
+  await page.waitForTimeout(2400);
+  await fp([1, 0.5], [-3, -3.5], "cafe");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${out}/10-fp-cafe.png` });
 
@@ -126,7 +126,7 @@ const { chromium } = require("playwright");
     s.setPlayerLocation("street");
     window.__vt.setState({ viewMode: "diorama" });
   });
-  await page.waitForTimeout(2200);
+  await page.waitForTimeout(2400);
   await page.screenshot({ path: `${out}/11-diorama-street.png` });
 
   // Notebook

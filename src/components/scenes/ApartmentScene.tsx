@@ -36,9 +36,12 @@ export default function ApartmentScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.32} color="#f8d8a8" />
+      <ambientLight intensity={0.45} color="#f8d8a8" />
       <pointLight position={[2, 3.4, 2]} intensity={1.6} color="#ffb060" distance={9} />
-      <pointLight position={[-3, 3, -2]} intensity={0.65} color="#aac6ff" distance={5} />
+      {/* Warm sconce above the sofa */}
+      <pointLight position={[-3, 3.6, -3]} intensity={1.4} color="#ffb060" distance={5} />
+      {/* Cool moonlight from the window */}
+      <pointLight position={[-5, 2.8, -2]} intensity={0.85} color="#aac6ff" distance={5} />
 
       {/* Hardwood floor */}
       <HardwoodFloor
@@ -83,6 +86,11 @@ export default function ApartmentScene() {
       <mesh position={[0, 1.4, 5.78]}>
         <boxGeometry args={[1.4, 2.4, 0.04]} />
         <meshStandardMaterial color="#28181c" />
+      </mesh>
+      {/* Ceiling — plaster cream */}
+      <mesh position={[0, 4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[14, 12]} />
+        <meshStandardMaterial color="#28181c" roughness={0.95} />
       </mesh>
 
       {/* Window with curtains on left wall */}

@@ -1,11 +1,14 @@
 "use client";
 
+import Arms from "./Arms";
+
 /**
  * Eddie Cole — 40s. Uniform jacket with brass buttons, peaked cap, baton.
  */
 export default function BankGuardBody() {
   return (
     <group>
+      <Arms sleeveColor="#2a3450" skinColor="#cc9870" />
       {/* Trousers */}
       <mesh position={[-0.13, 0.45, 0]} castShadow>
         <cylinderGeometry args={[0.11, 0.13, 0.9, 8]} />
@@ -36,15 +39,7 @@ export default function BankGuardBody() {
         <boxGeometry args={[0.12, 0.08, 0.04]} />
         <meshStandardMaterial color="#a07020" metalness={1} roughness={0.4} />
       </mesh>
-      {/* Hands */}
-      <mesh position={[-0.34, 1.0, 0]} castShadow>
-        <sphereGeometry args={[0.08, 10, 10]} />
-        <meshStandardMaterial color="#cc9870" roughness={0.85} />
-      </mesh>
-      <mesh position={[0.34, 1.0, 0]} castShadow>
-        <sphereGeometry args={[0.08, 10, 10]} />
-        <meshStandardMaterial color="#cc9870" roughness={0.85} />
-      </mesh>
+      {/* (arms now rendered by shared Arms component above) */}
       {/* Baton on belt */}
       <mesh position={[0.4, 0.7, 0.18]} rotation={[0.4, 0, 0]}>
         <cylinderGeometry args={[0.03, 0.03, 0.4, 6]} />

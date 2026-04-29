@@ -1,11 +1,14 @@
 "use client";
 
+import Arms from "./Arms";
+
 /**
  * Lillian Park — late 30s. Pencil skirt + crisp blouse + low bun.
  */
 export default function SecretaryBody() {
   return (
     <group>
+      <Arms sleeveColor="#5a2828" skinColor="#e6c4a0" />
       {/* Pencil skirt */}
       <mesh position={[0, 0.55, 0]} castShadow>
         <cylinderGeometry args={[0.18, 0.22, 1.0, 12]} />
@@ -26,15 +29,7 @@ export default function SecretaryBody() {
         <sphereGeometry args={[0.035, 8, 8]} />
         <meshStandardMaterial color="#a07020" metalness={1} roughness={0.3} />
       </mesh>
-      {/* Hands */}
-      <mesh position={[-0.28, 1.05, 0]} castShadow>
-        <sphereGeometry args={[0.07, 10, 10]} />
-        <meshStandardMaterial color="#e6c4a0" roughness={0.85} />
-      </mesh>
-      <mesh position={[0.28, 1.05, 0]} castShadow>
-        <sphereGeometry args={[0.07, 10, 10]} />
-        <meshStandardMaterial color="#e6c4a0" roughness={0.85} />
-      </mesh>
+      {/* (arms now rendered by shared Arms component above) */}
       {/* Head */}
       <mesh position={[0, 1.92, 0]} castShadow>
         <sphereGeometry args={[0.19, 14, 14]} />
@@ -45,13 +40,13 @@ export default function SecretaryBody() {
         <boxGeometry args={[0.05, 0.014, 0.01]} />
         <meshStandardMaterial color="#a01818" roughness={0.4} />
       </mesh>
-      {/* Hair: low bun at back, swept-back top */}
-      <mesh position={[0, 2.05, -0.05]} castShadow>
-        <sphereGeometry args={[0.20, 14, 14]} />
+      {/* Hair: swept-back cap on the head + small bun at the nape */}
+      <mesh position={[0, 1.99, -0.04]} castShadow>
+        <sphereGeometry args={[0.22, 16, 14, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
         <meshStandardMaterial color="#3a1f12" roughness={0.95} />
       </mesh>
-      <mesh position={[0, 1.88, -0.18]} castShadow>
-        <sphereGeometry args={[0.10, 12, 12]} />
+      <mesh position={[0, 1.78, -0.22]} castShadow>
+        <sphereGeometry args={[0.08, 12, 12]} />
         <meshStandardMaterial color="#3a1f12" roughness={0.95} />
       </mesh>
       {/* Earring */}

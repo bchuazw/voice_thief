@@ -39,10 +39,12 @@ export default function CafeScene() {
 
   return (
     <group>
-      <ambientLight intensity={0.42} color="#f5d6a0" />
-      <pointLight position={[-3, 3.4, -1]} intensity={1.2} color="#ffb968" distance={6} />
-      <pointLight position={[3, 3.4, -1]} intensity={1.2} color="#ffb968" distance={6} />
-      <pointLight position={[0, 3.0, 2]} intensity={0.6} color="#ffd9a0" distance={5} />
+      <ambientLight intensity={0.6} color="#f5d6a0" />
+      <pointLight position={[-3, 3.4, -1]} intensity={1.6} color="#ffb968" distance={8} />
+      <pointLight position={[3, 3.4, -1]} intensity={1.6} color="#ffb968" distance={8} />
+      <pointLight position={[0, 3.0, 2]} intensity={0.8} color="#ffd9a0" distance={6} />
+      {/* Back-bar wall wash */}
+      <pointLight position={[0, 2.5, -3.5]} intensity={1.0} color="#ffb060" distance={5} />
 
       {/* Checker tile floor */}
       <CheckerFloor
@@ -71,6 +73,16 @@ export default function CafeScene() {
       <mesh position={[0, 2, 5.9]}>
         <boxGeometry args={[14, 4, 0.2]} />
         <meshStandardMaterial color="#3a2818" roughness={0.85} />
+      </mesh>
+      {/* Ceiling — pressed-tin cream */}
+      <mesh position={[0, 4, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[14, 12]} />
+        <meshStandardMaterial color="#5a4838" roughness={0.85} />
+      </mesh>
+      {/* Crown molding */}
+      <mesh position={[0, 3.95, -4.95]}>
+        <boxGeometry args={[14, 0.15, 0.15]} />
+        <meshStandardMaterial color="#f4eccd" roughness={0.7} />
       </mesh>
       <mesh position={[0, 1.4, 5.78]}>
         <boxGeometry args={[1.2, 2.4, 0.04]} />

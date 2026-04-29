@@ -93,6 +93,11 @@ export default function BankInteriorScene() {
         <boxGeometry args={[2.4, 0.4, 0.04]} />
         <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.6} />
       </mesh>
+      {/* Coffered ceiling — light wood with thin grid */}
+      <mesh position={[0, 5, -2]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[24, 18]} />
+        <meshStandardMaterial color="#3a2418" roughness={0.85} />
+      </mesh>
 
       {/* Teller counter with brass detailing */}
       <TellerCounter position={[0, 0, -5]} />
@@ -114,12 +119,90 @@ export default function BankInteriorScene() {
       {/* Chandelier */}
       <Chandelier position={[0, 4.6, -2]} />
 
-      {/* Vault chamber further back */}
-      <mesh position={[0, 2.5, -12]}>
+      {/* Vault chamber further back — concrete walls */}
+      <mesh position={[0, 2.5, -16]}>
         <boxGeometry args={[8, 5, 0.4]} />
-        <meshStandardMaterial color="#222024" roughness={0.6} />
+        <meshStandardMaterial color="#222024" roughness={0.85} />
       </mesh>
+      {/* Vault side walls */}
+      <mesh position={[-4, 2.5, -14]}>
+        <boxGeometry args={[0.4, 5, 4]} />
+        <meshStandardMaterial color="#222024" roughness={0.85} />
+      </mesh>
+      <mesh position={[4, 2.5, -14]}>
+        <boxGeometry args={[0.4, 5, 4]} />
+        <meshStandardMaterial color="#222024" roughness={0.85} />
+      </mesh>
+      {/* Vault ceiling */}
+      <mesh position={[0, 5, -14]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[8, 4]} />
+        <meshStandardMaterial color="#1a1a20" roughness={0.95} />
+      </mesh>
+      {/* Vault floor — same marble pattern */}
+      <mesh position={[0, 0.01, -14]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[8, 4]} />
+        <meshStandardMaterial color="#3a2818" roughness={0.45} metalness={0.2} />
+      </mesh>
+      {/* Deposit boxes on the back wall — 4×3 brass-faced grid */}
+      {Array.from({ length: 4 }).map((_, ix) =>
+        Array.from({ length: 3 }).map((_, iy) => {
+          const x = -2.4 + ix * 1.6;
+          const y = 1.2 + iy * 1.0;
+          return (
+            <group key={`db-${ix}-${iy}`} position={[x, y, -15.78]}>
+              <mesh>
+                <boxGeometry args={[1.4, 0.85, 0.06]} />
+                <meshStandardMaterial color="#a07020" metalness={1} roughness={0.45} />
+              </mesh>
+              <mesh position={[0, 0, 0.04]}>
+                <boxGeometry args={[1.3, 0.75, 0.02]} />
+                <meshStandardMaterial color="#5a3a18" metalness={0.8} roughness={0.5} />
+              </mesh>
+              {/* Keyhole */}
+              <mesh position={[0, 0, 0.06]}>
+                <cylinderGeometry args={[0.04, 0.04, 0.02, 12]} />
+                <meshStandardMaterial color="#1a1a1a" />
+              </mesh>
+              {/* Number plate */}
+              <mesh position={[0.45, 0.2, 0.06]}>
+                <boxGeometry args={[0.16, 0.1, 0.02]} />
+                <meshStandardMaterial color="#0a0a10" emissive="#f5a623" emissiveIntensity={0.5} />
+              </mesh>
+            </group>
+          );
+        }),
+      )}
+      {/* Vault door at the entrance to the chamber */}
       <VaultDoor open={vaultOpen} position={[0, 2, -11.6]} />
+      {/* Vault door frame ring */}
+      <mesh position={[0, 2, -11.4]}>
+        <torusGeometry args={[2.6, 0.15, 16, 32]} />
+        <meshStandardMaterial color="#3a2418" metalness={0.7} roughness={0.45} />
+      </mesh>
+      {/* Wheel handle */}
+      {vaultOpen ? null : (
+        <group position={[0, 2, -11.3]}>
+          <mesh>
+            <torusGeometry args={[0.5, 0.05, 8, 24]} />
+            <meshStandardMaterial color="#a07020" metalness={1} roughness={0.35} />
+          </mesh>
+          {[0, 1, 2, 3].map((i) => (
+            <mesh
+              key={i}
+              rotation={[0, 0, (i / 4) * Math.PI * 2]}
+            >
+              <boxGeometry args={[0.04, 1.1, 0.04]} />
+              <meshStandardMaterial color="#a07020" metalness={1} roughness={0.35} />
+            </mesh>
+          ))}
+        </group>
+      )}
+      {/* Caged sconce inside the chamber */}
+      <mesh position={[0, 4.3, -13]}>
+        <sphereGeometry args={[0.18, 12, 12]} />
+        <meshStandardMaterial color="#fff5d8" emissive="#f5a623" emissiveIntensity={2.4} />
+      </mesh>
+      <pointLight position={[0, 4.0, -13]} intensity={1.3} color="#ffd9a0" distance={6} />
 
       {/* Briefcase pedestal inside vault, visible after open */}
       {vaultOpen && (

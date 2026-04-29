@@ -1,5 +1,7 @@
 "use client";
 
+import Arms from "./Arms";
+
 /**
  * Margaret Vance — 50s. Tea-length dress with belted waist, pearl
  * necklace, pinned hair.
@@ -7,6 +9,7 @@
 export default function WifeBody() {
   return (
     <group>
+      <Arms sleeveColor="#5a2828" skinColor="#e6c4a0" />
       {/* Skirt — flares slightly */}
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[0.2, 0.34, 1.0, 14]} />
@@ -27,15 +30,7 @@ export default function WifeBody() {
         <torusGeometry args={[0.10, 0.012, 6, 24]} />
         <meshStandardMaterial color="#f4eccd" roughness={0.4} metalness={0.2} />
       </mesh>
-      {/* Hands */}
-      <mesh position={[-0.30, 1.05, 0]} castShadow>
-        <sphereGeometry args={[0.07, 10, 10]} />
-        <meshStandardMaterial color="#e6c4a0" roughness={0.85} />
-      </mesh>
-      <mesh position={[0.30, 1.05, 0]} castShadow>
-        <sphereGeometry args={[0.07, 10, 10]} />
-        <meshStandardMaterial color="#e6c4a0" roughness={0.85} />
-      </mesh>
+      {/* (arms now rendered by shared Arms component above) */}
       {/* Head */}
       <mesh position={[0, 1.92, 0]} castShadow>
         <sphereGeometry args={[0.20, 14, 14]} />
@@ -46,17 +41,18 @@ export default function WifeBody() {
         <boxGeometry args={[0.06, 0.014, 0.01]} />
         <meshStandardMaterial color="#a01818" />
       </mesh>
-      {/* Hair: rolled-up volume, blonde-ish */}
-      <mesh position={[0, 2.1, -0.02]} castShadow>
-        <sphereGeometry args={[0.22, 14, 14]} />
+      {/* Hair: rolled-up half-dome, blonde */}
+      <mesh position={[0, 2.06, -0.04]} castShadow>
+        <sphereGeometry args={[0.24, 18, 14, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
         <meshStandardMaterial color="#a07a3a" roughness={0.95} />
       </mesh>
-      <mesh position={[-0.18, 1.92, -0.04]} castShadow>
-        <sphereGeometry args={[0.10, 12, 12]} />
+      {/* Side roll over each ear (much smaller; sits flush with skull) */}
+      <mesh position={[-0.20, 1.88, 0.0]} castShadow>
+        <sphereGeometry args={[0.07, 12, 12]} />
         <meshStandardMaterial color="#a07a3a" roughness={0.95} />
       </mesh>
-      <mesh position={[0.18, 1.92, -0.04]} castShadow>
-        <sphereGeometry args={[0.10, 12, 12]} />
+      <mesh position={[0.20, 1.88, 0.0]} castShadow>
+        <sphereGeometry args={[0.07, 12, 12]} />
         <meshStandardMaterial color="#a07a3a" roughness={0.95} />
       </mesh>
       {/* Earring */}
