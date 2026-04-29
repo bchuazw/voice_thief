@@ -77,20 +77,21 @@ export default function CafeScene() {
         <boxGeometry args={[14, 0.6, 0.05]} />
         <meshStandardMaterial color="#0a0a10" emissive="#a07020" emissiveIntensity={0.55} />
       </mesh>
-      {/* Cool teal accent strip along the entire back wall edge (where back wall
-          meets ceiling) — reads from any camera angle facing the bar */}
-      <mesh position={[0, 3.85, -4.85]}>
-        <boxGeometry args={[14, 0.08, 0.04]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={1.1} />
+      {/* Cool teal accent strip along the lower back wall — thick enough to
+          counterweight the brass band above it and the warm pendants */}
+      <mesh position={[0, 0.6, -4.85]}>
+        <boxGeometry args={[14, 0.4, 0.05]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={1.6} />
       </mesh>
-      {/* Vertical teal columns at the back corners */}
-      <mesh position={[6.85, 2, -4.85]}>
-        <boxGeometry args={[0.06, 4, 0.04]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.95} />
+      {/* Vertical teal columns inside the back wall plane (within FOV from
+          the player's typical camera angle) */}
+      <mesh position={[5, 2, -4.85]}>
+        <boxGeometry args={[0.18, 3.6, 0.05]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={1.4} />
       </mesh>
-      <mesh position={[-6.85, 2, -4.85]}>
-        <boxGeometry args={[0.06, 4, 0.04]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.95} />
+      <mesh position={[-5, 2, -4.85]}>
+        <boxGeometry args={[0.18, 3.6, 0.05]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={1.4} />
       </mesh>
       {/* Side walls */}
       <mesh position={[-7, 2, 0]} receiveShadow>
