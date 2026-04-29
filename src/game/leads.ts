@@ -132,5 +132,20 @@ export function buildLeads(state: GameState): Lead[] {
     });
   }
 
+  // Mute-protagonist beat — fires once after the player's first phone call
+  // (or any branch flip). Reminds them the silence is the whole game.
+  const flippedAny =
+    state.npcs.bankManager.branch !== "default" ||
+    state.npcs.secretary.branch !== "default" ||
+    state.bankBackExitUnlocked;
+  if (flippedAny) {
+    leads.push({
+      id: "old-habit",
+      title: "Old habit",
+      body: "You almost answered the receiver. Old habit. Nothing came. You hung up before the dial tone.",
+      urgency: "note",
+    });
+  }
+
   return leads;
 }

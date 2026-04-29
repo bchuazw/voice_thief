@@ -119,11 +119,14 @@ export default function PhoneUI() {
       }
 
       const branchFired = applyCallEffects(target, card.npcId, message);
-      // A call that doesn't move anything still costs heat — the line was tied up
-      // for nothing and the receiving NPC remembers a strange voice asking for something
-      // odd.
-      if (!branchFired && data.raisedSuspicion === 0 && card.npcId !== target) {
-        raiseSuspicion(4, `awkward call to ${NPC_PROFILES[target].displayName}`);
+      // Any non-firing call costs heat — even calling someone in their own
+      // voice is suspicious enough that the receiver remembers it later.
+      if (!branchFired && data.raisedSuspicion === 0) {
+        const reason =
+          card.npcId === target
+            ? `${NPC_PROFILES[target].displayName} heard their own voice`
+            : `awkward call to ${NPC_PROFILES[target].displayName}`;
+        raiseSuspicion(card.npcId === target ? 6 : 4, reason);
       }
 
       if (data.hangUp) {

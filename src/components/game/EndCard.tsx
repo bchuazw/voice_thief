@@ -5,6 +5,16 @@ import { clockLabel } from "@/game/timeFormat";
 import { evaluateLossConditions } from "@/game/winLose";
 import { evaluateAchievements } from "@/game/achievements";
 
+function lossText(reason: string): string {
+  if (/alarm/i.test(reason)) {
+    return "The bell. Boots in the lobby. Hands on your shoulders. You opened your mouth — old habit — and nothing came out.";
+  }
+  if (/9 PM|train|time/i.test(reason)) {
+    return "Nine o'clock. The whistle. The platform empty. You watch the briefcase ride away in someone else's hand.";
+  }
+  return `${reason}. The city kept its voices, this time.`;
+}
+
 function pathLabel(): string {
   const s = useGame.getState();
   if (s.bankBackExitUnlocked) return "Beat-cop bluff";
@@ -37,7 +47,7 @@ export default function EndCard() {
         <p className="mx-auto mt-3 max-w-lg text-noir-fog">
           {won
             ? "The train groans out of First City with the briefcase under your coat. Nobody remembers your voice, because you never used it."
-            : `${lossReason}. The city kept its voices, this time.`}
+            : lossText(lossReason)}
         </p>
         <div className="mx-auto mt-6 grid max-w-xl grid-cols-3 gap-2 text-center">
           <div className="rounded border border-noir-paper/10 bg-white/5 px-3 py-2">

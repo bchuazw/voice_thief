@@ -80,7 +80,7 @@ export default function VoiceAuthDialog() {
           if (auth.device === "bankFront") openBankFront(true);
           if (auth.device === "bankHallway") openHallway(true);
           setActiveAuth(null);
-        }, 1500);
+        }, 700);
       } else {
         raiseSuspicion(20, "failed voice auth");
         useGame.setState((s) => ({ failedAuthCount: s.failedAuthCount + 1 }));

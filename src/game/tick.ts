@@ -71,7 +71,9 @@ export function useGameTick(): void {
 
       // Recording awareness — fills if any non-target NPC is in the same scene
       // and within ~6 units of the player while recording. Drains otherwise.
-      if (next.player.isRecording) {
+      // Skip entirely while a modal is open (otherwise standing still reading
+      // the notebook can bust the recording silently).
+      if (next.player.isRecording && !paused) {
         const targetId = next.player.recordingTargetNpc;
         const playerLoc = next.player.currentLocation;
         let nearestOther = Infinity;
@@ -94,11 +96,12 @@ export function useGameTick(): void {
         const newAwareness = Math.max(0, Math.min(1, next.player.recordingAwareness + delta));
         next.setRecordingAwareness(newAwareness);
         if (newAwareness >= 0.999) {
-          // Bust — heat spike + cancel the recording (which the recordingManager
-          // will catch). The card is still added because the cone was technically
-          // captured, but you carry the heat.
+          // Bust — heat spike, increment counter, cancel recording. Reset
+          // awareness to 0 immediately so the next tick can't double-fire
+          // before endRecording() resolves async.
           next.raiseSuspicion(25, "someone watched you record");
           useGame.setState((s) => ({ recordingsBust: s.recordingsBust + 1 }));
+          next.setRecordingAwareness(0);
           endRecording().catch(() => {});
         }
       }

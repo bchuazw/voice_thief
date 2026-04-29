@@ -179,6 +179,10 @@ export default function Notebook() {
 
           {tab === "schedule" && (
             <div className="space-y-3">
+              <p className="text-[11px] italic text-noir-fog">
+                Times are approximate — your informants are guessing within a
+                couple of minutes.
+              </p>
               {(Object.keys(NPC_SCHEDULES) as NpcId[]).map((id) => (
                 <div key={id}>
                   <h3 className="font-serif text-lg">{NPC_PROFILES[id].displayName}</h3>
@@ -187,7 +191,7 @@ export default function Notebook() {
                       .filter((m) => m.branch === "default")
                       .map((m) => (
                         <li key={m.id} className="flex justify-between">
-                          <span>{clockLabel(m.startSeconds)}</span>
+                          <span>≈ {clockLabel(m.startSeconds)}</span>
                           <span>
                             {m.location} ·{" "}
                             <span className={emotionColorClass(m.emotion)}>

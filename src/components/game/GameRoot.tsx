@@ -15,6 +15,7 @@ import ToastStack from "./ToastStack";
 import TitleScreen from "./TitleScreen";
 import SceneTitle from "./SceneTitle";
 import PauseMenu from "./PauseMenu";
+import DialogueCaptions from "./DialogueCaptions";
 
 export default function GameRoot() {
   const phase = useGame((s) => s.phase);
@@ -45,6 +46,7 @@ export default function GameRoot() {
         <>
           <GameCanvas />
           <SceneTitle />
+          <DialogueCaptions />
           <HUD />
           <ToastStack />
           {notebookOpen && <Notebook />}

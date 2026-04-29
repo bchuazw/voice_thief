@@ -32,9 +32,10 @@ export function evaluateAchievements(state: GameState): Achievement[] {
     });
   }
 
-  // Voice collector — recorded all four NPCs at least once
+  // Voice collector — recorded all four NPCs at least once. Gated on win
+  // so the chip is a reward, not consolation.
   const recordedNpcs = new Set(state.voiceInventory.map((c) => c.npcId));
-  if (ALL_NPCS.every((id) => recordedNpcs.has(id))) {
+  if (won && ALL_NPCS.every((id) => recordedNpcs.has(id))) {
     out.push({
       id: "collector",
       label: "Voice Collector",
@@ -42,12 +43,13 @@ export function evaluateAchievements(state: GameState): Achievement[] {
     });
   }
 
-  // Cold call — won without making a single phone call
-  // (best heuristic available: no NPC branches were flipped from default)
+  // Cold call — won without making a single phone call.
+  // Excludes the back-exit unlock too (that's also a phone call).
   if (won) {
     const noBranchFlips =
       state.npcs.bankManager.branch === "default" &&
-      state.npcs.secretary.branch === "default";
+      state.npcs.secretary.branch === "default" &&
+      !state.bankBackExitUnlocked;
     if (noBranchFlips) {
       out.push({
         id: "cold-call",
