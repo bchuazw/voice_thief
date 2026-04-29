@@ -45,11 +45,16 @@ npm run generate-assets:legacy
 - `apartment-block.glb`
 - `living-room.glb`
 - `payphone.glb`
+- `records-plaque.glb`
 - `train-station.glb`
 - `teller-counter.glb`
+- `vault-audit-panel.glb`
 
 These replace the most visible primitive-heavy props while preserving the
-existing gameplay interaction points and collision logic.
+existing gameplay interaction points and collision logic. The records plaque
+and vault audit panel are puzzle-facing props: they visually reinforce that
+Lillian controls hallway records access and must be cleared before the vault
+will accept Harold's voice.
 
 ## Art Direction
 

@@ -21,7 +21,7 @@ function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
     return "Lillian sighs that Harold always loses things.";
   }
   if (caller === "bankManager" && target === "secretary") {
-    return "Lillian only obeys ordinary requests in his voice.";
+    return "Give Lillian a boring records errand. She questions anything dramatic.";
   }
   if (caller === "bankManager" && target === "wife") {
     return "Margaret notices when he sounds rehearsed.";

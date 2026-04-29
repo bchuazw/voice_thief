@@ -208,6 +208,16 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
       sourceMomentId: "wife-gossip-6_30",
       mock: true,
     });
+    t.addVoiceCard({
+      id: "card_secretary_calm_route",
+      npcId: "secretary",
+      elevenLabsVoiceId: "mock_voice_secretary_calm_route",
+      capturedAtInGameTime: 18 * 3600,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "secretary-cafe-6_00",
+      mock: true,
+    });
   });
 
   // ── 3. Phone diversion call ─────────────────────────────────────────
@@ -238,7 +248,7 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   check("manager branch flipped to rushedHome via wife→manager call", branchFlipped);
 
   state = await getState(page);
-  check("hallway unlocked as side effect", state.bankHallwayUnlocked === true);
+  check("family diversion does not unlock records hallway", state.bankHallwayUnlocked === false);
 
   // wait for auto-hangup to close the phone
   await waitFor(page, () => window.__vt.getState().phoneOpen === false, "phone auto-closes", 4000);
@@ -252,12 +262,35 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   await page.waitForTimeout(800);
   await shoot(page, "05-bank-lobby.png");
 
+  // Open hallway auth dialog. The hallway is Lillian's records intercom, not Harold's vault.
+  await page.evaluate(() => {
+    window.__vt.getState().setActiveAuth({ device: "bankHallway", voiceCardId: "", result: "pending" });
+  });
+  await page.waitForTimeout(500);
+  await shoot(page, "06-hallway-auth-open.png");
+
+  const secretaryHallwayBtn = page.locator("button", { hasText: /Lillian Park/ }).first();
+  if (await secretaryHallwayBtn.count()) {
+    await secretaryHallwayBtn.click();
+    const hallwayUnlocked = await waitFor(
+      page,
+      () => window.__vt.getState().bankHallwayUnlocked === true,
+      "secretary hallway auth unlocks",
+      8000,
+    );
+    state = await getState(page);
+    check("secretary records voice opens hallway", hallwayUnlocked && state.bankHallwayUnlocked === true);
+    await shoot(page, "07-hallway-auth-pass.png");
+  } else {
+    check("secretary card visible in hallway dialog", false, "button not found");
+  }
+
   // Open vault auth dialog
   await page.evaluate(() => {
     window.__vt.getState().setActiveAuth({ device: "vault", voiceCardId: "", result: "pending" });
   });
   await page.waitForTimeout(500);
-  await shoot(page, "06-vault-auth-open.png");
+  await shoot(page, "08-vault-auth-open.png");
 
   // Try the stressed card first → should fail
   // Find the button labeled "stressed"
@@ -268,7 +301,7 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     state = await getState(page);
     check("stressed voice fails vault", state.vaultOpen === false);
     check("suspicion increased after fail", state.suspicion > 0, `suspicion=${state.suspicion}`);
-    await shoot(page, "07-vault-auth-stressed-fail.png");
+    await shoot(page, "09-vault-auth-stressed-fail.png");
   } else {
     check("stressed card visible in dialog", false, "button not found");
   }
@@ -279,10 +312,51 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     await calmBtn.click();
     await page.waitForTimeout(2000);
     state = await getState(page);
-    check("calm voice opens vault", state.vaultOpen === true);
-    await shoot(page, "08-vault-auth-calm-pass.png");
+    check("calm manager voice is blocked while Lillian watches ledger", state.vaultOpen === false);
+    const lillianReasonVisible = await page.locator("text=Lillian").count();
+    check("vault rejection explains Lillian ledger blocker", lillianReasonVisible > 0);
+    await shoot(page, "10-vault-auth-lillian-block.png");
   } else {
     check("calm card visible in dialog", false, "button not found");
+  }
+
+  // Clear the counter with Harold's voice, then try the vault again.
+  await page.evaluate(() => window.__vt.getState().setActiveAuth(null));
+  await page.keyboard.press("p");
+  await page.waitForTimeout(500);
+  await page.locator("select").nth(0).selectOption("secretary");
+  const managerCalmCardId = await vt(page, () => {
+    return window.__vt.getState().voiceInventory.find(
+      (c) => c.npcId === "bankManager" && c.emotionalState === "calm",
+    )?.id;
+  });
+  await page.locator("select").nth(1).selectOption(managerCalmCardId);
+  await page.locator("textarea").fill("Lillian, please go upstairs and check the supply ledger.");
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => window.__vt.getState().npcs.secretary.branch === "runningErrand",
+    "secretary branch flips to runningErrand",
+    4000,
+  );
+  state = await getState(page);
+  check("Harold voice sends Lillian on errand", state.npcs.secretary.branch === "runningErrand");
+  await shoot(page, "11-secretary-errand-call.png");
+  await waitFor(page, () => window.__vt.getState().phoneOpen === false, "secretary phone auto-closes", 5000);
+
+  await page.evaluate(() => {
+    window.__vt.getState().setActiveAuth({ device: "vault", voiceCardId: "", result: "pending" });
+  });
+  await page.waitForTimeout(500);
+  const finalCalmBtn = page.locator("button", { hasText: /calm/ }).first();
+  if (await finalCalmBtn.count()) {
+    await finalCalmBtn.click();
+    await page.waitForTimeout(2000);
+    state = await getState(page);
+    check("calm manager voice opens vault after Lillian leaves", state.vaultOpen === true);
+    await shoot(page, "12-vault-auth-calm-pass.png");
+  } else {
+    check("calm card visible for final vault auth", false, "button not found");
   }
 
   // ── 5. Briefcase pickup ─────────────────────────────────────────────
@@ -504,8 +578,11 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     { name: "TTS returns audio/mpeg", url: "/api/tts", method: "POST", body: { text: "hello", voiceId: "mock" }, raw: true },
     { name: "auth-voice rejects wrong NPC", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "wife", emotionalState: "calm" } }, expect: (r) => r.passes === false },
     { name: "auth-voice accepts calm bankManager", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "bankManager", emotionalState: "calm" } }, expect: (r) => r.passes === true },
+    { name: "auth-voice rejects manager at records hallway", url: "/api/auth-voice", method: "POST", body: { device: "bankHallway", voiceCard: { elevenLabsVoiceId: "v", npcId: "bankManager", emotionalState: "calm" } }, expect: (r) => r.passes === false },
+    { name: "auth-voice accepts secretary at records hallway", url: "/api/auth-voice", method: "POST", body: { device: "bankHallway", voiceCard: { elevenLabsVoiceId: "v", npcId: "secretary", emotionalState: "calm" } }, expect: (r) => r.passes === true },
     { name: "auth-voice rejects panicked bankManager", url: "/api/auth-voice", method: "POST", body: { device: "vault", voiceCard: { elevenLabsVoiceId: "v", npcId: "bankManager", emotionalState: "panicked" } }, expect: (r) => r.passes === false && r.reason.includes("panicked") },
     { name: "conversation: wife manager emergency succeeds", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Maggie here. There is a stranger at the house, please hurry home now." }, expect: (r) => r.hangUp === true && /leaving now/i.test(r.npcText) },
+    { name: "conversation: manager gives Lillian records errand", url: "/api/conversation", method: "POST", body: { npcId: "secretary", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Lillian, please go upstairs and check the supply ledger." }, expect: (r) => r.hangUp === true && /go check now/i.test(r.npcText) },
     { name: "conversation: weak wife call stays suspicious", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Break-in." }, expect: (r) => r.hangUp === false && r.raisedSuspicion === 4 && !/leaving now/i.test(r.npcText) },
     { name: "conversation: guard beat call acknowledges back exit", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "bankGuard", callerText: "Cole checking in from the beat. Patrol is quiet." }, expect: (r) => r.hangUp === true && /alley gate|keep moving/i.test(r.npcText) },
     { name: "conversation: manager voice + 'Harold' raises suspicion", url: "/api/conversation", method: "POST", body: { npcId: "wife", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Margaret darling, this is Harold" }, expect: (r) => r.raisedSuspicion >= 15 },

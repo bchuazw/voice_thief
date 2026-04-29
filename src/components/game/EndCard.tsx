@@ -18,10 +18,10 @@ function lossText(reason: string): string {
 function pathLabel(): string {
   const s = useGame.getState();
   if (s.bankBackExitUnlocked) return "Beat-cop bluff";
-  if (s.npcs.secretary.branch === "runningErrand") return "Insider con";
   if (s.npcs.bankManager.branch === "atCafe") return "Ledger diversion";
   if (s.npcs.bankManager.branch === "rushedHome") return "Family emergency";
-  return "Direct lift";
+  if (s.npcs.secretary.branch === "runningErrand") return "Counter clearance";
+  return "Two-voice lift";
 }
 
 export default function EndCard() {

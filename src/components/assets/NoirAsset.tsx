@@ -12,8 +12,10 @@ const ASSETS = {
   cafeFacade: "/models/noir-kit/cafe-facade.glb",
   livingRoom: "/models/noir-kit/living-room.glb",
   payphone: "/models/noir-kit/payphone.glb",
+  recordsPlaque: "/models/noir-kit/records-plaque.glb",
   tellerCounter: "/models/noir-kit/teller-counter.glb",
   trainStation: "/models/noir-kit/train-station.glb",
+  vaultAuditPanel: "/models/noir-kit/vault-audit-panel.glb",
 } as const;
 
 export type NoirAssetName = keyof typeof ASSETS;

@@ -160,24 +160,27 @@ time, then offers an immediate replay.
 
 ## How a heist plays out
 
-There are three valid solution paths to the vault. None of them require
-combat or stealth in the traditional sense — only careful timing and good
-casting.
+The vault is now a layered voice puzzle, not a single-key door. None of the
+solutions require combat or traditional stealth, but the clean route asks you
+to learn the bank's chain of trust and keep two people from hearing the wrong
+thing.
 
-1. **Direct.** Record the manager during his calm 6:15 PM cigarette break,
-   wait until the bank empties, walk in and play it at the vault.
-2. **Diversion.** Record the manager's wife gossiping at home. Call the
-   manager from the payphone in her voice. Tell him there's a break-in.
-   Watch him flee. Steal his panicked voice on the way out (useful for
-   tricking the secretary, not the vault). You'll still need the calm
-   cigarette recording for the vault itself.
-3. **Insider.** Record the secretary at the cafe at 6:00 PM. Use her voice
-   to call the manager about a "lost ledger." He detours to the cafe. You
-   record him, calm, in person at the cafe. Then call the secretary in his
-   voice and send her on an errand. Bank is empty.
+1. **Records key.** The inner hallway belongs to Lillian Park, not Harold.
+   Capture a calm Lillian recording at the cafe, or send her outside on an
+   errand and record her there. Her voice opens the hallway intercom.
+2. **Vault key.** Harold Vance still owns the vault voiceprint. The best calm
+   recording is his 6:15 PM cigarette break, though the ledger diversion can
+   lure him to the cafe for another clean take.
+3. **Clear the counter.** The vault will reject even a perfect Harold sample
+   while Lillian's closing ledger is active. Use Harold's voice on the phone
+   to give her a boring records errand, then authenticate the hallway and the
+   vault in the right order.
+4. **Optional exits and diversions.** Margaret's voice can pull Harold out of
+   the bank. Eddie Cole's beat-call can open the alley gate for a faster
+   escape. These help, but they do not replace the records/vault voice puzzle.
 
-The vault accepts only **calm** voiceprints. A panicked or stressed
-recording fails authentication and pings suspicion.
+The important rule: intercoms accept only **calm** voiceprints. A panicked or
+stressed recording fails authentication and pings suspicion.
 
 ## Local development
 
@@ -228,12 +231,13 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev server in mock mode
-in one terminal and run `node vt-e2e.cjs` in another. **53 / 53 checks pass.**
+in one terminal and run `node vt-e2e.cjs` in another. **60 / 60 checks pass.**
 It exercises first-person startup and WASD movement, phase transitions,
-recording, notebook inventory, phone diversion, voice auth, briefcase,
-train-station win, suspicion-driven loss, time-out loss, Solution C,
-weak-call failure regressions, guard back-exit diversion, recording-awareness
-busts, and direct API contracts. Full transcript:
+recording, notebook inventory, phone diversion, hallway voice gating, vault
+watcher rejection, voice auth, briefcase, train-station win,
+suspicion-driven loss, time-out loss, Solution C, weak-call failure
+regressions, guard back-exit diversion, recording-awareness busts, and direct
+API contracts. Full transcript:
 [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
 The screenshots above are captured by `vt-fp-shots.cjs` against the running

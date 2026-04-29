@@ -18,9 +18,9 @@ export const AUTH_REQUIREMENTS: Record<AuthAttempt["device"], AuthRequirement> =
   },
   bankHallway: {
     device: "bankHallway",
-    expectedNpc: "bankManager",
+    expectedNpc: "secretary",
     requiredEmotion: "calm",
-    phrase: "Open hall, code 7-7-1",
+    phrase: "Records access, Lillian Park",
   },
   vault: {
     device: "vault",
@@ -64,6 +64,14 @@ export function validateVaultOpening(state: GameState, card: VoiceCard): AuthVer
   if (!verdict.passes) return verdict;
   if (state.suspicion >= 100) {
     return { passes: false, reason: "Alarm already raised.", stressScore: verdict.stressScore };
+  }
+  const secretary = state.npcs.secretary;
+  if (secretary.branch !== "runningErrand") {
+    return {
+      passes: false,
+      reason: "Lillian's closing ledger is still active - clear her from the counter first.",
+      stressScore: verdict.stressScore,
+    };
   }
   const guard = state.npcs.bankGuard;
   if (

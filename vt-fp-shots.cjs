@@ -166,6 +166,16 @@ function browserExecutablePath() {
       sourceMomentId: "wife-gossip-6_30",
       mock: true,
     });
+    s.addVoiceCard({
+      id: "shot_secretary",
+      npcId: "secretary",
+      elevenLabsVoiceId: "mock_voice_secretary_calm",
+      capturedAtInGameTime: 18 * 3600,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "secretary-cafe-6_00",
+      mock: true,
+    });
     window.__vt.setState({
       inGameTime: 18 * 3600 + 40 * 60,
       vaultOpen: false,
@@ -235,6 +245,10 @@ function browserExecutablePath() {
         bankManager: {
           ...state.npcs.bankManager,
           branch: "rushedHome",
+        },
+        secretary: {
+          ...state.npcs.secretary,
+          branch: "runningErrand",
         },
       },
       player: {

@@ -43,22 +43,6 @@ export function evaluateAchievements(state: GameState): Achievement[] {
     });
   }
 
-  // Cold call — won without making a single phone call.
-  // Excludes the back-exit unlock too (that's also a phone call).
-  if (won) {
-    const noBranchFlips =
-      state.npcs.bankManager.branch === "default" &&
-      state.npcs.secretary.branch === "default" &&
-      !state.bankBackExitUnlocked;
-    if (noBranchFlips) {
-      out.push({
-        id: "cold-call",
-        label: "Cold Call",
-        detail: "Won without dialing a single number",
-      });
-    }
-  }
-
   // Hot collar — won with heat ≥ 60 (sweaty finish)
   if (won && state.suspicion >= 60) {
     out.push({
@@ -77,7 +61,9 @@ export function evaluateAchievements(state: GameState): Achievement[] {
     });
   }
 
-  // Solution-specific — only one fires
+  // Solution-specific. These are additive now because the shippable route is
+  // intentionally layered: a good win can combine a diversion, a cleared
+  // records desk, and the back exit.
   if (won) {
     if (state.bankBackExitUnlocked) {
       out.push({
@@ -85,13 +71,15 @@ export function evaluateAchievements(state: GameState): Achievement[] {
         label: "Beat-Cop Bluff",
         detail: "Eddie's voice opened the alley gate",
       });
-    } else if (state.npcs.secretary.branch === "runningErrand") {
+    }
+    if (state.npcs.secretary.branch === "runningErrand") {
       out.push({
         id: "solution-c",
-        label: "Insider Job",
-        detail: "Lillian ran the errand. Bank empty.",
+        label: "Counter Clearance",
+        detail: "Moved Lillian off the closing ledger",
       });
-    } else if (state.npcs.bankManager.branch === "atCafe") {
+    }
+    if (state.npcs.bankManager.branch === "atCafe") {
       out.push({
         id: "solution-b1",
         label: "Lost Ledger",
@@ -103,11 +91,16 @@ export function evaluateAchievements(state: GameState): Achievement[] {
         label: "Family Emergency",
         detail: "Margaret's voice sent Harold flying",
       });
-    } else {
+    }
+    if (
+      state.npcs.bankManager.branch === "default" &&
+      state.npcs.secretary.branch === "default" &&
+      !state.bankBackExitUnlocked
+    ) {
       out.push({
         id: "solution-a",
-        label: "Direct Lift",
-        detail: "Walked right in. Walked right out.",
+        label: "Two-Voice Lift",
+        detail: "Solved the bank with clean voiceprints alone",
       });
     }
   }

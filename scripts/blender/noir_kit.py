@@ -388,10 +388,34 @@ def teller_counter():
     box("open ledger book left page", [0.62, 0.035, 0.42], [-3.08, 1.24, 0.12], MATS["paper"], 0.006)
     box("open ledger book right page", [0.62, 0.035, 0.42], [-2.48, 1.245, 0.12], MATS["paper"], 0.006)
     box("ledger dark spine", [0.08, 0.05, 0.44], [-2.78, 1.255, 0.12], MATS["wood"], 0.003)
+    box("lillian records brass desk plate", [1.18, 0.25, 0.045], [-2.78, 1.08, 0.58], MATS["brass"], 0.008)
+    box("lillian records black inset", [1.04, 0.16, 0.025], [-2.78, 1.08, 0.62], MATS["black"], 0.004)
+    text_label("lillian records desk text", "L. PARK  RECORDS", 0.055, [-2.78, 1.08, 0.65], MATS["cream"])
+    box("hallway log brass tray", [0.96, 0.06, 0.46], [-1.35, 1.19, 0.14], MATS["brass"], 0.006)
+    box("hallway log paper card", [0.82, 0.025, 0.34], [-1.35, 1.24, 0.14], MATS["paper"], 0.003)
     cylinder("banker lamp brass stem", 0.022, 0.38, [3.5, 1.38, 0.12], MATS["brass"], 12, True)
     sphere("banker lamp green shade glow", 0.14, [3.5, 1.63, 0.12], MATS["green"], 24)
     box("ink stamp body", [0.22, 0.12, 0.18], [2.65, 1.23, 0.08], MATS["dark_metal"], 0.01)
     box("small teller bell", [0.18, 0.06, 0.18], [4.3, 1.22, 0.04], MATS["brass"], 0.012)
+
+
+def records_plaque():
+    box("records wall brass backplate", [1.72, 0.62, 0.08], [0, 0.31, 0], MATS["brass"], 0.014)
+    box("records black enamel inset", [1.54, 0.46, 0.035], [0, 0.31, 0.052], MATS["black"], 0.006)
+    text_label("records plaque top letters", "L. PARK", 0.13, [0, 0.4, 0.09], MATS["cream"])
+    text_label("records plaque lower letters", "RECORDS", 0.105, [0, 0.2, 0.09], MATS["cream"])
+    cylinder("records teal status lamp", 0.06, 0.035, [0.72, 0.5, 0.095], MATS["neon_teal"], 16, True, "z")
+    cylinder("records amber call button", 0.055, 0.03, [-0.72, 0.5, 0.092], MATS["neon_amber"], 16, True, "z")
+
+
+def vault_audit_panel():
+    box("vault audit brass frame", [1.42, 0.92, 0.08], [0, 0.46, 0], MATS["brass"], 0.014)
+    box("vault audit smoked glass", [1.24, 0.72, 0.04], [0, 0.46, 0.052], MATS["glass_teal"], 0.006)
+    text_label("vault audit header", "AUDIT", 0.12, [0, 0.67, 0.095], MATS["black"])
+    text_label("vault audit l park", "L. PARK", 0.105, [0, 0.47, 0.095], MATS["black"])
+    text_label("vault audit clear", "CLEAR", 0.105, [0, 0.27, 0.095], MATS["black"])
+    for i, x in enumerate([-0.42, 0.0, 0.42]):
+        cylinder(f"vault audit jewel lamp {i}", 0.04, 0.025, [x, 0.1, 0.09], MATS["neon_amber"], 12, True, "z")
 
 
 def cafe_interior():
@@ -492,6 +516,8 @@ ASSETS = {
     "payphone": payphone,
     "train-station": train_station,
     "teller-counter": teller_counter,
+    "records-plaque": records_plaque,
+    "vault-audit-panel": vault_audit_panel,
 }
 
 

@@ -87,7 +87,6 @@ function bankManagerReply(callerNpc: NpcId, text: string): PhoneRuleResult {
         hangUp: true,
         effect: {
           branch: { npcId: "bankManager", branch: "rushedHome" },
-          unlockHallway: true,
           toast: "The manager rushes for the door.",
         },
       };
@@ -173,8 +172,7 @@ function secretaryReply(callerNpc: NpcId, text: string): PhoneRuleResult {
         hangUp: true,
         effect: {
           branch: { npcId: "secretary", branch: "runningErrand" },
-          unlockHallway: true,
-          toast: "Lillian leaves to run the errand.",
+          toast: "Lillian leaves to run the errand. Her records desk is unattended.",
         },
       };
     }

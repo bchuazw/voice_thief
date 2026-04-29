@@ -50,7 +50,7 @@ export default function PauseMenu() {
         <p className="mt-4 text-sm text-noir-fog">
           {hasBriefcase
             ? "Briefcase in hand. Main Street, then the train."
-            : "Open the notebook for leads, use the phone to move people, and keep one calm Harold voice for the vault."}
+            : "Open the notebook for leads, move Lillian off the counter, and keep calm voices for the hallway and vault."}
         </p>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <button

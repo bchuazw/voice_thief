@@ -126,14 +126,14 @@ export const NPC_SCHEDULES: Record<NpcId, ScheduleMoment[]> = {
     },
     {
       id: "secretary-running-errand",
-      startSeconds: T(18, 50),
+      startSeconds: T(18, 15),
       endSeconds: T(19, 30),
       branch: "runningErrand",
       location: "street",
       position: { x: 6, y: 0, z: 6 },
       emotion: "calm",
       scriptId: "secretary-running-errand",
-      recordable: false,
+      recordable: true,
     },
   ],
 

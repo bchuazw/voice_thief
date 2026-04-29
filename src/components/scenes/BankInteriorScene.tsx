@@ -12,6 +12,7 @@ import TargetPing from "@/components/world/TargetPing";
 import MarbleFloor from "@/components/props/MarbleFloor";
 import TellerCounter from "@/components/props/TellerCounter";
 import Chandelier from "@/components/props/Chandelier";
+import NoirAsset from "@/components/assets/NoirAsset";
 import type { NpcId } from "@/game/types";
 
 const NPC_LIST: NpcId[] = ["bankManager", "secretary", "bankGuard"];
@@ -45,11 +46,12 @@ export default function BankInteriorScene() {
   return (
     <group>
       {/* Warm interior lighting + cool counter-bounce */}
-      <ambientLight intensity={0.68} color="#f5e0bc" />
-      <hemisphereLight args={["#61749a", "#201b16", 0.54]} />
+      <ambientLight intensity={0.8} color="#f5e0bc" />
+      <hemisphereLight args={["#7083aa", "#2a211c", 0.68]} />
       <pointLight position={[-3, 4, 2]} intensity={1.85} color="#ffd9a0" distance={11} />
       <pointLight position={[3, 4, 2]} intensity={1.85} color="#ffd9a0" distance={11} />
-      <pointLight position={[0, 3.5, -8]} intensity={1.18} color="#ffb060" distance={6} />
+      <pointLight position={[0, 3.5, -8]} intensity={1.55} color="#ffb060" distance={7} />
+      <pointLight position={[2.7, 2.0, -10.4]} intensity={0.85} color="#ffd9a0" distance={4.5} />
       {/* Cool teal bounce from the marble floor — counter-tone for the warm chandeliers */}
       <pointLight position={[0, 0.9, 2]} intensity={0.76} color="#7aa6cc" distance={10} />
       <VolumetricLamp position={[-6, 4, -6]} color="#f0c878" />
@@ -137,6 +139,7 @@ export default function BankInteriorScene() {
         <boxGeometry args={[2, 1.2, 0.4]} />
         <meshStandardMaterial color="#3a2418" roughness={0.6} />
       </mesh>
+      <NoirAsset name="recordsPlaque" position={[-1.38, 2.05, -7.74]} />
 
       {/* Chandelier */}
       <Chandelier position={[0, 4.6, -2]} />
@@ -196,6 +199,7 @@ export default function BankInteriorScene() {
       )}
       {/* Vault door at the entrance to the chamber */}
       <VaultDoor open={vaultOpen} position={[0, 2, -11.6]} />
+      <NoirAsset name="vaultAuditPanel" position={[3.15, 1.28, -11.34]} scale={0.86} />
       {/* Vault door frame ring */}
       <mesh position={[0, 2, -11.4]}>
         <torusGeometry args={[2.6, 0.15, 16, 32]} />

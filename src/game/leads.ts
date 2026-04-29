@@ -22,6 +22,7 @@ function hasVoice(state: GameState, npcId: NpcId, emotion?: string): boolean {
 export function buildLeads(state: GameState): Lead[] {
   const leads: Lead[] = [];
   const hasCalmManager = hasVoice(state, "bankManager", "calm");
+  const hasCalmSecretary = hasVoice(state, "secretary", "calm");
   const hasAnyVoice = state.voiceInventory.length > 0;
   const hasWife = hasVoice(state, "wife");
   const hasSecretary = hasVoice(state, "secretary");
@@ -31,7 +32,7 @@ export function buildLeads(state: GameState): Lead[] {
     leads.push({
       id: "first-voice",
       title: "Heard at the cafe counter",
-      body: "Lillian — the bank's secretary — takes black coffee here every Thursday at six sharp. She's gone by ten past.",
+      body: "Lillian - the bank's secretary - takes black coffee here every Thursday at six sharp. Her records voice opens the inner hallway.",
       urgency: state.inGameTime >= inGameTimeFromClock(18, 8) ? "active" : "note",
     });
     leads.push({
@@ -54,6 +55,22 @@ export function buildLeads(state: GameState): Lead[] {
       id: "calm-manager-done",
       title: "Harold's calm voice is in the notebook",
       body: "The kind of voice the vault might believe.",
+      urgency: "solved",
+    });
+  }
+
+  if (!hasCalmSecretary && hasCalmManager) {
+    leads.push({
+      id: "records-voice",
+      title: "The records desk",
+      body: "The hallway intercom carries Lillian Park's nameplate. If her cafe window is gone, Harold can still send her outside on an errand.",
+      urgency: "active",
+    });
+  } else if (hasCalmSecretary && !state.bankHallwayUnlocked) {
+    leads.push({
+      id: "records-voice-ready",
+      title: "Lillian's records voice is in the notebook",
+      body: "Good for the inner hallway. The vault is Harold's problem.",
       urgency: "solved",
     });
   }
@@ -88,10 +105,13 @@ export function buildLeads(state: GameState): Lead[] {
   if (hasCalmManager && !state.vaultOpen) {
     leads.push({
       id: "use-manager",
-      title: "Two intercoms remember Harold",
-      body: state.bankFrontUnlocked
-        ? "The hallway and the vault both want his voice. The bank front is still open."
-        : "The bank's locked for the night. All three intercoms answer to the same voice now.",
+      title: "The vault remembers Harold",
+      body:
+        state.npcs.secretary.branch !== "runningErrand"
+          ? "Harold's voice can fool the vault, but Lillian's closing ledger will flag the clunk. Move her off the counter first."
+          : state.bankHallwayUnlocked
+            ? "Lillian is out and the hallway is open. Harold's calm voice is the final key."
+            : "Lillian is out. Use her records voice on the hallway, then Harold's calm voice at the vault.",
       urgency: "active",
     });
   }
