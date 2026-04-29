@@ -17,10 +17,10 @@ export default function ApartmentBlock({ position }: Props) {
       <mesh position={[0, 4.0, -3]} castShadow receiveShadow>
         <boxGeometry args={[6.0, 8.0, 6]} />
         <meshStandardMaterial
-          color="#2a2230"
+          color="#3a2e3a"
           roughness={0.9}
-          emissive="#1a1428"
-          emissiveIntensity={0.45}
+          emissive="#2a1c2e"
+          emissiveIntensity={0.95}
         />
       </mesh>
 

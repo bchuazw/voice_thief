@@ -77,11 +77,20 @@ export default function CafeScene() {
         <boxGeometry args={[14, 0.6, 0.05]} />
         <meshStandardMaterial color="#0a0a10" emissive="#a07020" emissiveIntensity={0.55} />
       </mesh>
-      {/* Cool teal accent bar along the right back corner so the cool counter-tone
-          reads even when the moonlight isn't framed */}
-      <mesh position={[6.85, 2.5, -3]}>
-        <boxGeometry args={[0.06, 1.4, 0.04]} />
-        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.85} />
+      {/* Cool teal accent strip along the entire back wall edge (where back wall
+          meets ceiling) — reads from any camera angle facing the bar */}
+      <mesh position={[0, 3.85, -4.85]}>
+        <boxGeometry args={[14, 0.08, 0.04]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={1.1} />
+      </mesh>
+      {/* Vertical teal columns at the back corners */}
+      <mesh position={[6.85, 2, -4.85]}>
+        <boxGeometry args={[0.06, 4, 0.04]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.95} />
+      </mesh>
+      <mesh position={[-6.85, 2, -4.85]}>
+        <boxGeometry args={[0.06, 4, 0.04]} />
+        <meshStandardMaterial color="#0a0a10" emissive="#7aa6cc" emissiveIntensity={0.95} />
       </mesh>
       {/* Side walls */}
       <mesh position={[-7, 2, 0]} receiveShadow>
