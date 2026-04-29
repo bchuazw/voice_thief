@@ -188,6 +188,35 @@ export const NPC_SCHEDULES: Record<NpcId, ScheduleMoment[]> = {
   ],
 };
 
+/** Stable string-hash → 0..1, deterministic per (seed, momentId).
+ *  Used to jitter schedule windows so memorized routes don't dominate. */
+function jitterFor(seed: number, momentId: string): number {
+  let h = seed >>> 0;
+  for (let i = 0; i < momentId.length; i++) {
+    h = ((h ^ momentId.charCodeAt(i)) * 16777619) >>> 0;
+  }
+  // Map to [-1, 1]
+  return ((h & 0xffff) / 0xffff) * 2 - 1;
+}
+
+/** ±90 in-game seconds of jitter per moment (1.5 game-min). Keeps moments
+ *  roughly where the leads describe, but no two runs are identical. */
+const JITTER_RANGE_SECONDS = 90;
+
+/** Apply per-run jitter to a moment's start/end. Read seed from store. */
+function jitter(m: ScheduleMoment): ScheduleMoment {
+  // Don't jitter "branch" overrides — they should fire deterministically when
+  // the player flips them via the phone. Only jitter the default schedule.
+  if (m.branch !== "default") return m;
+  const seed = useGame.getState().runSeed;
+  const offset = jitterFor(seed, m.id) * JITTER_RANGE_SECONDS;
+  return {
+    ...m,
+    startSeconds: m.startSeconds + offset,
+    endSeconds: m.endSeconds + offset,
+  };
+}
+
 export function findActiveMoment(
   npcId: NpcId,
   inGameTime: number,
@@ -196,12 +225,14 @@ export function findActiveMoment(
   const moments = NPC_SCHEDULES[npcId];
   for (const m of moments) {
     if (m.branch !== branch) continue;
-    if (inGameTime >= m.startSeconds && inGameTime < m.endSeconds) return m;
+    const jm = jitter(m);
+    if (inGameTime >= jm.startSeconds && inGameTime < jm.endSeconds) return jm;
   }
   if (branch !== "default") {
     for (const m of moments) {
       if (m.branch !== "default") continue;
-      if (inGameTime >= m.startSeconds && inGameTime < m.endSeconds) return m;
+      const jm = jitter(m);
+      if (inGameTime >= jm.startSeconds && inGameTime < jm.endSeconds) return jm;
     }
   }
   return null;

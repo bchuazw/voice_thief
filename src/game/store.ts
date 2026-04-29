@@ -86,6 +86,10 @@ export const initialState: GameState = {
   audioVolume: 0.85,
   viewMode: "fp",
   pointerLocked: false,
+  runSeed: 1,
+  runStartedAt: 0,
+  failedAuthCount: 0,
+  recordingsBust: 0,
 };
 
 export interface GameActions {
@@ -134,6 +138,11 @@ export const useGame = create<GameState & GameActions>()(
         return {
           phase,
           menuOpen: false,
+          // Fresh per-run seed so schedule jitter is different each playthrough.
+          runSeed: Math.floor(Math.random() * 1_000_000) + 1,
+          runStartedAt: Date.now(),
+          failedAuthCount: 0,
+          recordingsBust: 0,
           toasts: [
             ...s.toasts,
             {
@@ -320,6 +329,11 @@ export const useGame = create<GameState & GameActions>()(
         audioMuted: s.audioMuted,
         audioVolume: s.audioVolume,
         viewMode: s.viewMode,
+        // New seed + counters per restart
+        runSeed: Math.floor(Math.random() * 1_000_000) + 1,
+        runStartedAt: Date.now(),
+        failedAuthCount: 0,
+        recordingsBust: 0,
         toasts: [
           {
             id: `${Date.now()}_objective`,

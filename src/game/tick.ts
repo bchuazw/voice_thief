@@ -98,6 +98,7 @@ export function useGameTick(): void {
           // will catch). The card is still added because the cone was technically
           // captured, but you carry the heat.
           next.raiseSuspicion(25, "someone watched you record");
+          useGame.setState((s) => ({ recordingsBust: s.recordingsBust + 1 }));
           endRecording().catch(() => {});
         }
       }

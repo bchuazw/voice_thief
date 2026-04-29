@@ -83,6 +83,7 @@ export default function VoiceAuthDialog() {
         }, 1500);
       } else {
         raiseSuspicion(20, "failed voice auth");
+        useGame.setState((s) => ({ failedAuthCount: s.failedAuthCount + 1 }));
       }
     } finally {
       setBusy(false);

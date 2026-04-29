@@ -97,6 +97,16 @@ export interface GameState {
   audioVolume: number;
   viewMode: "fp" | "diorama";
   pointerLocked: boolean;
+  /** Per-run random seed; drives schedule jitter so memorized routes
+   *  don't dominate. Generated fresh on each `setPhase("playing")` and
+   *  on `restartRun`. */
+  runSeed: number;
+  /** Wall-clock real time when the current run actually started, for
+   *  end-card "Run length" stats. */
+  runStartedAt: number;
+  /** Counters for end-of-run achievements. */
+  failedAuthCount: number;
+  recordingsBust: number;
 }
 
 export const GAME_START_SECONDS = 18 * 3600;

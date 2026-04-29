@@ -3,9 +3,11 @@
 import { useGame } from "@/game/store";
 import { clockLabel } from "@/game/timeFormat";
 import { evaluateLossConditions } from "@/game/winLose";
+import { evaluateAchievements } from "@/game/achievements";
 
 function pathLabel(): string {
   const s = useGame.getState();
+  if (s.bankBackExitUnlocked) return "Beat-cop bluff";
   if (s.npcs.secretary.branch === "runningErrand") return "Insider con";
   if (s.npcs.bankManager.branch === "atCafe") return "Ledger diversion";
   if (s.npcs.bankManager.branch === "rushedHome") return "Family emergency";
@@ -56,6 +58,29 @@ export default function EndCard() {
         <p className="mt-4 text-xs uppercase tracking-[0.3em] text-noir-fog">
           Final mark: {clockLabel(inGameTime)}
         </p>
+
+        {/* Achievement chips */}
+        {(() => {
+          const chips = evaluateAchievements(useGame.getState());
+          if (chips.length === 0) return null;
+          return (
+            <div className="mx-auto mt-6 flex max-w-2xl flex-wrap justify-center gap-2">
+              {chips.map((c) => (
+                <div
+                  key={c.id}
+                  className="rounded border border-noir-amber/45 bg-noir-amber/5 px-3 py-2 text-left"
+                  title={c.detail}
+                >
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-noir-amber">
+                    {c.label}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-noir-fog">{c.detail}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
           <button
             onClick={restartRun}
