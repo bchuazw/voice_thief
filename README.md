@@ -78,6 +78,13 @@ of moving her off the counter by phone.
 
 ![FP — Records cabinet](docs/screenshots/07b-fp-records-cabinet.png)
 
+### The guard log
+
+The side desk near Cole's post holds the alley log. Eddie's calm voice can sign
+out the back gate from inside the bank, but tampering with it adds heat.
+
+![FP — Guard log](docs/screenshots/07c-fp-guard-log.png)
+
 ### The vault
 
 Past the manager's hallway, the brass torus frame rings the open vault door.
@@ -160,7 +167,7 @@ time, then offers an immediate replay.
 | **Shift** | Run |
 | Mouse | Look around (FP only — click the canvas to engage pointer-lock) |
 | Click ground | Walk to that point (Diorama only) |
-| **E** | Interact with what's centered in the crosshair: record an NPC, use the payphone, open a door, file a records clearance, authenticate at a voice-locked intercom, take the briefcase |
+| **E** | Interact with what's centered in the crosshair: record an NPC, use the payphone, open a door, sign the guard log, file a records clearance, authenticate at a voice-locked intercom, take the briefcase |
 | **N** | Toggle the Notebook |
 | **P** | Toggle the Phone |
 | **M** | Mute / unmute audio |
@@ -185,11 +192,13 @@ thing.
    phone to give her a boring records errand, or get into the hallway with
    Lillian's calm voice and forge a records clearance at the cabinet.
 4. **Optional exits and diversions.** Margaret's voice can pull Harold out of
-   the bank. Eddie Cole's beat-call can open the alley gate for a faster
-   escape. These help, but they do not replace the records/vault voice puzzle.
+   the bank. Eddie Cole's beat-call can open the alley gate, or his calm voice
+   can forge the guard log from inside. These help, but they do not replace the
+   records/vault voice puzzle.
 
 The important rule: intercoms accept only **calm** voiceprints. A panicked or
-stressed recording fails authentication and pings suspicion.
+stressed recording fails authentication, pings suspicion, and temporarily locks
+that relay before you can try again.
 
 ## Local development
 
@@ -241,11 +250,12 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev or production server
-in mock mode and run `node vt-e2e.cjs` in another terminal. **82 / 82 checks pass.**
+in mock mode and run `node vt-e2e.cjs` in another terminal. **86 / 86 checks pass.**
 Set `VT_BASE_URL=http://localhost:<port>` if your server is not on port 3000.
 It exercises first-person startup and WASD movement, phase transitions,
 save/continue, pause settings, recording, notebook inventory, phone diversion,
-hallway voice gating, vault watcher rejection, forged records clearance,
+hallway voice gating, intercom lockouts, vault watcher rejection, forged records clearance,
+guard-log alley access,
 voice auth, briefcase, train-station win,
 suspicion-driven loss, time-out loss, Solution C, weak-call failure
 regressions, guard back-exit diversion, caller-aware guard replies,

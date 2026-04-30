@@ -149,10 +149,16 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       radius: 0.85,
       priority: 2,
       build: () => ({
-          kind: "inspect",
-          label: "Inspect records plaque",
-          toast: "L. Park, Records. Every inner-door card is stamped with her initials.",
+        kind: "inspect",
+        label: "Inspect records plaque",
+        toast: "L. Park, Records. Every inner-door card is stamped with her initials.",
       }),
+    });
+    targets.push({
+      pos: new THREE.Vector3(-9.2, 1.1, -3.15),
+      radius: 1.1,
+      priority: 4,
+      build: () => ({ kind: "patrolLog" }),
     });
     // Back-alley exit (right side of lobby) — only appears if Eddie's beat-call
     // unlocked it. Skips the front door entirely and dumps you near the train.

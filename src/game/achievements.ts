@@ -72,6 +72,13 @@ export function evaluateAchievements(state: GameState): Achievement[] {
         detail: "Eddie's voice opened the alley gate",
       });
     }
+    if (state.patrolLogForged) {
+      out.push({
+        id: "solution-f",
+        label: "Signed Beat",
+        detail: "Forged Cole's patrol log at the guard desk",
+      });
+    }
     if (state.npcs.secretary.branch === "runningErrand") {
       out.push({
         id: "solution-c",

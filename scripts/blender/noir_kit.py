@@ -439,6 +439,23 @@ def records_cabinet():
     text_label("records cabinet side letters", "AUDIT", 0.08, [-0.48, 0.18, -0.27], MATS["cream"])
 
 
+def guard_logbook():
+    box("guard log small oak desk", [1.55, 0.74, 0.58], [0, 0.37, 0], MATS["wood"], 0.035)
+    box("guard desk black front inset", [1.32, 0.42, 0.035], [0, 0.42, 0.31], MATS["black"], 0.008)
+    box("guard desk brass kick rail", [1.42, 0.055, 0.055], [0, 0.13, 0.335], MATS["brass"], 0.006)
+    box("guard desk marble writing slab", [1.42, 0.055, 0.66], [0, 0.78, 0], MATS["marble"], 0.016)
+    box("open patrol log left page", [0.48, 0.028, 0.36], [-0.25, 0.835, 0.05], MATS["paper"], 0.004, rot=(0.0, 0.0, math.radians(3)))
+    box("open patrol log right page", [0.48, 0.028, 0.36], [0.25, 0.838, 0.05], MATS["paper"], 0.004, rot=(0.0, 0.0, math.radians(-3)))
+    box("patrol log dark spine", [0.08, 0.04, 0.39], [0, 0.85, 0.05], MATS["wood"], 0.003)
+    text_label("patrol log header", "PATROL LOG", 0.055, [0, 0.88, 0.25], MATS["black"])
+    text_label("patrol log cole line", "E. COLE", 0.048, [0.22, 0.88, 0.1], MATS["black"])
+    box("patrol brass stamp pad", [0.32, 0.035, 0.22], [-0.5, 0.84, -0.18], MATS["brass"], 0.006)
+    cylinder("patrol stamp handle", 0.045, 0.18, [-0.5, 0.94, -0.18], MATS["dark_metal"], 14, True)
+    sphere("patrol amber desk lamp", 0.08, [0.56, 0.98, -0.18], MATS["neon_amber"], 18)
+    sphere("patrol teal ready lamp", 0.055, [0.64, 0.78, 0.27], MATS["neon_teal"], 14)
+    text_label("guard desk side label", "ALLEY", 0.08, [0, 0.42, 0.345], MATS["cream"])
+
+
 def briefcase():
     # Brass-cornered wood briefcase that sits on its pedestal inside the vault.
     box("briefcase wood pedestal", [0.74, 0.92, 0.6], [0, 0.46, 0], MATS["wood"], 0.025)
@@ -593,6 +610,7 @@ ASSETS = {
     "payphone": payphone,
     "train-station": train_station,
     "teller-counter": teller_counter,
+    "guard-logbook": guard_logbook,
     "records-plaque": records_plaque,
     "records-cabinet": records_cabinet,
     "vault-audit-panel": vault_audit_panel,

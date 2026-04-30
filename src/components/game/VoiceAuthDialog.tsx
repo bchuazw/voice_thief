@@ -5,6 +5,7 @@ import { useGame } from "@/game/store";
 import { NPC_PROFILES } from "@/config/voices";
 import { AUTH_REQUIREMENTS, validateVaultOpening } from "@/game/solutionValidator";
 import { emotionGlyph } from "@/game/emotionDisplay";
+import { clockLabel } from "@/game/timeFormat";
 import { playAudio } from "@/audio/play";
 import { speakStolenText } from "@/audio/npcSpeech";
 import type { AuthAttempt } from "@/game/types";
@@ -23,7 +24,12 @@ export default function VoiceAuthDialog() {
   const openVault = useGame((s) => s.openVault);
   const openBankFront = useGame((s) => s.openBankFront);
   const openHallway = useGame((s) => s.openHallway);
+  const lockAuthDevice = useGame((s) => s.lockAuthDevice);
+  const clearAuthLockout = useGame((s) => s.clearAuthLockout);
   const failedAuthCount = useGame((s) => s.failedAuthCount);
+  const inGameTime = useGame((s) => s.inGameTime);
+  const lockoutUntil = useGame((s) => s.authLockouts[auth.device] ?? 0);
+  const locked = lockoutUntil > inGameTime;
   const [busy, setBusy] = useState(false);
   const [verdict, setVerdict] = useState<{ passes: boolean; reason: string } | null>(null);
   const requirement = AUTH_REQUIREMENTS[auth.device];
@@ -39,6 +45,14 @@ export default function VoiceAuthDialog() {
   async function tryAuth(cardId: string) {
     const card = inventory.find((c) => c.id === cardId);
     if (!card) return;
+    const currentLockout = useGame.getState().authLockouts[auth.device] ?? 0;
+    if (currentLockout > useGame.getState().inGameTime) {
+      setVerdict({
+        passes: false,
+        reason: `Relay cooling until ${clockLabel(currentLockout)}.`,
+      });
+      return;
+    }
     setBusy(true);
     setVerdict(null);
     try {
@@ -74,6 +88,7 @@ export default function VoiceAuthDialog() {
       }
       setVerdict({ passes, reason });
       if (passes) {
+        clearAuthLockout(auth.device);
         setTimeout(() => {
           if (auth.device === "vault") openVault();
           if (auth.device === "bankFront") openBankFront(true);
@@ -92,6 +107,8 @@ export default function VoiceAuthDialog() {
             ? "failed voice auth"
             : `failed voice auth — system on edge (×${priorFails + 1})`;
         raiseSuspicion(cost, reasonText);
+        const lockSeconds = auth.device === "vault" ? 180 : 90;
+        lockAuthDevice(auth.device, useGame.getState().inGameTime + lockSeconds);
         useGame.setState((s) => ({ failedAuthCount: s.failedAuthCount + 1 }));
       }
     } finally {
@@ -129,6 +146,15 @@ export default function VoiceAuthDialog() {
           </p>
         )}
 
+        {locked && (
+          <p
+            className="mt-3 rounded border border-noir-amber/45 bg-noir-amber/10 px-3 py-2 text-xs text-noir-amber"
+            role="status"
+          >
+            Relay cooling until {clockLabel(lockoutUntil)}. Find another move, or wait out the circuit.
+          </p>
+        )}
+
         <div className="mt-4 space-y-2">
           {inventory.length === 0 && (
             <p className="italic text-noir-fog">
@@ -138,9 +164,9 @@ export default function VoiceAuthDialog() {
           {inventory.map((card) => (
             <button
               key={card.id}
-              disabled={busy}
+              disabled={busy || locked}
               onClick={() => tryAuth(card.id)}
-              className="flex w-full items-center justify-between rounded border border-noir-paper/15 bg-black/40 px-3 py-2 text-left hover:bg-noir-ash"
+              className="flex w-full items-center justify-between rounded border border-noir-paper/15 bg-black/40 px-3 py-2 text-left hover:bg-noir-ash disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span>
                 <span className="text-sm">{NPC_PROFILES[card.npcId].displayName}</span>
@@ -150,7 +176,7 @@ export default function VoiceAuthDialog() {
                 </span>
               </span>
               <span className="text-[11px] uppercase tracking-[0.3em] text-noir-amber">
-                Try
+                {locked ? "Cooling" : "Try"}
               </span>
             </button>
           ))}

@@ -25,6 +25,7 @@ export default function BankInteriorScene() {
   const viewMode = useGame((s) => s.viewMode);
   const vaultOpen = useGame((s) => s.vaultOpen);
   const auditLedgerForged = useGame((s) => s.auditLedgerForged);
+  const patrolLogForged = useGame((s) => s.patrolLogForged);
   const bankHallwayUnlocked = useGame((s) => s.bankHallwayUnlocked);
   const bankBackExitUnlocked = useGame((s) => s.bankBackExitUnlocked);
   const lastPos = useRef(player.position);
@@ -113,6 +114,14 @@ export default function BankInteriorScene() {
       {bankBackExitUnlocked && (
         <pointLight position={[11.4, 2.6, -3]} intensity={0.45} color="#3affa6" distance={3} />
       )}
+
+      <NoirAsset name="guardLogbook" position={[-9.2, 0, -3.15]} rotation={[0, -0.55, 0]} scale={0.95} />
+      <pointLight
+        position={[-9.2, 1.35, -2.95]}
+        intensity={patrolLogForged ? 0.55 : 0.36}
+        color={patrolLogForged ? "#3affa6" : "#f5a623"}
+        distance={3}
+      />
 
       {/* Front wall + entrance back to street */}
       <mesh position={[0, 2.5, 6]} receiveShadow>

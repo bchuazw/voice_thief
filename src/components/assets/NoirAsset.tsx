@@ -10,6 +10,7 @@ const ASSETS = {
   bankFacade: "/models/noir-kit/bank-facade.glb",
   cafeInterior: "/models/noir-kit/cafe-interior.glb",
   cafeFacade: "/models/noir-kit/cafe-facade.glb",
+  guardLogbook: "/models/noir-kit/guard-logbook.glb",
   livingRoom: "/models/noir-kit/living-room.glb",
   payphone: "/models/noir-kit/payphone.glb",
   recordsCabinet: "/models/noir-kit/records-cabinet.glb",

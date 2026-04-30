@@ -16,9 +16,11 @@ export interface SavedRunState {
   vaultOpen: boolean;
   briefcaseTaken: boolean;
   auditLedgerForged: boolean;
+  patrolLogForged: boolean;
   bankFrontUnlocked: boolean;
   bankHallwayUnlocked: boolean;
   bankBackExitUnlocked: boolean;
+  authLockouts: GameState["authLockouts"];
   lastPressureCheck: number;
   audioMuted: boolean;
   audioVolume: number;
@@ -84,9 +86,11 @@ function serializeRun(state: GameState): SavedRun | null {
       vaultOpen: state.vaultOpen,
       briefcaseTaken: state.briefcaseTaken,
       auditLedgerForged: state.auditLedgerForged,
+      patrolLogForged: state.patrolLogForged,
       bankFrontUnlocked: state.bankFrontUnlocked,
       bankHallwayUnlocked: state.bankHallwayUnlocked,
       bankBackExitUnlocked: state.bankBackExitUnlocked,
+      authLockouts: state.authLockouts,
       lastPressureCheck: state.lastPressureCheck,
       audioMuted: state.audioMuted,
       audioVolume: state.audioVolume,

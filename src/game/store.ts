@@ -5,6 +5,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import {
   GAME_START_SECONDS,
   type ActiveCall,
+  type AuthDevice,
   type AuthAttempt,
   type Emotion,
   type GameState,
@@ -73,9 +74,11 @@ export const initialState: GameState = {
   vaultOpen: false,
   briefcaseTaken: false,
   auditLedgerForged: false,
+  patrolLogForged: false,
   bankFrontUnlocked: true,
   bankHallwayUnlocked: false,
   bankBackExitUnlocked: false,
+  authLockouts: {},
   lastPressureCheck: 0,
   activeCall: null,
   activeAuth: null,
@@ -112,6 +115,9 @@ export interface GameActions {
   openHallway(open: boolean): void;
   openBackExit(open: boolean): void;
   fileAuditLedger(): boolean;
+  forgePatrolLog(): boolean;
+  lockAuthDevice(device: AuthDevice, unlockAt: number): void;
+  clearAuthLockout(device: AuthDevice): void;
   openVault(): void;
   takeBriefcase(): void;
   setActiveCall(call: ActiveCall | null): void;
@@ -294,6 +300,68 @@ export const useGame = create<GameState & GameActions>()(
       });
       return filed;
     },
+
+    forgePatrolLog: () => {
+      let forged = false;
+      set((s) => {
+        if (s.bankBackExitUnlocked) {
+          return {
+            toasts: [
+              ...s.toasts,
+              {
+                id: `${Date.now()}_patrol_already`,
+                text: "The alley gate is already signed out.",
+                expiresAt: Date.now() + 3800,
+              },
+            ],
+          };
+        }
+        const hasGuardCalm = s.voiceInventory.some(
+          (card) => card.npcId === "bankGuard" && card.emotionalState === "calm",
+        );
+        if (!hasGuardCalm) {
+          return {
+            toasts: [
+              ...s.toasts,
+              {
+                id: `${Date.now()}_patrol_need_voice`,
+                text: "The guard log wants Eddie Cole's calm voiceprint.",
+                expiresAt: Date.now() + 4200,
+              },
+            ],
+          };
+        }
+        forged = true;
+        return {
+          patrolLogForged: true,
+          bankBackExitUnlocked: true,
+          toasts: [
+            ...s.toasts,
+            {
+              id: `${Date.now()}_patrol`,
+              text: "Cole's patrol log signs out the alley gate.",
+              expiresAt: Date.now() + 5200,
+            },
+          ],
+        };
+      });
+      return forged;
+    },
+
+    lockAuthDevice: (device, unlockAt) =>
+      set((s) => ({
+        authLockouts: {
+          ...s.authLockouts,
+          [device]: Math.max(s.authLockouts[device] ?? 0, unlockAt),
+        },
+      })),
+
+    clearAuthLockout: (device) =>
+      set((s) => {
+        const next = { ...s.authLockouts };
+        delete next[device];
+        return { authLockouts: next };
+      }),
 
     openVault: () =>
       set({

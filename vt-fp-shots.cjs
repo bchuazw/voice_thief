@@ -122,6 +122,15 @@ function browserExecutablePath() {
   await page.screenshot({ path: `${out}/07b-fp-records-cabinet.png` });
 
   await page.evaluate(() => {
+    window.__vt.setState({ bankBackExitUnlocked: false, patrolLogForged: false });
+  });
+  await fp([-8.1, -2.05], [-9.2, -3.15], "bankLobby");
+  await page.waitForTimeout(2400);
+  await fp([-8.1, -2.05], [-9.2, -3.15], "bankLobby");
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${out}/07c-fp-guard-log.png` });
+
+  await page.evaluate(() => {
     window.__vt.setState({ vaultOpen: true });
   });
   // Stand inside the vault chamber, off-axis from the door, looking at

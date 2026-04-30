@@ -43,6 +43,7 @@ npm run generate-assets:legacy
 - `cafe-facade.glb`
 - `cafe-interior.glb`
 - `apartment-block.glb`
+- `guard-logbook.glb`
 - `living-room.glb`
 - `payphone.glb`
 - `records-cabinet.glb`
@@ -55,11 +56,11 @@ npm run generate-assets:legacy
 - `vault-audit-panel.glb`
 
 These replace the most visible primitive-heavy props while preserving the
-existing gameplay interaction points and collision logic. The records plaque,
-records cabinet, and vault audit panel are puzzle-facing props: they visually
-reinforce that Lillian controls hallway records access and that the vault needs
-either a cleared ledger or a forged records clearance before it will accept
-Harold's voice.
+existing gameplay interaction points and collision logic. The guard logbook,
+records plaque, records cabinet, and vault audit panel are puzzle-facing props:
+they visually reinforce that Cole controls the alley gate, Lillian controls
+hallway records access, and the vault needs either a cleared ledger or a forged
+records clearance before it will accept Harold's voice.
 
 ## Art Direction
 

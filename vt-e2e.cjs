@@ -252,6 +252,16 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
       sourceMomentId: "secretary-cafe-6_00",
       mock: true,
     });
+    t.addVoiceCard({
+      id: "card_guard_calm_route",
+      npcId: "bankGuard",
+      elevenLabsVoiceId: "mock_voice_guard_calm_route",
+      capturedAtInGameTime: 18 * 3600 + 30 * 60,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "guard-patrol-6_30",
+      mock: true,
+    });
   });
 
   // ── 3. Phone diversion call ─────────────────────────────────────────
@@ -335,7 +345,11 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     state = await getState(page);
     check("stressed voice fails vault", state.vaultOpen === false);
     check("suspicion increased after fail", state.suspicion > 0, `suspicion=${state.suspicion}`);
+    check("failed auth locks vault relay", (state.authLockouts.vault ?? 0) > state.inGameTime);
+    check("vault relay cooling notice appears", (await page.locator("text=Relay cooling").count()) > 0);
     await shoot(page, "09-vault-auth-stressed-fail.png");
+    await page.evaluate(() => window.__vt.getState().clearAuthLockout("vault"));
+    await page.waitForTimeout(300);
   } else {
     check("stressed card visible in dialog", false, "button not found");
   }
@@ -350,9 +364,20 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     const lillianReasonVisible = await page.locator("text=Lillian").count();
     check("vault rejection explains Lillian ledger blocker", lillianReasonVisible > 0);
     await shoot(page, "10-vault-auth-lillian-block.png");
+    await page.evaluate(() => window.__vt.getState().clearAuthLockout("vault"));
+    await page.waitForTimeout(300);
   } else {
     check("calm card visible in dialog", false, "button not found");
   }
+
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    if (s.forgePatrolLog()) s.raiseSuspicion(10, "guard log tampering");
+  });
+  await page.waitForTimeout(300);
+  state = await getState(page);
+  check("guard log can sign out alley gate with Eddie's voice", state.patrolLogForged === true);
+  check("forged patrol log opens the back exit", state.bankBackExitUnlocked === true);
 
   // Alternate route: forge a records clearance with Lillian's calm voice,
   // keeping her at the counter while bypassing the closing-ledger blocker.

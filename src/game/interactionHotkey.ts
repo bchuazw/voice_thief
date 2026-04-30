@@ -42,6 +42,10 @@ export function useInteractionHotkey(): void {
           if (s.fileAuditLedger()) s.raiseSuspicion(8, "records cabinet tampering");
           return;
         }
+        case "patrolLog": {
+          if (s.forgePatrolLog()) s.raiseSuspicion(10, "guard log tampering");
+          return;
+        }
         case "briefcase":
           s.takeBriefcase();
           s.pushToast("Briefcase secured. Get to the train station.");

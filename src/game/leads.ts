@@ -113,8 +113,24 @@ export function buildLeads(state: GameState): Lead[] {
     leads.push({
       id: "guard-back-exit",
       title: "Eddie's beat",
-      body: "Cole hums to himself about the alley door. \"Only thing back there's the dumpster and the back gate, and the gate listens for me.\"",
+      body: "Cole hums to himself about the alley door. The gate listens for him, and the lobby logbook signs his rounds.",
       urgency: "active",
+    });
+  }
+
+  if (hasGuard && !state.bankBackExitUnlocked) {
+    leads.push({
+      id: "guard-logbook",
+      title: "The patrol log",
+      body: "A small guard desk sits by the side wall. Eddie's calm voice could sign the alley gate out without making a call.",
+      urgency: "active",
+    });
+  } else if (state.patrolLogForged) {
+    leads.push({
+      id: "guard-logbook-done",
+      title: "Alley gate signed out",
+      body: "The patrol log says Cole cleared the back gate. It should open from inside.",
+      urgency: "solved",
     });
   }
 

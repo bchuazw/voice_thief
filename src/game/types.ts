@@ -13,6 +13,8 @@ export type Emotion = "calm" | "stressed" | "panicked";
 
 export type Phase = "title" | "intro" | "playing" | "won" | "lost";
 
+export type AuthDevice = "bankFront" | "bankHallway" | "vault";
+
 export interface Vec3 {
   x: number;
   y: number;
@@ -70,7 +72,7 @@ export interface ActiveCall {
 }
 
 export interface AuthAttempt {
-  device: "bankFront" | "bankHallway" | "vault";
+  device: AuthDevice;
   voiceCardId: string;
   result: "pending" | "pass" | "fail";
   reason?: string;
@@ -88,9 +90,11 @@ export interface GameState {
   vaultOpen: boolean;
   briefcaseTaken: boolean;
   auditLedgerForged: boolean;
+  patrolLogForged: boolean;
   bankFrontUnlocked: boolean;
   bankHallwayUnlocked: boolean;
   bankBackExitUnlocked: boolean;
+  authLockouts: Partial<Record<AuthDevice, number>>;
   /** Wall-clock real time the in-game pressure tick last fired, for ramping checks */
   lastPressureCheck: number;
   activeCall: ActiveCall | null;
