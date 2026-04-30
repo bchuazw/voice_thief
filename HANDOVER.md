@@ -10,9 +10,11 @@ project, especially mock-mode and key handling), then this file.
 ## Where things stand
 
 - **Branch:** `claude/voice-thief-game-hhUcJ`
-- **Latest gameplay pass:** caller-aware Cole/guard-desk replies are now in
-  place; the remaining recommendations below start after that pass.
-- **E2E:** `node vt-e2e.cjs` → 72/72 passing in mock mode
+- **Latest gameplay pass:** production polish added save/continue, pause
+  settings, pointer-lock-safe modals, bank collision gates, less hand-holding
+  in auth, phone UI hardening, slow-time phone/auth pressure, inspectable
+  world clues, and Node 20 release pinning.
+- **E2E:** `node vt-e2e.cjs` → 79/79 passing in mock mode
   (`VT_MOCK_AI=1 npm run start`)
 - **Tooling clean:** `npm run typecheck`, `npm run lint`, `npm run build`
   all pass
@@ -233,32 +235,24 @@ coverage. Keep expanding this only if you add new Cole-facing routes.
 **Changed files:** `src/game/phoneRules.ts`, `vt-e2e.cjs`,
 `docs/E2E_REPORT.md`, `README.md`.
 
-### Phase E — Save/load + settings menu (Steam table-stakes)
+### Phase E — Save/load + settings menu (done)
 
-Required for any Steam release. Not required for hackathon submission.
+This has landed as a lightweight local autosave/continue path plus pause
+volume/view settings. The save format starts at version 1 and deliberately
+does not persist live modal/call/auth/recording state.
 
-**What you need:**
+**What landed:**
 
-- Zustand persistence middleware (built in: `zustand/middleware`'s
-  `persist`). Wrap the store in `src/game/store.ts`. Decide which slice
-  is persisted (probably `phase`, `voiceInventory`, `npcs`, `inGameTime`,
-  achievements unlocked, but not the live `activeCall` or `activeAuth`).
-- A settings panel in `src/components/game/PauseMenu.tsx`: audio volume,
-  view mode default, accessibility toggles (captions on/off, reduced
-  motion, color-blind palette swap for the suspicion meter).
-- A simple save-slot UI on the title screen.
+- `src/game/saveGame.ts` handles versioned local storage.
+- `src/components/game/TitleScreen.tsx` exposes Continue / New Run.
+- `src/components/game/PauseMenu.tsx` exposes volume, mute, view mode, and
+  Save + Title.
 
-**Where it slots in:**
+**Remaining small follow-ups:**
 
-- `src/game/store.ts` — wrap with `persist`.
-- `src/components/game/PauseMenu.tsx` — extend.
-- `src/components/game/TitleScreen.tsx` — add Continue / New Run.
-
-**Scope:** ~1-2 days.
-
-**Risks:**
-- Schema migration. Once you ship a save format, breaking it on the next
-  build wipes player progress. Add a `version` field from day one.
+- Add multiple manual save slots only if play sessions become longer.
+- Add reduced-motion and mouse-sensitivity settings when controller/Steam Deck
+  work begins.
 
 ## What I would NOT do
 
@@ -285,7 +279,7 @@ VT_MOCK_AI=1 npm run dev          # mock mode, no keys needed
 VT_MOCK_AI=0 npm run dev          # real APIs, requires .env.local
 npm run typecheck && npm run lint
 npm run build && VT_MOCK_AI=1 npm run start
-node vt-e2e.cjs                   # 72 assertions, full gameplay loop
+node vt-e2e.cjs                   # 79 assertions, full gameplay loop
 ```
 
 **Asset bake (if you have Blender 4.5 LTS locally):**

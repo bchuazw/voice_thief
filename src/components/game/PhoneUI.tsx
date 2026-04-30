@@ -81,6 +81,9 @@ export default function PhoneUI() {
   const selectedVoiceCard =
     storedVoiceCard ?? inventory.find((card) => card.npcId !== target) ?? inventory[0] ?? null;
   const selectedVoiceCardId = selectedVoiceCard?.id ?? "";
+  const callTarget = activeCall?.targetNpc ?? target;
+  const callVoiceCardId = activeCall?.voiceCardId ?? selectedVoiceCardId;
+  const activeVoiceCard = inventory.find((card) => card.id === callVoiceCardId) ?? selectedVoiceCard;
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -95,7 +98,8 @@ export default function PhoneUI() {
   }, [setActiveCall, togglePhone]);
 
   async function placeCall() {
-    const card = inventory.find((v) => v.id === selectedVoiceCardId);
+    const activeTarget = activeCall?.targetNpc ?? target;
+    const card = inventory.find((v) => v.id === (activeCall?.voiceCardId ?? selectedVoiceCardId));
     if (!card) {
       useGame.getState().pushToast("Pick a voice card first.");
       return;
@@ -105,7 +109,7 @@ export default function PhoneUI() {
     setPending(true);
 
     const newCall = activeCall ?? {
-      targetNpc: target,
+      targetNpc: activeTarget,
       voiceCardId: card.id,
       transcript: [],
       pending: true,
@@ -131,7 +135,7 @@ export default function PhoneUI() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          npcId: target,
+          npcId: activeTarget,
           callerVoiceId: card.elevenLabsVoiceId,
           callerVoiceNpcId: card.npcId,
           callerText: message,
@@ -158,7 +162,7 @@ export default function PhoneUI() {
       }
 
       const rule = resolvePhoneRule({
-        targetNpc: target,
+        targetNpc: activeTarget,
         callerNpc: card.npcId,
         text: message,
       });
@@ -185,23 +189,26 @@ export default function PhoneUI() {
       pushCallTurn({ role: "npc", text: displayedNpcText });
       setTimeout(() => {
         if (data.mock || !data.npcAudio) {
-          speakStolenText(target, displayedNpcText, "calm");
+          speakStolenText(activeTarget, displayedNpcText, "calm");
         } else {
           playAudio(data.npcAudio);
         }
       }, 600);
 
       if (data.raisedSuspicion > 0 && !branchBlocked) {
-        raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
+        raiseSuspicion(
+          data.raisedSuspicion,
+          `${NPC_PROFILES[activeTarget].displayName} grew suspicious`,
+        );
       }
 
       // High-doubt hangup is a serious heat event — scaled with how badly the
       // bluff was botched. 60-doubt = 12 heat; 100-doubt = 24 heat.
       if (forceHangup) {
-        raiseSuspicion(Math.round(newDoubt * 0.2), `${target} smelled the bluff`);
+        raiseSuspicion(Math.round(newDoubt * 0.2), `${NPC_PROFILES[activeTarget].displayName} smelled the bluff`);
       }
 
-      const overhearer = findOverhearer(target);
+      const overhearer = findOverhearer(activeTarget);
       if (overhearer) {
         raiseSuspicion(6, `${NPC_PROFILES[overhearer].displayName} overheard the call`);
       }
@@ -212,7 +219,7 @@ export default function PhoneUI() {
 
       if (effectiveHangup) {
         setTimeout(() => {
-          useGame.getState().pushToast(`${NPC_PROFILES[target].displayName} hung up.`);
+          useGame.getState().pushToast(`${NPC_PROFILES[activeTarget].displayName} hung up.`);
           setActiveCall(null);
           togglePhone(false);
         }, 4200);
@@ -248,15 +255,15 @@ export default function PhoneUI() {
     setMessage("");
   }
 
-  const callerVoiceNpcId = selectedVoiceCard?.npcId ?? null;
-  const placeholder = phonePlaceholder(callerVoiceNpcId, target);
+  const callerVoiceNpcId = activeVoiceCard?.npcId ?? null;
+  const placeholder = phonePlaceholder(callerVoiceNpcId, callTarget);
   const hasVoices = inventory.length > 0;
   const callDoubt = activeCall?.doubt ?? 0;
   const doubtTone = callDoubt < 30 ? "calm" : callDoubt < 60 ? "wary" : "exposed";
   // Live overhear check — recomputes whenever npcs / player position change.
   const nearbyOverhearer = (() => {
     for (const id of Object.keys(npcs) as NpcId[]) {
-      if (id === target) continue;
+      if (id === callTarget) continue;
       const npc = npcs[id];
       if (npc.currentLocation !== playerLoc) continue;
       if (distance(npc.location, playerPos) < OVERHEAR_RADIUS) return id;
@@ -290,11 +297,13 @@ export default function PhoneUI() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
+          <label htmlFor="phone-target" className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
             Call
             <select
-              value={target}
+              id="phone-target"
+              value={callTarget}
               onChange={(e) => setTarget(e.target.value as NpcId)}
+              disabled={!!activeCall || pending}
               className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-xs text-noir-paper sm:text-sm"
             >
               {TARGETS.map((t) => (
@@ -305,11 +314,13 @@ export default function PhoneUI() {
             </select>
           </label>
 
-          <label className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
+          <label htmlFor="phone-voice" className="text-[11px] uppercase tracking-[0.3em] text-noir-fog">
             Speak as
             <select
-              value={selectedVoiceCardId}
+              id="phone-voice"
+              value={callVoiceCardId}
               onChange={(e) => setVoiceCardId(e.target.value)}
+              disabled={!!activeCall || pending}
               className="mt-1 w-full rounded bg-noir-ash px-3 py-2 text-xs text-noir-paper sm:text-sm"
             >
               {!hasVoices && <option value="">-- no voices yet --</option>}
@@ -353,7 +364,7 @@ export default function PhoneUI() {
               aria-valuenow={Math.round(callDoubt)}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label="Call tension"
+              aria-label="Phone tension"
             >
               <div
                 className={`h-full transition-all duration-300 ${
@@ -379,21 +390,24 @@ export default function PhoneUI() {
           </div>
         )}
 
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={hasVoices ? placeholder : "No stolen voices yet."}
-          rows={3}
-          disabled={!hasVoices}
-          className="mt-3 w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog/70 placeholder:italic focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-        />
+        <div className="relative mt-3">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={hasVoices ? placeholder : "No stolen voices yet."}
+            rows={3}
+            maxLength={280}
+            disabled={!hasVoices}
+            className="block w-full resize-none rounded bg-noir-ash px-3 py-2 text-sm text-noir-paper placeholder:text-noir-fog/70 placeholder:italic focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
 
-        <div className="mt-2 flex items-center justify-between">
+        <div className="relative z-10 mt-2 flex items-center justify-between gap-3">
           <span className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">
             {message.length}/280
           </span>
           <button
-            disabled={pending || !message.trim() || !selectedVoiceCardId || !hasVoices}
+            disabled={pending || !message.trim() || !callVoiceCardId || !hasVoices}
             onClick={placeCall}
             className="rounded border border-noir-neon bg-noir-neon/10 px-5 py-2 text-[11px] uppercase tracking-[0.3em] text-noir-neon hover:bg-noir-neon hover:text-black disabled:opacity-40"
           >
@@ -411,7 +425,7 @@ export default function PhoneUI() {
               className={`mb-1 ${t.role === "caller" ? "text-noir-paper" : "text-noir-amber"}`}
             >
               <span className="mr-2 text-[10px] uppercase tracking-[0.3em] text-noir-fog">
-                {t.role === "caller" ? "you" : NPC_PROFILES[target].displayName}
+                {t.role === "caller" ? "you" : NPC_PROFILES[callTarget].displayName}
               </span>
               {t.text}
             </p>

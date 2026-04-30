@@ -28,8 +28,6 @@ export default function VoiceAuthDialog() {
   const [verdict, setVerdict] = useState<{ passes: boolean; reason: string } | null>(null);
   const requirement = AUTH_REQUIREMENTS[auth.device];
 
-  const candidates = inventory.filter((c) => c.npcId === requirement.expectedNpc);
-
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setActiveAuth(null);
@@ -114,11 +112,10 @@ export default function VoiceAuthDialog() {
         </div>
         <h2 id="auth-title" className="font-serif text-2xl italic">Authentication required</h2>
         <p className="mt-2 text-sm text-noir-fog">
-          Speak the phrase{" "}
+          The intercom will play its challenge phrase through whichever recording you choose:{" "}
           <span className="font-serif italic text-noir-paper">
             “{requirement.phrase}”
-          </span>{" "}
-          in the voice of {NPC_PROFILES[requirement.expectedNpc].displayName}.
+          </span>
         </p>
 
         {failedAuthCount > 0 && (
@@ -133,12 +130,12 @@ export default function VoiceAuthDialog() {
         )}
 
         <div className="mt-4 space-y-2">
-          {candidates.length === 0 && (
+          {inventory.length === 0 && (
             <p className="italic text-noir-fog">
-              No matching voices in your notebook.
+              No recordings in your notebook.
             </p>
           )}
-          {candidates.map((card) => (
+          {inventory.map((card) => (
             <button
               key={card.id}
               disabled={busy}

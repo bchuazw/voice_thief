@@ -20,6 +20,9 @@ export default function FirstPersonController({ scene }: Props) {
   const { camera, gl } = useThree();
   const setPlayerPosition = useGame((s) => s.setPlayerPosition);
   const setPointerLocked = useGame((s) => s.setPointerLocked);
+  const modalOpen = useGame(
+    (s) => s.notebookOpen || s.phoneOpen || s.menuOpen || s.activeAuth !== null || s.phase === "won" || s.phase === "lost",
+  );
   const keys = useRef<Record<string, boolean>>({});
   const controlsRef = useRef<{
     isLocked: boolean;
@@ -65,7 +68,7 @@ export default function FirstPersonController({ scene }: Props) {
 
     // Pause movement when modal open
     const s = useGame.getState();
-    if (s.notebookOpen || s.phoneOpen || s.activeAuth !== null) return;
+    if (s.notebookOpen || s.phoneOpen || s.menuOpen || s.activeAuth !== null) return;
 
     // Build a forward vector from camera yaw (ignore pitch — no flying)
     const forward = new THREE.Vector3();
@@ -90,10 +93,14 @@ export default function FirstPersonController({ scene }: Props) {
     let nz = player.position.z + move.z;
 
     // Step-by-axis collision: if X moved into a blocked zone, only allow Z, and vice versa
-    if (isBlocked({ x: nx, y: 0, z: nz }, scene)) {
-      if (!isBlocked({ x: nx, y: 0, z: player.position.z }, scene)) {
+    const gates = {
+      bankHallwayUnlocked: s.bankHallwayUnlocked,
+      vaultOpen: s.vaultOpen,
+    };
+    if (isBlocked({ x: nx, y: 0, z: nz }, scene, gates)) {
+      if (!isBlocked({ x: nx, y: 0, z: player.position.z }, scene, gates)) {
         nz = player.position.z;
-      } else if (!isBlocked({ x: player.position.x, y: 0, z: nz }, scene)) {
+      } else if (!isBlocked({ x: player.position.x, y: 0, z: nz }, scene, gates)) {
         nx = player.position.x;
       } else {
         return;
@@ -102,6 +109,8 @@ export default function FirstPersonController({ scene }: Props) {
 
     setPlayerPosition({ x: nx, y: 0, z: nz });
   });
+
+  if (modalOpen) return null;
 
   return (
     <PointerLockControls

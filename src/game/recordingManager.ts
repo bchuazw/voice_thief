@@ -22,6 +22,17 @@ interface ActiveRecorder {
 }
 
 let active: ActiveRecorder | null = null;
+let pending:
+  | {
+      cancelled: boolean;
+      startedAt: number;
+      target: {
+        npcId: NpcId;
+        momentId: string;
+        emotion: Emotion;
+      };
+    }
+  | null = null;
 
 function eligibleNpcNearPlayer(): {
   npcId: NpcId;
@@ -58,7 +69,7 @@ async function startMicRecorder(): Promise<{ recorder: MediaRecorder; stream: Me
 }
 
 export async function beginRecording(): Promise<void> {
-  if (active) return;
+  if (active || pending) return;
   const target = eligibleNpcNearPlayer();
   if (!target) {
     useGame.getState().pushToast("Nothing to record here.");
@@ -66,11 +77,21 @@ export async function beginRecording(): Promise<void> {
   }
   useGame.getState().startRecording(target.npcId);
 
+  pending = { cancelled: false, startedAt: Date.now(), target };
   const mic = await startMicRecorder();
+  const localPending = pending;
+  pending = null;
+  if (!localPending) {
+    mic?.recorder.stop();
+    mic?.stream.getTracks().forEach((t) => t.stop());
+    useGame.getState().stopRecording();
+    return;
+  }
+
   active = {
     recorder: mic?.recorder ?? null,
     stream: mic?.stream ?? null,
-    startedAt: Date.now(),
+    startedAt: localPending.startedAt,
     npcId: target.npcId,
     momentId: target.momentId,
     emotion: target.emotion,
@@ -84,12 +105,20 @@ export async function beginRecording(): Promise<void> {
     };
   }
 
+  if (localPending.cancelled) {
+    endRecording().catch(() => {});
+  }
+
   setTimeout(() => {
     if (active && Date.now() - active.startedAt >= MAX_DURATION_MS) endRecording().catch(() => {});
   }, MAX_DURATION_MS + 200);
 }
 
 export async function endRecording(): Promise<void> {
+  if (pending) {
+    pending.cancelled = true;
+    return;
+  }
   if (!active) return;
   const local = active;
   active = null;

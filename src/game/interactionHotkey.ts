@@ -17,6 +17,9 @@ export function useInteractionHotkey(): void {
         case "phone":
           s.togglePhone(true);
           return;
+        case "inspect":
+          s.pushToast(current.toast, 5200);
+          return;
         case "enterLocation":
           if (current.locked) {
             s.pushToast("Locked. Try authenticating.");

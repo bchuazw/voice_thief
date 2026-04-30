@@ -31,14 +31,13 @@ export function useGameTick(): void {
       const awarenessDtSec = Math.min(10, elapsedSec);
       lastTickAt = now;
       const state = useGame.getState();
-      // Accessibility: pause the in-game clock while any modal is open so
-      // slow readers (or screen-reader users) can study the notebook,
-      // phone, or auth dialog without losing real-time.
-      const paused =
-        state.notebookOpen || state.phoneOpen || state.menuOpen || state.activeAuth !== null;
+      // Accessibility + tension: full pause for reading/menu surfaces; slow
+      // time for phone/auth so the heist still breathes while you bluff.
+      const paused = state.notebookOpen || state.menuOpen;
+      const slowed = state.phoneOpen || state.activeAuth !== null;
       const prevTime = state.inGameTime;
       if (!paused) {
-        const deltaInGame = clockDtSec / REAL_SECONDS_PER_GAME_SECOND;
+        const deltaInGame = (clockDtSec / REAL_SECONDS_PER_GAME_SECOND) * (slowed ? 0.25 : 1);
         state.advanceTime(deltaInGame);
       }
       state.pruneToasts(now);

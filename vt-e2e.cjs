@@ -87,8 +87,12 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     permissions: ["microphone"],
   });
   const page = await ctx.newPage();
+  const pageErrors = [];
 
-  page.on("pageerror", (e) => console.log("PAGEERROR:", e.message));
+  page.on("pageerror", (e) => {
+    pageErrors.push(e.message);
+    console.log("PAGEERROR:", e.message);
+  });
 
   // ── 1. Phase transitions ────────────────────────────────────────────
   console.log("\n=== Phase 1: title → intro → playing ===");
@@ -144,6 +148,35 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   }));
   await page.waitForTimeout(500);
   await shoot(page, "01-street-6pm.png");
+
+  // Pause menu settings + local save/continue.
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  await page.locator("#pause-title").waitFor({ timeout: 4000 });
+  await page.locator("#pause-volume").evaluate((el) => {
+    el.value = "0.4";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await page.locator("button", { hasText: /Diorama/ }).first().click();
+  state = await getState(page);
+  check("pause volume slider updates store", Math.abs(state.audioVolume - 0.4) < 0.01, `volume=${state.audioVolume}`);
+  check("pause view toggle updates store", state.viewMode === "fp", `view=${state.viewMode}`);
+  await shoot(page, "01b-pause-settings.png");
+  await page.locator("text=Save + Title").first().click();
+  await page.waitForTimeout(500);
+  state = await getState(page);
+  check("Save + Title returns to title", state.phase === "title", `phase=${state.phase}`);
+  check("title offers Continue after saved run", (await page.locator("text=Continue").count()) > 0);
+  await page.locator("text=Continue").first().click();
+  await page.waitForTimeout(500);
+  state = await getState(page);
+  check("Continue restores playing phase", state.phase === "playing", `phase=${state.phase}`);
+  check("Continue restores settings", Math.abs(state.audioVolume - 0.4) < 0.01 && state.viewMode === "fp");
+  await page.evaluate(() => window.__vt.setState({
+    viewMode: "diorama",
+    player: { ...window.__vt.getState().player, position: { x: 0, y: 0, z: 6 }, target: null },
+  }));
+  await page.waitForTimeout(300);
 
   // ── 2. Recording flow (via API + store) ─────────────────────────────
   console.log("\n=== Phase 2: recording ===");
@@ -759,6 +792,10 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   }));
   check("strong specific opener keeps doubt low", doubtState.doubt < 30, `doubt=${doubtState.doubt}`);
   check("strong specific opener flips branch", doubtState.branch === "rushedHome");
+
+  // Browser console/runtime health: UI transitions should not throw, even when
+  // switching views while modals and pointer-lock controls mount/unmount.
+  check("no browser page errors during full run", pageErrors.length === 0, pageErrors.join(" | "));
 
   await browser.close();
 

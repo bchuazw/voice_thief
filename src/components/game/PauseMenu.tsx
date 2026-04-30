@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useGame } from "@/game/store";
+import { saveCurrentRun } from "@/game/saveGame";
 import { clockLabel } from "@/game/timeFormat";
 
 export default function PauseMenu() {
@@ -9,9 +10,25 @@ export default function PauseMenu() {
   const voiceCount = useGame((s) => s.voiceInventory.length);
   const suspicion = useGame((s) => s.suspicion);
   const hasBriefcase = useGame((s) => s.briefcaseTaken);
+  const audioMuted = useGame((s) => s.audioMuted);
+  const audioVolume = useGame((s) => s.audioVolume);
+  const viewMode = useGame((s) => s.viewMode);
   const toggleMenu = useGame((s) => s.toggleMenu);
   const restartRun = useGame((s) => s.restartRun);
   const reset = useGame((s) => s.reset);
+  const toggleMute = useGame((s) => s.toggleMute);
+  const setVolume = useGame((s) => s.setVolume);
+  const toggleViewMode = useGame((s) => s.toggleViewMode);
+
+  function restart() {
+    restartRun();
+    window.setTimeout(() => saveCurrentRun(useGame.getState()), 0);
+  }
+
+  function returnToTitle() {
+    saveCurrentRun(useGame.getState());
+    reset();
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -52,6 +69,39 @@ export default function PauseMenu() {
             ? "Briefcase in hand. Main Street, then the train."
             : "Open the notebook for leads, move Lillian off the counter, and keep calm voices for the hallway and vault."}
         </p>
+        <div className="mt-5 rounded border border-noir-paper/10 bg-black/25 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="pause-volume" className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">
+              Volume
+            </label>
+            <button
+              onClick={() => toggleMute()}
+              className="rounded border border-noir-paper/20 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-noir-fog hover:text-noir-paper"
+            >
+              {audioMuted ? "Muted" : "Sound"}
+            </button>
+          </div>
+          <input
+            id="pause-volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={audioVolume}
+            onInput={(e) => setVolume(Number(e.currentTarget.value))}
+            onChange={(e) => setVolume(Number(e.currentTarget.value))}
+            className="mt-3 w-full accent-noir-amber"
+          />
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-noir-paper/10 pt-3">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-noir-fog">View</span>
+            <button
+              onClick={toggleViewMode}
+              className="rounded border border-noir-paper/20 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-noir-fog hover:text-noir-paper"
+            >
+              {viewMode === "fp" ? "First-person" : "Diorama"}
+            </button>
+          </div>
+        </div>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <button
             onClick={() => toggleMenu(false)}
@@ -60,16 +110,16 @@ export default function PauseMenu() {
             Resume
           </button>
           <button
-            onClick={restartRun}
+            onClick={restart}
             className="flex-1 rounded border border-noir-amber/55 px-4 py-3 text-xs uppercase tracking-[0.3em] text-noir-amber hover:bg-noir-amber hover:text-black"
           >
             Restart Heist
           </button>
           <button
-            onClick={reset}
+            onClick={returnToTitle}
             className="flex-1 rounded border border-noir-paper/20 px-4 py-3 text-xs uppercase tracking-[0.3em] text-noir-fog hover:text-noir-paper"
           >
-            Title
+            Save + Title
           </button>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { useGame } from "@/game/store";
-import { moveToward } from "@/game/pathfinding";
+import { clampToWalkable, moveToward } from "@/game/pathfinding";
 import PlayerCharacter from "@/components/characters/PlayerCharacter";
 import NpcActor from "@/components/characters/NpcActor";
 import VolumetricLamp from "@/components/shaders/VolumetricLamp";
@@ -24,6 +24,7 @@ export default function BankInteriorScene() {
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
   const viewMode = useGame((s) => s.viewMode);
   const vaultOpen = useGame((s) => s.vaultOpen);
+  const bankHallwayUnlocked = useGame((s) => s.bankHallwayUnlocked);
   const bankBackExitUnlocked = useGame((s) => s.bankBackExitUnlocked);
   const lastPos = useRef(player.position);
   const { camera } = useThree();
@@ -38,7 +39,10 @@ export default function BankInteriorScene() {
     if (viewMode !== "diorama") return;
     const t = useGame.getState().player.target;
     if (!t) return;
-    const next = moveToward(lastPos.current, t, dt * 4);
+    const next = clampToWalkable(moveToward(lastPos.current, t, dt * 4), "bankLobby", {
+      bankHallwayUnlocked,
+      vaultOpen,
+    });
     lastPos.current = next;
     setPlayerPosition(next);
     if (Math.hypot(next.x - t.x, next.z - t.z) < 0.05) setPlayerTarget(null);
@@ -63,7 +67,12 @@ export default function BankInteriorScene() {
         size={[24, 18]}
         onClick={(e) => {
           if (viewMode !== "diorama") return;
-          setPlayerTarget({ x: e.point.x, y: 0, z: e.point.z });
+          setPlayerTarget(
+            clampToWalkable({ x: e.point.x, y: 0, z: e.point.z }, "bankLobby", {
+              bankHallwayUnlocked,
+              vaultOpen,
+            }),
+          );
         }}
       />
 

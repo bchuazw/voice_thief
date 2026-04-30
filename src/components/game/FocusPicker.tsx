@@ -105,8 +105,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       radius: 1.5,
       priority: 6,
       build: () => {
-        if (!s.briefcaseTaken) return null;
-        return { kind: "trainStation" };
+        if (s.briefcaseTaken) return { kind: "trainStation" };
+        return {
+          kind: "inspect",
+          label: "Read train board",
+          toast: "Last eastbound leaves at 9:00. No conductor waits for sirens.",
+        };
       },
     });
   }
@@ -140,6 +144,16 @@ function listTargets(scene: LocationId): InteractableTarget[] {
         return { kind: "auth", device: "bankHallway" };
       },
     });
+    targets.push({
+      pos: new THREE.Vector3(-1.38, 1.8, -7.74),
+      radius: 0.85,
+      priority: 2,
+      build: () => ({
+          kind: "inspect",
+          label: "Inspect records plaque",
+          toast: "L. Park, Records. Every inner-door card is stamped with her initials.",
+      }),
+    });
     // Back-alley exit (right side of lobby) — only appears if Eddie's beat-call
     // unlocked it. Skips the front door entirely and dumps you near the train.
     if (s.bankBackExitUnlocked) {
@@ -164,6 +178,16 @@ function listTargets(scene: LocationId): InteractableTarget[] {
         radius: 1.4,
         priority: 4,
         build: () => ({ kind: "auth", device: "vault" }),
+      });
+      targets.push({
+        pos: new THREE.Vector3(3.15, 1.3, -11.34),
+        radius: 0.9,
+        priority: 3,
+        build: () => ({
+          kind: "inspect",
+          label: "Inspect audit panel",
+          toast: "The audit glass holds on one line: L. Park - closing ledger - clear before vault cycle.",
+        }),
       });
     } else if (!s.briefcaseTaken) {
       targets.push({

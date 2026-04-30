@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useGame } from "@/game/store";
+import { clearSavedRun, saveCurrentRun } from "@/game/saveGame";
 import { useGameTick } from "@/game/tick";
 import { useWinWatch } from "@/game/useWinWatch";
 import GameCanvas from "./GameCanvas";
@@ -37,6 +38,28 @@ export default function GameRoot() {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const save = () => saveCurrentRun(useGame.getState());
+    const interval = window.setInterval(save, 2500);
+    window.addEventListener("beforeunload", save);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("beforeunload", save);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (notebookOpen || phoneOpen || menuOpen || activeAuth || phase === "won" || phase === "lost") {
+      document.exitPointerLock?.();
+    }
+  }, [activeAuth, menuOpen, notebookOpen, phase, phoneOpen]);
+
+  useEffect(() => {
+    if (phase === "won" || phase === "lost") clearSavedRun();
+  }, [phase]);
 
   return (
     <div className="relative h-full w-full">

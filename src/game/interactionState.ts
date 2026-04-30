@@ -6,6 +6,7 @@ import type { NpcId, Vec3 } from "./types";
 export type InteractionAction =
   | { kind: "record"; npcId: NpcId; npcName: string; momentId: string }
   | { kind: "phone" }
+  | { kind: "inspect"; label: string; toast: string }
   | { kind: "enterLocation"; target: string; label: string; locked?: boolean; entryPosition?: Vec3 }
   | { kind: "auth"; device: "bankFront" | "bankHallway" | "vault" }
   | { kind: "briefcase" }
@@ -33,6 +34,8 @@ export function describeAction(a: InteractionAction | null): string {
       return `Record ${a.npcName}`;
     case "phone":
       return "Use payphone";
+    case "inspect":
+      return a.label;
     case "enterLocation":
       return a.locked ? `${a.label} (locked)` : a.label;
     case "auth":

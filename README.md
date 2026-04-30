@@ -10,7 +10,7 @@ A noir heist puzzle where the player has no voice — but everyone else does.
 
 ## The pitch
 
-It is 6 PM. The First City Bank vault closes at 7. You have until 9 PM to walk
+It is 6 PM. The First City Bank locks down at 7:30. You have until 9 PM to walk
 out with the briefcase. The vault opens only to the manager's voice. So does
 the office. So does the front door after closing.
 
@@ -131,8 +131,9 @@ plausible, the world bends around it.
 ### Pause and replay
 
 Esc opens a pause menu when no modal is active. It freezes the clock, shows the
-current heat/voice count, and gives the player clean resume, restart, and title
-actions.
+current heat/voice count, exposes volume and view settings, and lets the player
+resume, restart, or save back to title. The title screen offers Continue when a
+saved run exists.
 
 ![Pause menu](docs/screenshots/16-pause-menu.png)
 
@@ -190,6 +191,7 @@ cd voice_thief
 cp .env.local.example .env.local
 # Default mock mode (VT_MOCK_AI=1) lets you play without any API keys.
 npm install
+nvm use # optional, but Node 20 LTS is the pinned release runtime
 npm run generate-assets
 npm run dev
 # Open http://localhost:3000
@@ -230,15 +232,16 @@ npm run dev
 
 ## Tests
 
-The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev server in mock mode
-in one terminal and run `node vt-e2e.cjs` in another. **72 / 72 checks pass.**
+The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev or production server
+in mock mode and run `node vt-e2e.cjs` in another terminal. **79 / 79 checks pass.**
 Set `VT_BASE_URL=http://localhost:<port>` if your server is not on port 3000.
 It exercises first-person startup and WASD movement, phase transitions,
-recording, notebook inventory, phone diversion, hallway voice gating, vault
-watcher rejection, voice auth, briefcase, train-station win,
+save/continue, pause settings, recording, notebook inventory, phone diversion,
+hallway voice gating, vault watcher rejection, voice auth, briefcase, train-station win,
 suspicion-driven loss, time-out loss, Solution C, weak-call failure
 regressions, guard back-exit diversion, caller-aware guard replies,
-recording-awareness busts, the doubt accumulator, and direct API contracts.
+recording-awareness busts, the doubt accumulator, direct API contracts, and
+browser runtime error health.
 Full transcript:
 [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
@@ -275,9 +278,9 @@ all four APIs so the game is fully playable without any keys.
   the Hold-E hotkey.
 - Every modal is `role="dialog" aria-modal="true"` with an `aria-labelledby`
   heading; **Esc** closes everything.
-- Game time auto-pauses while any modal is open so slow readers and
-  screen-reader users don't lose real-time. A `paused` badge announces the
-  state.
+- Game time pauses for the notebook and pause menu. Phone and auth surfaces run
+  in slow time, preserving accessibility without fully removing heist pressure.
+  A `paused` badge announces true pause state.
 - **M** toggles a global mute that's respected by all synthesized speech
   playback (TTS calls, voice-auth playback, scripted NPC dialogue).
 - HUD controls compress on mobile instead of overlapping. Phone calls render
