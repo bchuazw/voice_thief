@@ -250,13 +250,14 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev or production server
-in mock mode and run `node vt-e2e.cjs` in another terminal. **86 / 86 checks pass.**
+in mock mode and run `node vt-e2e.cjs` in another terminal. **91 / 91 checks pass.**
 Set `VT_BASE_URL=http://localhost:<port>` if your server is not on port 3000.
 It exercises first-person startup and WASD movement, phase transitions,
 save/continue, pause settings, recording, notebook inventory, phone diversion,
 hallway voice gating, intercom lockouts, vault watcher rejection, forged records clearance,
 guard-log alley access,
 voice auth, briefcase, train-station win,
+notebook lockout leads, signed-patrol ending attribution,
 suspicion-driven loss, time-out loss, Solution C, weak-call failure
 regressions, guard back-exit diversion, caller-aware guard replies,
 recording-awareness busts, the doubt accumulator, direct API contracts, and

@@ -348,8 +348,29 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     check("failed auth locks vault relay", (state.authLockouts.vault ?? 0) > state.inGameTime);
     check("vault relay cooling notice appears", (await page.locator("text=Relay cooling").count()) > 0);
     await shoot(page, "09-vault-auth-stressed-fail.png");
+    await page.evaluate(() => {
+      const s = window.__vt.getState();
+      s.setActiveAuth(null);
+      s.toggleNotebook(true);
+    });
+    await page.waitForTimeout(500);
+    check(
+      "notebook opens to relay lockout lead",
+      (await page.locator("text=Vault relay cooling").count()) > 0,
+    );
+    check(
+      "relay lockout lead shows cooling time",
+      (await page.locator("text=The intercom is hot until").count()) > 0,
+    );
+    await shoot(page, "09b-notebook-relay-lockout.png");
+    await page.evaluate(() => window.__vt.getState().toggleNotebook(false));
+    await page.waitForTimeout(300);
     await page.evaluate(() => window.__vt.getState().clearAuthLockout("vault"));
     await page.waitForTimeout(300);
+    await page.evaluate(() => {
+      window.__vt.getState().setActiveAuth({ device: "vault", voiceCardId: "", result: "pending" });
+    });
+    await page.waitForTimeout(500);
   } else {
     check("stressed card visible in dialog", false, "button not found");
   }
@@ -482,6 +503,22 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   await shoot(page, "10-win.png");
   const familyEmergencyChip = await page.locator("text=Family Emergency").count();
   check("win card shows Family Emergency achievement", familyEmergencyChip > 0);
+  const signedBeatChip = await page.locator("text=Signed Beat").count();
+  check("win card shows Signed Beat achievement", signedBeatChip > 0);
+  const beatCopChip = await page.locator("text=Beat-Cop Bluff").count();
+  check("patrol-log route does not double-count Beat-Cop Bluff", beatCopChip === 0);
+  const winMethod = await page.evaluate(() => {
+    const labels = Array.from(document.querySelectorAll("p")).map((el) =>
+      el.textContent?.trim() ?? "",
+    );
+    const idx = labels.findIndex((text) => text === "Method");
+    return idx >= 0 ? labels[idx + 1] ?? "" : "";
+  });
+  check(
+    "win method reflects signed patrol route",
+    winMethod === "Signed beat + Family emergency",
+    `method=${winMethod}`,
+  );
 
   // ── 6. Reset and run failure path ───────────────────────────────────
   console.log("\n=== Phase 6: failure path ===");

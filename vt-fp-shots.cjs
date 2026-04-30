@@ -259,6 +259,9 @@ function browserExecutablePath() {
       briefcaseTaken: true,
       vaultOpen: true,
       bankHallwayUnlocked: true,
+      bankBackExitUnlocked: true,
+      patrolLogForged: true,
+      auditLedgerForged: false,
       npcs: {
         ...state.npcs,
         bankManager: {

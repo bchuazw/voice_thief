@@ -9,8 +9,8 @@ export type InteractionAction =
   | { kind: "inspect"; label: string; toast: string }
   | { kind: "enterLocation"; target: string; label: string; locked?: boolean; entryPosition?: Vec3 }
   | { kind: "auth"; device: AuthDevice }
-  | { kind: "auditLedger" }
-  | { kind: "patrolLog" }
+  | { kind: "auditLedger"; label?: string }
+  | { kind: "patrolLog"; label?: string }
   | { kind: "briefcase" }
   | { kind: "trainStation" };
 
@@ -47,9 +47,9 @@ export function describeAction(a: InteractionAction | null): string {
           ? "Open hallway"
           : "Open bank door";
     case "auditLedger":
-      return "File audit clearance";
+      return a.label ?? "File audit clearance";
     case "patrolLog":
-      return "Sign patrol log";
+      return a.label ?? "Sign patrol log";
     case "briefcase":
       return "Take the briefcase";
     case "trainStation":

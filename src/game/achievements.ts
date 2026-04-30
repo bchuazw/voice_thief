@@ -65,18 +65,17 @@ export function evaluateAchievements(state: GameState): Achievement[] {
   // intentionally layered: a good win can combine a diversion, a cleared
   // records desk, and the back exit.
   if (won) {
-    if (state.bankBackExitUnlocked) {
-      out.push({
-        id: "solution-d",
-        label: "Beat-Cop Bluff",
-        detail: "Eddie's voice opened the alley gate",
-      });
-    }
     if (state.patrolLogForged) {
       out.push({
         id: "solution-f",
         label: "Signed Beat",
         detail: "Forged Cole's patrol log at the guard desk",
+      });
+    } else if (state.bankBackExitUnlocked) {
+      out.push({
+        id: "solution-d",
+        label: "Beat-Cop Bluff",
+        detail: "Eddie's voice opened the alley gate",
       });
     }
     if (state.npcs.secretary.branch === "runningErrand") {

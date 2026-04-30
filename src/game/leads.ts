@@ -1,6 +1,6 @@
 import { NPC_PROFILES } from "@/config/voices";
-import { inGameTimeFromClock } from "./timeFormat";
-import type { GameState, NpcId } from "./types";
+import { clockLabel, inGameTimeFromClock } from "./timeFormat";
+import type { AuthDevice, GameState, NpcId } from "./types";
 
 export interface Lead {
   id: string;
@@ -15,6 +15,12 @@ function hasVoice(state: GameState, npcId: NpcId, emotion?: string): boolean {
   );
 }
 
+function authDeviceLabel(device: AuthDevice): string {
+  if (device === "bankHallway") return "Records hallway";
+  if (device === "bankFront") return "Front door";
+  return "Vault";
+}
+
 /**
  * Notebook leads. These are observations and overheard fragments — never
  * imperatives. The player still has to figure out what to actually do.
@@ -27,6 +33,19 @@ export function buildLeads(state: GameState): Lead[] {
   const hasWife = hasVoice(state, "wife");
   const hasSecretary = hasVoice(state, "secretary");
   const hasGuard = hasVoice(state, "bankGuard");
+
+  for (const [device, unlockAt] of (
+    Object.entries(state.authLockouts) as [AuthDevice, number][]
+  )
+    .filter(([, unlockAt]) => unlockAt > state.inGameTime)
+    .sort((a, b) => a[1] - b[1])) {
+    leads.push({
+      id: `auth-lockout-${device}`,
+      title: `${authDeviceLabel(device)} relay cooling`,
+      body: `The intercom is hot until ${clockLabel(unlockAt)}. A different route or a short wait beats hammering the same voice.`,
+      urgency: "active",
+    });
+  }
 
   if (!hasAnyVoice) {
     leads.push({
@@ -109,12 +128,19 @@ export function buildLeads(state: GameState): Lead[] {
     });
   }
 
-  if (hasGuard) {
+  if (hasGuard && !state.bankBackExitUnlocked) {
     leads.push({
       id: "guard-back-exit",
       title: "Eddie's beat",
       body: "Cole hums to himself about the alley door. The gate listens for him, and the lobby logbook signs his rounds.",
       urgency: "active",
+    });
+  } else if (hasGuard && state.bankBackExitUnlocked && !state.patrolLogForged) {
+    leads.push({
+      id: "guard-back-exit-done",
+      title: "Back exit answered",
+      body: "Cole's beat call has the alley gate expecting him.",
+      urgency: "solved",
     });
   }
 

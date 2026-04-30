@@ -26,6 +26,10 @@ const MAX_REACH = 4.5;
 function listTargets(scene: LocationId): InteractableTarget[] {
   const s = useGame.getState();
   const targets: InteractableTarget[] = [];
+  const hasCalmVoice = (npcId: NpcId) =>
+    s.voiceInventory.some(
+      (card) => card.npcId === npcId && card.emotionalState === "calm",
+    );
 
   // NPCs in the same scene that are speaking + recordable
   for (const id of Object.keys(s.npcs) as NpcId[]) {
@@ -158,7 +162,14 @@ function listTargets(scene: LocationId): InteractableTarget[] {
       pos: new THREE.Vector3(-9.2, 1.1, -3.15),
       radius: 1.1,
       priority: 4,
-      build: () => ({ kind: "patrolLog" }),
+      build: () => ({
+        kind: "patrolLog",
+        label: s.bankBackExitUnlocked
+          ? "Review signed patrol log"
+          : hasCalmVoice("bankGuard")
+            ? "Sign patrol log"
+            : "Inspect patrol log",
+      }),
     });
     // Back-alley exit (right side of lobby) — only appears if Eddie's beat-call
     // unlocked it. Skips the front door entirely and dumps you near the train.
@@ -199,7 +210,14 @@ function listTargets(scene: LocationId): InteractableTarget[] {
         pos: new THREE.Vector3(-2.65, 1.15, -9.35),
         radius: 1.1,
         priority: 5,
-        build: () => ({ kind: "auditLedger" }),
+        build: () => ({
+          kind: "auditLedger",
+          label: s.auditLedgerForged
+            ? "Review audit clearance"
+            : hasCalmVoice("secretary")
+              ? "File audit clearance"
+              : "Inspect audit drawer",
+        }),
       });
     } else if (!s.briefcaseTaken) {
       targets.push({

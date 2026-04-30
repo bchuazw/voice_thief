@@ -19,9 +19,18 @@ export default function Notebook() {
   const toggleNotebook = useGame((s) => s.toggleNotebook);
   const state = useGame();
   const leads = buildLeads(state);
-  // First-time players get the Schedule tab — it's the actual strategy
-  // briefing. Once they've recorded anything, default back to Voices.
-  const [tab, setTab] = useState<Tab>(inventory.length > 0 ? "voices" : "leads");
+  const hasActiveLockout = Object.values(state.authLockouts).some(
+    (unlockAt) => unlockAt > state.inGameTime,
+  );
+  // First-time players get Leads. Once they've recorded anything, default
+  // back to Voices unless a hot relay has created a time-sensitive lead.
+  const [tab, setTab] = useState<Tab>(
+    hasActiveLockout ? "leads" : inventory.length > 0 ? "voices" : "leads",
+  );
+
+  useEffect(() => {
+    if (hasActiveLockout) setTab("leads");
+  }, [hasActiveLockout]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

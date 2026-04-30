@@ -17,11 +17,14 @@ function lossText(reason: string): string {
 
 function pathLabel(): string {
   const s = useGame.getState();
-  if (s.bankBackExitUnlocked) return "Beat-cop bluff";
-  if (s.npcs.bankManager.branch === "atCafe") return "Ledger diversion";
-  if (s.npcs.bankManager.branch === "rushedHome") return "Family emergency";
-  if (s.npcs.secretary.branch === "runningErrand") return "Counter clearance";
-  return "Two-voice lift";
+  const pieces: string[] = [];
+  if (s.patrolLogForged) pieces.push("Signed beat");
+  else if (s.bankBackExitUnlocked) pieces.push("Beat-cop bluff");
+  if (s.npcs.bankManager.branch === "atCafe") pieces.push("Ledger diversion");
+  else if (s.npcs.bankManager.branch === "rushedHome") pieces.push("Family emergency");
+  if (s.auditLedgerForged) pieces.push("Forged ledger");
+  if (s.npcs.secretary.branch === "runningErrand") pieces.push("Counter clearance");
+  return pieces.length > 0 ? pieces.slice(0, 2).join(" + ") : "Two-voice lift";
 }
 
 export default function EndCard() {
