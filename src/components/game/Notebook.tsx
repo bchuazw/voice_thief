@@ -148,7 +148,9 @@ export default function Notebook() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => startNpcAudio(card.npcId, card.sourceMomentId)}
+                    onClick={() =>
+                      startNpcAudio(card.npcId, card.sourceMomentId, { spatial: false })
+                    }
                     className="pointer-events-auto relative z-10 mt-3 block w-full rounded border border-noir-paper/20 px-3 py-2 text-[10px] uppercase tracking-[0.25em] text-noir-paper hover:bg-noir-paper hover:text-black"
                   >
                     Replay sample

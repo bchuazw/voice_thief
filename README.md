@@ -22,6 +22,8 @@ city who do.
 The game plays in first-person — WASD walk, Shift run, mouse-look, **E** to
 interact with whatever's centered in the crosshair. Press **C** to flip into
 a top-down "diorama" view if you'd rather plan the heist like a chess board.
+NPC dialogue is proximity-mixed, so overheard lines get louder as you move
+closer and fade naturally across the street or bank floor.
 
 ### Landing
 
