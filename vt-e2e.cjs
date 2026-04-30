@@ -545,14 +545,16 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
   check("guard beat call reply matches success", /alley gate|keep moving/i.test(guardReply), guardReply);
 
   await page.evaluate(() => window.__vt.getState().reset());
+  await page.waitForTimeout(300);
   await page.evaluate(() => window.__vt.getState().setPhase("playing"));
+  await page.waitForTimeout(300);
   await page.evaluate(() => window.__vt.setState({ viewMode: "diorama", inGameTime: 18 * 3600 + 50 * 60 }));
   await page.evaluate(() => {
     const s = window.__vt.getState();
     s.setPlayerLocation("bankLobby");
     s.setPlayerPosition({ x: -6, y: 0, z: -2 });
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1500);
   await page.keyboard.down("e");
   await page.waitForTimeout(8500);
   await page.keyboard.up("e");

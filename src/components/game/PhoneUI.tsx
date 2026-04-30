@@ -6,11 +6,26 @@ import { playAudio } from "@/audio/play";
 import { speakStolenText } from "@/audio/npcSpeech";
 import { emotionGlyph } from "@/game/emotionDisplay";
 import { setBranch } from "@/game/npcSchedules";
+import { distance } from "@/game/pathfinding";
 import { resolvePhoneRule, type PhoneRuleEffect } from "@/game/phoneRules";
 import { useGame } from "@/game/store";
 import type { NpcId } from "@/game/types";
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
+const OVERHEAR_RADIUS = 5;
+
+function findOverhearer(targetNpc: NpcId): NpcId | null {
+  const s = useGame.getState();
+  const playerLoc = s.player.currentLocation;
+  const playerPos = s.player.position;
+  for (const id of Object.keys(s.npcs) as NpcId[]) {
+    if (id === targetNpc) continue;
+    const npc = s.npcs[id];
+    if (npc.currentLocation !== playerLoc) continue;
+    if (distance(npc.location, playerPos) < OVERHEAR_RADIUS) return id;
+  }
+  return null;
+}
 
 function phonePlaceholder(caller: NpcId | null, target: NpcId): string {
   if (!caller) return "Pick a stolen voice, then dial.";
@@ -43,6 +58,11 @@ export default function PhoneUI() {
   const pushCallTurn = useGame((s) => s.pushCallTurn);
   const raiseSuspicion = useGame((s) => s.raiseSuspicion);
   const inGameTime = useGame((s) => s.inGameTime);
+  // Subscribing to npcs makes the overhear warning live-update if a patrolling
+  // NPC walks into earshot while the phone is open.
+  const npcs = useGame((s) => s.npcs);
+  const playerLoc = useGame((s) => s.player.currentLocation);
+  const playerPos = useGame((s) => s.player.position);
 
   const [target, setTarget] = useState<NpcId>("bankManager");
   const [voiceCardId, setVoiceCardId] = useState("");
@@ -130,6 +150,11 @@ export default function PhoneUI() {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
       }
 
+      const overhearer = findOverhearer(target);
+      if (overhearer) {
+        raiseSuspicion(6, `${NPC_PROFILES[overhearer].displayName} overheard the call`);
+      }
+
       const rule = resolvePhoneRule({
         targetNpc: target,
         callerNpc: card.npcId,
@@ -178,6 +203,16 @@ export default function PhoneUI() {
   const callerVoiceNpcId = selectedVoiceCard?.npcId ?? null;
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
   const hasVoices = inventory.length > 0;
+  // Live overhear check — recomputes whenever npcs / player position change.
+  const nearbyOverhearer = (() => {
+    for (const id of Object.keys(npcs) as NpcId[]) {
+      if (id === target) continue;
+      const npc = npcs[id];
+      if (npc.currentLocation !== playerLoc) continue;
+      if (distance(npc.location, playerPos) < OVERHEAR_RADIUS) return id;
+    }
+    return null;
+  })();
 
   return (
     <div
@@ -241,6 +276,16 @@ export default function PhoneUI() {
         {!hasVoices && (
           <div className="mt-4 rounded border border-noir-amber/30 bg-black/35 px-3 py-3 text-sm text-noir-fog">
             Record someone first. The best leads are in the notebook schedule.
+          </div>
+        )}
+
+        {hasVoices && nearbyOverhearer && (
+          <div
+            className="mt-4 rounded border border-noir-neon/45 bg-noir-neon/5 px-3 py-2 text-xs text-noir-neon"
+            role="status"
+            aria-live="polite"
+          >
+            {NPC_PROFILES[nearbyOverhearer].displayName} is within earshot. Placing the call now will draw eyes.
           </div>
         )}
 
