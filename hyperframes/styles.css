@@ -98,6 +98,27 @@ body {
   font-weight: 900;
 }
 
+.hook-flash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(244, 210, 123, 0.22), rgba(5, 4, 3, 0.7) 54%, rgba(5, 4, 3, 0.96) 100%),
+    linear-gradient(135deg, rgba(255, 79, 79, 0.32), rgba(0, 0, 0, 0.22));
+  animation: hookBlast 0.72s cubic-bezier(0.18, 0.85, 0.18, 1) both;
+}
+
+.hook-flash span {
+  color: #fff5e6;
+  font-size: 104px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: 0 0 36px rgba(255, 79, 79, 0.55), 0 12px 36px #000;
+}
+
 .hud-badge {
   top: 66px;
   padding: 14px 24px;
@@ -213,11 +234,57 @@ body {
   text-transform: uppercase;
 }
 
+.signal-pulse {
+  position: absolute;
+  left: 50%;
+  top: 49%;
+  width: 280px;
+  height: 280px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.signal-pulse i {
+  position: absolute;
+  inset: 0;
+  border: 4px solid rgba(255, 79, 79, 0.82);
+  border-radius: 50%;
+  box-shadow: 0 0 36px rgba(255, 79, 79, 0.42);
+  animation: signalRing 1.2s ease-out infinite;
+}
+
+.signal-pulse i:nth-child(2) { animation-delay: 0.28s; }
+.signal-pulse i:nth-child(3) { animation-delay: 0.56s; }
+
 .end-card {
   justify-content: flex-end;
   padding-bottom: 152px;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+.end-card::before,
+.end-card::after {
+  content: "";
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  pointer-events: none;
+}
+
+.end-card::before {
+  bottom: 280px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(244, 210, 123, 0.85), transparent);
+  box-shadow: 0 0 28px rgba(244, 210, 123, 0.42);
+  animation: endSweep 1.55s ease-in-out infinite;
+}
+
+.end-card::after {
+  inset: 0 -20%;
+  opacity: 0.09;
+  background: repeating-linear-gradient(180deg, transparent 0 18px, rgba(244, 210, 123, 0.55) 18px 20px);
+  animation: scanRoll 1.1s linear infinite;
 }
 
 .end-card h2 {
@@ -247,6 +314,29 @@ body {
 @keyframes titleHit {
   from { opacity: 0; transform: scale(1.14); filter: blur(18px); }
   to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes hookBlast {
+  0% { opacity: 0; transform: scale(1.15); filter: blur(18px); }
+  38% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(0.96); filter: blur(4px); }
+}
+
+@keyframes signalRing {
+  0% { opacity: 0.85; transform: scale(0.12); }
+  72% { opacity: 0.18; }
+  100% { opacity: 0; transform: scale(1.28); }
+}
+
+@keyframes endSweep {
+  0% { transform: translateX(-16%); opacity: 0.25; }
+  50% { opacity: 1; }
+  100% { transform: translateX(16%); opacity: 0.25; }
+}
+
+@keyframes scanRoll {
+  from { transform: translateY(-20px); }
+  to { transform: translateY(20px); }
 }
 
 @keyframes endPulse {

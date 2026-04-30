@@ -8,6 +8,7 @@ Hyperframes composition for the vertical gameplay submission trailer.
 - `styles.css` contains the trailer overlays, caption styling, and motion polish.
 - `assets/gameplay/gameplay-trailer-base.mp4` is the trimmed gameplay base used by the composition.
 - `assets/voiceover-submission/*.mp3` are ElevenLabs-generated narration clips copied from `docs/trailer/voiceover-submission/`.
+- `assets/audio/noir-pulse.wav` is a procedural, royalty-free music/tension bed mixed under the narration.
 - `output/voice-thief-submission-trailer.mp4` is the raw Hyperframes render and is ignored by git.
 
 The canonical upload file is written to:
@@ -56,4 +57,3 @@ ffmpeg -y -i .\output\voice-thief-submission-trailer.mp4 `
   -movflags +faststart `
   ..\docs\trailer\voice-thief-submission-trailer.mp4
 ```
-
