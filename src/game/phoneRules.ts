@@ -272,30 +272,96 @@ export function resolvePhoneRule(input: PhoneRuleInput): PhoneRuleResult {
  * "generic", "neutral"). Calls accumulate doubt across turns; ≥60 ends the
  * call, ≥30 (going into a turn) blocks branch-flip side effects so a
  * fumbled opener can't be salvaged by spamming the right keywords later.
+ *
+ * The vocabulary axis is character-aware: each caller has a list of words
+ * they would and wouldn't naturally know. Margaret saying "vault" or
+ * "patrol" raises doubt; Cole saying "porch light" raises doubt; the
+ * manager has the broadest natural vocabulary. This blocks the regression
+ * where high noun-density alone (regardless of in-character coherence)
+ * always lowered doubt.
  */
 export interface TurnAnalysis {
   doubt: number;
-  tone: "specific" | "weak" | "generic" | "neutral";
+  tone: "specific" | "weak" | "generic" | "neutral" | "out-of-character";
 }
 
-const NOUN_HINTS = [
-  // people / pet-names
+const GENERIC_NOUN_HINTS = [
+  // pure names — fine for any caller to drop
   /maggie|margaret|harold|harry|lillian|cole|eddie|vance|park/i,
-  // places
-  /home|house|bedroom|window|cafe|booth|counter|lobby|alley|gate|office|attic|storage|supply|upstairs|vault|records/i,
-  // items
-  /ledger|file|papers|folder|key|button|coffee|patrol|round|beat/i,
-  // numbers / time
+  // numbers / time — universal
   /\b(\d{1,2})(:\d\d)?\b|\b(seven|eight|nine|ten|eleven)\b/i,
 ];
 
-const GENERIC_OPENERS = /^(hi|hey|hello|yo|yes|no|ok|okay|wait|um|uh)\b/i;
-
-function countNounHints(text: string): number {
-  let n = 0;
-  for (const r of NOUN_HINTS) if (r.test(text)) n += 1;
-  return n;
+interface CallerVocab {
+  // Words that flow naturally from this caller's life.
+  own: RegExp[];
+  // Words that would raise an eyebrow on the other end of the line.
+  foreign: RegExp[];
 }
+
+// Each entry is one *category* — countMatches returns the number of
+// categories present in the text, so multiple OOC words from the same
+// caller compound into more doubt.
+const VOCAB_BY_CALLER: Record<NpcId, CallerVocab> = {
+  wife: {
+    own: [
+      /\b(home|house|bedroom|window|kitchen|porch|dinner|door)\b/i, // domestic
+      /\b(maggie|harry|margaret|hendersons|ruthie)\b/i, // family
+      /\b(scared|frightened|hurry|please)\b/i, // domestic distress
+    ],
+    foreign: [
+      /\bledger\b/i,
+      /\bvault\b/i,
+      /\bcombination\b|7-?7-?1/i,
+      /\bpatrol\b/i,
+      /\balley\b/i,
+      /\brecords\b/i,
+      /\bteller\b/i,
+      /\bbeat\b/i,
+    ],
+  },
+  bankManager: {
+    own: [
+      /\b(lillian|park|cole|maggie|margaret|harry)\b/i, // people
+      /\b(ledger|vault|teller|deposit|records|safe|combination|first city|bank)\b/i, // bank vocab
+      /\b(office|upstairs|attic|supply|storage)\b/i, // bank places
+    ],
+    // The manager is the worldly one — narrow foreign list (only beat-cop slang).
+    foreign: [/\b(dock|beat-cop|nightstick)\b/i],
+  },
+  secretary: {
+    own: [
+      /\b(lillian|harold|vance|harry)\b/i, // people
+      /\b(ledger|file|records|key)\b/i, // records-desk vocab
+      /\b(attic|storage|supply|upstairs|cafe|coffee|booth|signing|firm)\b/i, // places + work
+    ],
+    foreign: [
+      /\bpatrol\b/i,
+      /\bbeat\b/i,
+      /\balley\b/i,
+      /\bporch\b/i,
+      /\bbedroom\b/i,
+      /\bdock\b/i,
+      /\bcombination\b|7-?7-?1/i,
+    ],
+  },
+  bankGuard: {
+    own: [
+      /\b(cole|eddie|vance|harold)\b/i, // people he calls by name
+      /\b(patrol|beat|round|alley|gate|lobby|signing|night|dock|station)\b/i, // beat vocab
+    ],
+    foreign: [
+      /\bledger\b/i,
+      /\bfile\b/i,
+      /\brecords\b/i,
+      /\bbedroom\b/i,
+      /\bporch\b/i,
+      /\b(hendersons|ruthie)\b/i,
+    ],
+  },
+};
+
+const GENERIC_OPENERS = /^(hi|hey|hello|yo|yes|no|ok|okay|wait|um|uh)\b/i;
 
 function wordCount(text: string): number {
   const trimmed = text.trim();
@@ -303,9 +369,12 @@ function wordCount(text: string): number {
   return trimmed.split(/\s+/).length;
 }
 
-export function analyzeTurnDoubt(text: string, priorTranscript: string[]): TurnAnalysis {
+export function analyzeTurnDoubt(
+  text: string,
+  priorTranscript: string[],
+  callerNpc?: NpcId,
+): TurnAnalysis {
   const words = wordCount(text);
-  const nouns = countNounHints(text);
 
   // Repetition is the single most damning signal — if you say the same line
   // twice, the NPC notices.
@@ -314,20 +383,36 @@ export function analyzeTurnDoubt(text: string, priorTranscript: string[]): TurnA
     return { doubt: 25, tone: "weak" };
   }
 
+  // Vocabulary check (character-aware). The foreign-vocabulary penalty
+  // overrides keyword-density bonuses — using words your character wouldn't
+  // know is the loudest tell of a bluff.
+  const vocab = callerNpc ? VOCAB_BY_CALLER[callerNpc] : null;
+  const foreignHits = vocab ? countMatches(text, vocab.foreign) : 0;
+  if (foreignHits > 0) {
+    // Each foreign word is worth +12 doubt. Two such words is enough to
+    // push a fresh call past the branch-block threshold by itself.
+    return { doubt: 12 * foreignHits, tone: "out-of-character" };
+  }
+
+  const ownHits = vocab ? countMatches(text, vocab.own) : 0;
+  const genericNouns = countMatches(text, GENERIC_NOUN_HINTS);
+  const totalNouns = ownHits + genericNouns;
+
   // Very short or no nouns → reads as fishing / panicked. 18 is calibrated so
   // a SECOND weak turn pushes cumulative doubt past the 30 branch-block
   // threshold (player can't recover by spamming keywords after a fumble).
   if (words < 4) return { doubt: 18, tone: "weak" };
-  if (nouns === 0) return { doubt: 16, tone: "weak" };
+  if (totalNouns === 0) return { doubt: 16, tone: "weak" };
 
   // Generic opener with little behind it.
-  if (GENERIC_OPENERS.test(text) && nouns < 2) return { doubt: 10, tone: "generic" };
+  if (GENERIC_OPENERS.test(text) && totalNouns < 2) return { doubt: 10, tone: "generic" };
 
-  // Specific multi-noun message with reasonable length: rapport-building.
-  if (nouns >= 3 && words >= 8) return { doubt: -3, tone: "specific" };
+  // Specific multi-noun message with reasonable length and IN-CHARACTER
+  // vocabulary: rapport-building.
+  if (ownHits >= 2 && words >= 8) return { doubt: -3, tone: "specific" };
 
   // Solid, coherent, on-topic.
-  if (nouns >= 2 && words >= 6) return { doubt: 2, tone: "neutral" };
+  if (totalNouns >= 2 && words >= 6) return { doubt: 2, tone: "neutral" };
 
   // Default: light doubt for anything else.
   return { doubt: 5, tone: "neutral" };

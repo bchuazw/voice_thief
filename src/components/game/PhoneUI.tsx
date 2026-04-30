@@ -120,7 +120,7 @@ export default function PhoneUI() {
     const priorCallerTurns = newCall.transcript
       .filter((t) => t.role === "caller")
       .map((t) => t.text);
-    const turnAnalysis = analyzeTurnDoubt(message, priorCallerTurns);
+    const turnAnalysis = analyzeTurnDoubt(message, priorCallerTurns, card.npcId);
     const priorDoubt = newCall.doubt;
 
     pushCallTurn({ role: "caller", text: message });

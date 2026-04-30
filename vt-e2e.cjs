@@ -691,7 +691,46 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     `replies=${JSON.stringify(doubtState.npcReplies)}`,
   );
 
-  // Test 3: Fresh call with strong opener should flip branch normally.
+  // Test 3 (out-of-character vocabulary): wife saying "ledger, vault,
+  // patrol" — high noun density but ALL foreign to Margaret — should spike
+  // doubt instead of lowering it. This is the imsim purist's specific
+  // regression: the old analyzer rewarded keyword density regardless of
+  // who was speaking.
+  await page.evaluate(() => {
+    window.__vt.getState().setActiveCall(null);
+    window.__vt.getState().togglePhone(false);
+  });
+  await page.waitForTimeout(300);
+  await page.keyboard.press("p");
+  await page.waitForTimeout(400);
+  await page.locator("select").nth(1).selectOption("card_wife_doubt");
+  await page.locator("textarea").fill("Harry the ledger and vault and patrol records combination teller alley");
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => (window.__vt.getState().activeCall?.transcript ?? []).some((t) => t.role === "npc"),
+    "out-of-character vocab gets a reply",
+    4000,
+  );
+  doubtState = await page.evaluate(() => ({
+    doubt: window.__vt.getState().activeCall?.doubt ?? 0,
+    branch: window.__vt.getState().npcs.bankManager.branch,
+  }));
+  check(
+    "out-of-character vocab from wife spikes doubt above 30",
+    doubtState.doubt >= 30,
+    `doubt=${doubtState.doubt}`,
+  );
+  check(
+    "out-of-character vocab does NOT flip branch",
+    doubtState.branch === "default",
+    `branch=${doubtState.branch}`,
+  );
+
+  // Test 4: Fresh call with strong opener should flip branch normally.
+  // Wait past the prev call's 4200ms auto-hangup setTimeout so it can't
+  // close the phone mid-fill below.
+  await page.waitForTimeout(4500);
   await page.evaluate(() => {
     window.__vt.getState().setActiveCall(null);
     window.__vt.getState().togglePhone(false);
