@@ -10,9 +10,9 @@ project, especially mock-mode and key handling), then this file.
 ## Where things stand
 
 - **Branch:** `claude/voice-thief-game-hhUcJ`
-- **Latest commit:** `8d62ace` — "In-character vocabulary check + delete
-  surviving 'Hmmm-mm-mm'"
-- **E2E:** `node vt-e2e.cjs` → 69/69 passing in mock mode
+- **Latest gameplay pass:** caller-aware Cole/guard-desk replies are now in
+  place; the remaining recommendations below start after that pass.
+- **E2E:** `node vt-e2e.cjs` → 72/72 passing in mock mode
   (`VT_MOCK_AI=1 npm run start`)
 - **Tooling clean:** `npm run typecheck`, `npm run lint`, `npm run build`
   all pass
@@ -49,9 +49,9 @@ Convergent unsolved gaps after round 2:
 3. **Mic-driven bluff** — the streamer's 10× change. The player still
    types into a textarea instead of speaking into a mic and hearing
    their own words come out in a stolen voice.
-4. **bankGuardReply** has no character-coherence layer. The other three
-   targets do (vocabulary check + doubt accumulator). Cole still answers
-   to a two-regex tree. Imsim purist's specific round-2 callout.
+4. ~~**bankGuardReply** has no character-coherence layer.~~ Fixed in the
+   caller-aware guard-desk pass: Harold can check the lobby, Margaret gets a
+   wrong-line response, and casual off-post orders now raise heat.
 
 ## Recommendations, sequenced
 
@@ -224,31 +224,14 @@ plant-the-clue moment that teaches the puzzle.
 - Don't break the bank job. Add a regression e2e covering the existing
   win path before refactoring `npcSchedules.ts`.
 
-### Phase D — Tighten bankGuardReply
+### Phase D — Tighten bankGuardReply (done)
 
-Smallest of the four. Imsim purist's round-2 callout: `bankGuardReply`
-in `src/game/phoneRules.ts:210-224` is still two regexes (leave-post
-detection + default-back). No character coherence; no doubt-aware
-hangup. The other three targets all have richer reply branches.
+Smallest of the four. This has landed: `bankGuardReply` is now
+caller-aware, with Harold/Margaret/Lillian branches and API regression
+coverage. Keep expanding this only if you add new Cole-facing routes.
 
-**What you need:**
-
-- 30 minutes. Add caller-aware branches to `bankGuardReply` for at
-  least manager-as-caller and wife-as-caller. Manager calling Cole
-  should be able to ask about the lobby ("everything quiet?" → yes;
-  "leave your post" → no). Wife calling Cole should default to
-  "Mrs. Vance? Wrong line, try the lobby."
-
-**Where it slots in:**
-
-- `src/game/phoneRules.ts` — `bankGuardReply(text)` becomes
-  `bankGuardReply(callerNpc, text)`, dispatching like
-  `bankManagerReply` does at line 47.
-- `vt-e2e.cjs` — add one assertion per new branch.
-
-**Scope:** 30 minutes including the e2e.
-
-**Risks:** None. Pure additive change.
+**Changed files:** `src/game/phoneRules.ts`, `vt-e2e.cjs`,
+`docs/E2E_REPORT.md`, `README.md`.
 
 ### Phase E — Save/load + settings menu (Steam table-stakes)
 
@@ -302,7 +285,7 @@ VT_MOCK_AI=1 npm run dev          # mock mode, no keys needed
 VT_MOCK_AI=0 npm run dev          # real APIs, requires .env.local
 npm run typecheck && npm run lint
 npm run build && VT_MOCK_AI=1 npm run start
-node vt-e2e.cjs                   # 69 assertions, full gameplay loop
+node vt-e2e.cjs                   # 72 assertions, full gameplay loop
 ```
 
 **Asset bake (if you have Blender 4.5 LTS locally):**

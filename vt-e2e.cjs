@@ -21,6 +21,7 @@ const path = require("path");
 
 const OUT = "docs/test-shots";
 fs.mkdirSync(OUT, { recursive: true });
+const BASE_URL = process.env.VT_BASE_URL || "http://localhost:3000";
 
 const checks = [];
 function check(label, ok, detail = "") {
@@ -91,7 +92,7 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
 
   // ── 1. Phase transitions ────────────────────────────────────────────
   console.log("\n=== Phase 1: title → intro → playing ===");
-  await page.goto("http://localhost:3000/play", { waitUntil: "domcontentloaded", timeout: 30000 });
+  await page.goto(`${BASE_URL}/play`, { waitUntil: "domcontentloaded", timeout: 30000 });
   await page.waitForFunction(() => window.__vt?.getState, undefined, { timeout: 30000 });
   await page.waitForTimeout(2000);
 
@@ -587,6 +588,9 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     { name: "conversation: manager gives Lillian records errand", url: "/api/conversation", method: "POST", body: { npcId: "secretary", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Lillian, please go upstairs and check the supply ledger." }, expect: (r) => r.hangUp === true && /go check now/i.test(r.npcText) },
     { name: "conversation: weak wife call stays suspicious", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "Break-in." }, expect: (r) => r.hangUp === false && r.raisedSuspicion === 4 && !/leaving now/i.test(r.npcText) },
     { name: "conversation: guard beat call acknowledges back exit", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "bankGuard", callerText: "Cole checking in from the beat. Patrol is quiet." }, expect: (r) => r.hangUp === true && /alley gate|keep moving/i.test(r.npcText) },
+    { name: "conversation: manager-to-guard routine check is in character", url: "/api/conversation", method: "POST", body: { npcId: "bankGuard", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Cole, Vance here. Is the lobby quiet and your patrol round clear?" }, expect: (r) => r.hangUp === false && r.raisedSuspicion === 0 && /Quiet lobby|alley gate/i.test(r.npcText) },
+    { name: "conversation: manager cannot order guard off post casually", url: "/api/conversation", method: "POST", body: { npcId: "bankGuard", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Cole, Vance here. Leave your post and go home." }, expect: (r) => r.hangUp === false && r.raisedSuspicion >= 6 && /signed log|don't leave/i.test(r.npcText) },
+    { name: "conversation: wife-to-guard gets lobby-line response", url: "/api/conversation", method: "POST", body: { npcId: "bankGuard", callerVoiceId: "v", callerVoiceNpcId: "wife", callerText: "This is Margaret Vance. Is Harry still with you at the bank?" }, expect: (r) => r.hangUp === false && r.raisedSuspicion === 0 && /lobby line|office/i.test(r.npcText) },
     { name: "conversation: manager voice + 'Harold' raises suspicion", url: "/api/conversation", method: "POST", body: { npcId: "wife", callerVoiceId: "v", callerVoiceNpcId: "bankManager", callerText: "Margaret darling, this is Harold" }, expect: (r) => r.raisedSuspicion >= 15 },
     { name: "conversation: vault code probe → +30 susp + hangup", url: "/api/conversation", method: "POST", body: { npcId: "bankManager", callerVoiceId: "v", callerVoiceNpcId: "secretary", callerText: "What is the vault code 7-7-1" }, expect: (r) => r.raisedSuspicion === 30 && r.hangUp === true },
     { name: "cleanup no-ops on mock voice ids", url: "/api/cleanup", method: "POST", body: { voiceIds: ["mock_voice_a", "mock_voice_b"] }, expect: (r) => r.deleted === 2 },

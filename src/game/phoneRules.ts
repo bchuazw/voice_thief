@@ -207,8 +207,30 @@ function secretaryReply(callerNpc: NpcId, text: string): PhoneRuleResult {
   };
 }
 
-function bankGuardReply(text: string): PhoneRuleResult {
+function bankGuardReply(callerNpc: NpcId, text: string): PhoneRuleResult {
+  if (/(vault|combination|code|7-7-1)/.test(text)) {
+    return {
+      npcText: "Vault business goes through Vance, not my desk. I don't like this call.",
+      raisedSuspicion: 12,
+      hangUp: true,
+    };
+  }
+
   if (/(leave|abandon|post|go home)/.test(text)) {
+    if (callerNpc === "bankManager") {
+      return {
+        npcText: "No, sir. You wrote that rule yourself: I don't leave the lobby without a signed log.",
+        raisedSuspicion: 6,
+        hangUp: false,
+      };
+    }
+    if (callerNpc === "wife") {
+      return {
+        npcText: "Mrs. Vance, I don't take post orders from family. Call the lobby desk.",
+        raisedSuspicion: 8,
+        hangUp: true,
+      };
+    }
     return {
       npcText: "Not gonna happen, friend. I'll call this in. Have a good one.",
       raisedSuspicion: 10,
@@ -216,9 +238,69 @@ function bankGuardReply(text: string): PhoneRuleResult {
     };
   }
 
+  if (callerNpc === "bankManager") {
+    const routineCheck = countMatches(text, [
+      /quiet/,
+      /lobby/,
+      /front/,
+      /round/,
+      /patrol/,
+      /everything/,
+      /report/,
+      /check.?in/,
+    ]);
+    const formal = countMatches(text, [/cole/, /eddie/, /vance/, /mr\.?\s*vance/, /sir/]);
+
+    if (routineCheck >= 1 && formal >= 1) {
+      return {
+        npcText: "Quiet lobby, Mr. Vance. Front door's clean, alley gate's logged. I stay put till you say otherwise in writing.",
+        raisedSuspicion: 0,
+        hangUp: false,
+      };
+    }
+
+    return {
+      npcText: "Mr. Vance? If this is for the guard log, say it plain.",
+      raisedSuspicion: 3,
+      hangUp: false,
+    };
+  }
+
+  if (callerNpc === "wife") {
+    if (/(harry|harold|husband|vance|manager)/.test(text)) {
+      return {
+        npcText: "Mrs. Vance? This is the lobby line. I can ring his office, but I can't leave my post.",
+        raisedSuspicion: 0,
+        hangUp: false,
+      };
+    }
+
+    return {
+      npcText: "Ma'am, wrong desk. If it's about Mr. Vance, call the lobby operator.",
+      raisedSuspicion: 3,
+      hangUp: false,
+    };
+  }
+
+  if (callerNpc === "secretary") {
+    if (/(lobby|front|round|patrol|quiet|gate|log)/.test(text)) {
+      return {
+        npcText: "Quiet as church, Miss Park. Front's clean and the alley gate is in the log.",
+        raisedSuspicion: 0,
+        hangUp: false,
+      };
+    }
+
+    return {
+      npcText: "Miss Park? If this is a lobby note, put it in the guard log.",
+      raisedSuspicion: 2,
+      hangUp: false,
+    };
+  }
+
   return {
-    npcText: "Cole, security. ... Yeah? Mhm. Right. Anything else?",
-    raisedSuspicion: 0,
+    npcText: "Cole, security. Keep it official or keep it short.",
+    raisedSuspicion: 3,
     hangUp: false,
   };
 }
@@ -261,7 +343,7 @@ export function resolvePhoneRule(input: PhoneRuleInput): PhoneRuleResult {
     return secretaryReply(input.callerNpc, text);
   }
   if (input.targetNpc === "bankGuard") {
-    return bankGuardReply(text);
+    return bankGuardReply(input.callerNpc, text);
   }
   return wifeReply(input.callerNpc, text);
 }

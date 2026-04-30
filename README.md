@@ -231,13 +231,15 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev server in mock mode
-in one terminal and run `node vt-e2e.cjs` in another. **60 / 60 checks pass.**
+in one terminal and run `node vt-e2e.cjs` in another. **72 / 72 checks pass.**
+Set `VT_BASE_URL=http://localhost:<port>` if your server is not on port 3000.
 It exercises first-person startup and WASD movement, phase transitions,
 recording, notebook inventory, phone diversion, hallway voice gating, vault
 watcher rejection, voice auth, briefcase, train-station win,
 suspicion-driven loss, time-out loss, Solution C, weak-call failure
-regressions, guard back-exit diversion, recording-awareness busts, and direct
-API contracts. Full transcript:
+regressions, guard back-exit diversion, caller-aware guard replies,
+recording-awareness busts, the doubt accumulator, and direct API contracts.
+Full transcript:
 [docs/E2E_REPORT.md](./docs/E2E_REPORT.md).
 
 The screenshots above are captured by `vt-fp-shots.cjs` against the running
@@ -246,6 +248,8 @@ dev server in mock mode:
 ```bash
 npm run dev
 node vt-fp-shots.cjs
+# Or, for a non-3000 server:
+VT_BASE_URL=http://localhost:3001 node vt-fp-shots.cjs
 ```
 
 ## Architecture

@@ -1,6 +1,7 @@
 // @ts-nocheck
 const { chromium } = require("playwright");
 const fs = require("fs");
+const BASE_URL = process.env.VT_BASE_URL || "http://localhost:3000";
 
 function browserExecutablePath() {
   const candidates = [
@@ -37,11 +38,11 @@ function browserExecutablePath() {
 
   const out = "docs/screenshots";
 
-  await page.goto("http://localhost:3000/", { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${out}/01-landing.png` });
 
-  await page.goto("http://localhost:3000/play", { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/play`, { waitUntil: "networkidle" });
   await page.waitForTimeout(2400);
   await page.screenshot({ path: `${out}/02-title.png` });
 
