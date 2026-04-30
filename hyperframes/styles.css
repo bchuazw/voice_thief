@@ -1,0 +1,255 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #050403;
+}
+
+#stage {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  color: #f8f1e4;
+  background: #050403;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+.gameplay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 50%;
+  filter: brightness(1.12) contrast(1.06) saturate(1.03);
+  animation: cameraDrift 10s ease-in-out infinite alternate;
+}
+
+@keyframes cameraDrift {
+  0% { transform: scale(1.025) translate3d(-5px, 0, 0); }
+  50% { transform: scale(1.035) translate3d(5px, -3px, 0); }
+  100% { transform: scale(1.025) translate3d(-2px, 4px, 0); }
+}
+
+.grade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(0, 0, 0, 0) 0 43%, rgba(0, 0, 0, 0.5) 74%, rgba(0, 0, 0, 0.78) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0) 34%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+.grade::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  opacity: 0.085;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    112deg,
+    transparent 0%,
+    transparent 43%,
+    rgba(244, 210, 123, 0.34) 50%,
+    transparent 57%,
+    transparent 100%
+  );
+  animation: lightSweep 8.5s ease-in-out infinite alternate;
+}
+
+@keyframes lightSweep {
+  from { transform: translate3d(-18%, -2%, 0) rotate(0.001deg); }
+  to { transform: translate3d(18%, 2%, 0) rotate(0.001deg); }
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.055;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image:
+    repeating-radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.45) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 5px);
+  animation: grainMove 0.8s steps(5) infinite;
+}
+
+@keyframes grainMove {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-18px, 12px, 0); }
+  50% { transform: translate3d(16px, -10px, 0); }
+  75% { transform: translate3d(-10px, -16px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.hud-badge,
+.step {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 2px solid rgba(248, 241, 228, 0.26);
+  background: rgba(5, 4, 3, 0.72);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.hud-badge {
+  top: 66px;
+  padding: 14px 24px;
+  font-size: 27px;
+  letter-spacing: 0.12em;
+  color: #f4d27b;
+  animation: fadeRise 0.45s ease-out both;
+}
+
+.step {
+  top: 78px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 28px;
+  font-size: 31px;
+  letter-spacing: 0.08em;
+  color: #f8f1e4;
+  animation: popIn 0.38s cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
+}
+
+.step span {
+  color: #ff4f4f;
+  font-size: 52px;
+  line-height: 1;
+}
+
+.cue {
+  position: absolute;
+  left: 50%;
+  width: 91%;
+  transform: translateX(-50%);
+  color: #fff6e8;
+  font-size: 72px;
+  line-height: 0.98;
+  font-weight: 900;
+  text-align: center;
+  text-transform: lowercase;
+  text-shadow:
+    0 7px 0 #000,
+    0 0 22px rgba(0, 0, 0, 0.95),
+    0 10px 38px rgba(0, 0, 0, 0.9);
+  animation: captionIn 0.36s cubic-bezier(0.2, 0.85, 0.25, 1.12) both;
+}
+
+.cue-bottom {
+  bottom: 174px;
+}
+
+.cue strong {
+  display: block;
+  color: #ff4f4f;
+  font-weight: 900;
+}
+
+.title-card,
+.end-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.55) 50%, rgba(0, 0, 0, 0.82));
+  animation: titleHit 0.42s cubic-bezier(0.2, 0.85, 0.25, 1.18) both;
+}
+
+.title-card h1 {
+  margin: 0;
+  font-size: 178px;
+  line-height: 0.92;
+  font-weight: 900;
+  text-shadow: 0 0 34px rgba(255, 79, 79, 0.45), 0 12px 36px #000;
+}
+
+.title-card p,
+.end-card p {
+  margin: 26px 0 0;
+  color: #f4d27b;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  position: absolute;
+  left: 50%;
+  bottom: 190px;
+  width: 88%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 61px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.04;
+  text-align: center;
+  text-shadow: 0 7px 0 #000, 0 0 28px #000;
+  animation: captionIn 0.36s cubic-bezier(0.2, 0.85, 0.25, 1.12) both;
+}
+
+.subtitle span {
+  display: block;
+  margin-bottom: 16px;
+  color: #ff4f4f;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  font-size: 27px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.end-card {
+  justify-content: flex-end;
+  padding-bottom: 152px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+.end-card h2 {
+  margin: 0;
+  font-size: 124px;
+  line-height: 0.95;
+  font-weight: 900;
+  text-shadow: 0 0 36px rgba(255, 79, 79, 0.45), 0 12px 34px #000;
+  animation: endPulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes fadeRise {
+  from { opacity: 0; transform: translateX(-50%) translateY(18px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes captionIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes titleHit {
+  from { opacity: 0; transform: scale(1.14); filter: blur(18px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes endPulse {
+  from { transform: scale(1); text-shadow: 0 0 30px rgba(255, 79, 79, 0.35), 0 12px 34px #000; }
+  to { transform: scale(1.025); text-shadow: 0 0 48px rgba(255, 79, 79, 0.58), 0 12px 34px #000; }
+}

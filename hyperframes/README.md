@@ -1,44 +1,59 @@
-# Voice Thief — Trailer
+# Voice Thief Trailer
 
-Hyperframes composition for the 60-second hackathon trailer.
+Hyperframes composition for the vertical gameplay submission trailer.
 
-## What's here
+## Current Pipeline
 
-- `compositions/trailer.html` — full timeline composition (per Voice Thief spec §12.3)
-- `compositions/styles.css` — typography + caption animations
-- `assets/gameplay-clips/` — drop OBS captures here (1920×1080, 60 fps, H.264 MP4)
-- `assets/music/` — drop a royalty-free noir track here as `noir-pulse.wav`
-- `output/` — render destination
+- `index.html` is the active Hyperframes composition.
+- `styles.css` contains the trailer overlays, caption styling, and motion polish.
+- `assets/gameplay/gameplay-trailer-base.mp4` is the trimmed gameplay base used by the composition.
+- `assets/voiceover-submission/*.mp3` are ElevenLabs-generated narration clips copied from `docs/trailer/voiceover-submission/`.
+- `output/voice-thief-submission-trailer.mp4` is the raw Hyperframes render and is ignored by git.
 
-## Required clips
-
-Capture each at 1920×1080 / 60 fps / MP4-H.264 with OBS:
-
-| Clip | Duration | Filename |
-| --- | --- | --- |
-| Establishing rain | 4 s | `01-rain-establishing.mp4` |
-| Following the manager | 5 s | `02-following-manager.mp4` |
-| Cigarette break record | 6 s | `03-cigarette-record.mp4` |
-| Payphone pickup | 3 s | `04-payphone-pickup.mp4` |
-| Typing the message | 4 s | `05-typing-message.mp4` |
-| Wife's cloned voice | 5 s | `06-managers-wife-voice.mp4` |
-| Manager rushes out | 4 s | `07-manager-rushes-out.mp4` |
-| Bank empty | 3 s | `08-bank-empty.mp4` |
-| Vault auth | 6 s | `09-vault-auth.mp4` |
-| Briefcase pickup | 3 s | `10-briefcase-pickup.mp4` |
-| Walk into rain | 4 s | `11-walk-into-rain.mp4` |
-| Title card | 4 s | `12-title-card.mp4` |
-
-Also render or compose `assets/gameplay-clips/full-diegetic-track.wav` (~51 s) per spec §12.5.
-
-## Rendering
+The canonical upload file is written to:
 
 ```bash
-cd hyperframes
-npx hyperframes init voice-thief-trailer   # one time
-npx hyperframes preview                     # live preview in browser
-npx hyperframes lint                        # validate composition
-npx hyperframes render --output ./output/voice-thief-trailer.mp4
+docs/trailer/voice-thief-submission-trailer.mp4
 ```
 
-Output target: 1920×1080, 60 fps, ~51 s, ~30–40 MB MP4.
+## Render
+
+FFmpeg must be available on `PATH`. On this machine the Winget install is:
+
+```powershell
+$env:PATH = "C:\Users\bchua\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1-full_build\bin;$env:PATH"
+npm run render
+```
+
+The render script targets:
+
+- MP4 container
+- H.264 High Profile
+- 1080x1920 vertical
+- 60 fps
+- BT.709 SDR
+- 12 Mbps video target
+
+## Voiceover
+
+Narration is generated through `scripts/render-submission-trailer-vo.mjs`, which reads `ELEVENLABS_API_KEY` from the environment or `.env.local`.
+
+After regenerating VO, copy the files into this Hyperframes project:
+
+```powershell
+Copy-Item ..\docs\trailer\voiceover-submission\*.mp3 .\assets\voiceover-submission -Force
+```
+
+## Upload Master
+
+After Hyperframes render, the canonical upload master is produced with a final audio/loudness pass:
+
+```powershell
+ffmpeg -y -i .\output\voice-thief-submission-trailer.mp4 `
+  -c:v copy `
+  -filter:a "loudnorm=I=-14:LRA=9:TP=-1.5" `
+  -c:a aac -b:a 384k -ar 48000 -ac 2 `
+  -movflags +faststart `
+  ..\docs\trailer\voice-thief-submission-trailer.mp4
+```
+

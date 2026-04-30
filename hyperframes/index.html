@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<div
+  id="stage"
+  data-composition-id="voice-thief-vertical"
+  data-start="0"
+  data-duration="58.6"
+  data-width="1080"
+  data-height="1920"
+  data-fps="60"
+>
+  <video
+    class="clip gameplay"
+    id="gameplay"
+    data-start="0"
+    data-duration="58.6"
+    data-track-index="0"
+    data-has-audio="false"
+    src="./assets/gameplay/gameplay-trailer-base.mp4"
+    muted
+    playsinline
+    preload="auto"
+  ></video>
+
+  <div class="clip grade" id="grade" data-start="0" data-duration="58.6" data-track-index="1"></div>
+  <div class="clip grain" id="grain" data-start="0" data-duration="58.6" data-track-index="2"></div>
+  <div class="clip hud-badge" id="badge-gameplay" data-start="0.35" data-duration="5.4" data-track-index="3">
+    actual gameplay capture
+  </div>
+
+  <div class="clip cue cue-bottom" id="cue-bank" data-start="0.65" data-duration="4.1" data-track-index="4">
+    walk to the bank.
+    <strong>voices open doors.</strong>
+  </div>
+
+  <div class="clip title-card" id="title-main" data-start="5.0" data-duration="3.0" data-track-index="5">
+    <h1>VOICE<br />THIEF</h1>
+    <p>a first-person noir voice heist</p>
+  </div>
+
+  <div class="clip step" id="step-shadow" data-start="10.0" data-duration="4.8" data-track-index="6">
+    <span>01</span>
+    shadow the manager
+  </div>
+  <div class="clip cue cue-bottom" id="cue-record" data-start="11.0" data-duration="5.3" data-track-index="4">
+    get close.
+    <strong>hold E to record.</strong>
+  </div>
+
+  <div class="clip step" id="step-clone" data-start="17.4" data-duration="4.6" data-track-index="6">
+    <span>02</span>
+    clone the voice
+  </div>
+  <div class="clip cue cue-bottom" id="cue-call" data-start="18.0" data-duration="5.2" data-track-index="4">
+    steal the voiceprint.
+    <strong>place the call.</strong>
+  </div>
+
+  <div class="clip step" id="step-bluff" data-start="24.8" data-duration="4.8" data-track-index="6">
+    <span>03</span>
+    bluff under pressure
+  </div>
+  <div class="clip subtitle" id="subtitle-manager" data-start="25.2" data-duration="6.0" data-track-index="7">
+    <span>[cloned: harold vance]</span>
+    Margaret. Head home. There's been a break-in.
+  </div>
+
+  <div class="clip cue cue-bottom" id="cue-heat" data-start="32.4" data-duration="5.2" data-track-index="4">
+    every lie raises heat.
+    <strong>every voice can betray you.</strong>
+  </div>
+
+  <div class="clip step" id="step-plan" data-start="41.6" data-duration="5.8" data-track-index="6">
+    <span>04</span>
+    plan the exit
+  </div>
+  <div class="clip cue cue-bottom" id="cue-plan" data-start="42.4" data-duration="6.6" data-track-index="4">
+    study the schedule.
+    <strong>pick the right voice.</strong>
+  </div>
+
+  <div class="clip cue cue-bottom" id="cue-clean-exit" data-start="49.4" data-duration="4.3" data-track-index="4">
+    one night.
+    <strong>four voices.</strong>
+    one clean exit.
+  </div>
+
+  <div class="clip end-card" id="title-end" data-start="53.5" data-duration="5.1" data-track-index="8">
+    <h2>VOICE THIEF</h2>
+    <p>play the demo</p>
+  </div>
+
+  <audio class="clip" id="vo-hook" data-start="0.45" data-duration="4.0" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/01-hook.mp3"></audio>
+  <audio class="clip" id="vo-title" data-start="5.25" data-duration="1.1" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/02-title.mp3"></audio>
+  <audio class="clip" id="vo-shadow" data-start="10.65" data-duration="4.25" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/03-shadow.mp3"></audio>
+  <audio class="clip" id="vo-clone" data-start="18.05" data-duration="3.95" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/04-clone.mp3"></audio>
+  <audio class="clip" id="vo-manager" data-start="25.15" data-duration="5.8" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/05-manager.mp3"></audio>
+  <audio class="clip" id="vo-heat" data-start="32.65" data-duration="4.2" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/06-heat.mp3"></audio>
+  <audio class="clip" id="vo-plan" data-start="42.6" data-duration="5.8" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/07-plan.mp3"></audio>
+  <audio class="clip" id="vo-outro" data-start="52.75" data-duration="3.4" data-track-index="20" data-volume="1.0" src="./assets/voiceover-submission/08-outro.mp3"></audio>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  window.__timelines["voice-thief-vertical"] = window.gsap
+    ? window.gsap.timeline({ paused: true })
+    : { paused: true };
+</script>
+</body>
+</html>

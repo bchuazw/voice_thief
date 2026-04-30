@@ -5,6 +5,6 @@
   "scripts": {
     "preview": "npx hyperframes preview",
     "lint": "npx hyperframes lint",
-    "render": "npx hyperframes render --output ./output/voice-thief-trailer.mp4"
+    "render": "npx hyperframes render --fps 60 --quality high --video-bitrate 12M --sdr --output ./output/voice-thief-submission-trailer.mp4"
   }
 }
