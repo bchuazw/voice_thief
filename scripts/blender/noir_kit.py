@@ -418,6 +418,62 @@ def vault_audit_panel():
         cylinder(f"vault audit jewel lamp {i}", 0.04, 0.025, [x, 0.1, 0.09], MATS["neon_amber"], 12, True, "z")
 
 
+def briefcase():
+    # Brass-cornered wood briefcase that sits on its pedestal inside the vault.
+    box("briefcase wood pedestal", [0.74, 0.92, 0.6], [0, 0.46, 0], MATS["wood"], 0.025)
+    box("briefcase pedestal cap", [0.78, 0.04, 0.64], [0, 0.94, 0], MATS["brass"], 0.006)
+    # Body (sits on pedestal cap)
+    box("briefcase wood body", [0.62, 0.18, 0.44], [0, 1.05, 0], MATS["wood"], 0.012)
+    box("briefcase brass corner ll", [0.06, 0.06, 0.06], [-0.28, 0.97, -0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner lr", [0.06, 0.06, 0.06], [0.28, 0.97, -0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner ul", [0.06, 0.06, 0.06], [-0.28, 1.13, -0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner ur", [0.06, 0.06, 0.06], [0.28, 1.13, -0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner ll back", [0.06, 0.06, 0.06], [-0.28, 0.97, 0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner lr back", [0.06, 0.06, 0.06], [0.28, 0.97, 0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner ul back", [0.06, 0.06, 0.06], [-0.28, 1.13, 0.19], MATS["brass"], 0.003)
+    box("briefcase brass corner ur back", [0.06, 0.06, 0.06], [0.28, 1.13, 0.19], MATS["brass"], 0.003)
+    # Brass clasp + handle
+    box("briefcase brass clasp", [0.18, 0.05, 0.025], [0, 1.06, 0.225], MATS["brass"], 0.004)
+    box("briefcase brass handle bracket l", [0.04, 0.05, 0.05], [-0.12, 1.18, 0], MATS["brass"], 0.003)
+    box("briefcase brass handle bracket r", [0.04, 0.05, 0.05], [0.12, 1.18, 0], MATS["brass"], 0.003)
+    cylinder("briefcase wrapped leather handle", 0.022, 0.27, [0, 1.22, 0], MATS["dark_metal"], 18, True, "x")
+    # Faint amber rim light source baked as emissive trim, not a real light.
+    box("briefcase top edge brass trim", [0.6, 0.012, 0.42], [0, 1.146, 0], MATS["brass"], 0.002)
+
+
+def street_mailbox():
+    # Curbside USPS-style mailbox: dark green-blue, brass handle, riveted trim.
+    box("mailbox lower body", [0.68, 0.78, 0.5], [0, 0.39, 0], MATS["dark_metal"], 0.038)
+    # Curved upper hood approximated with a slightly wider box + bevel.
+    box("mailbox curved hood", [0.74, 0.32, 0.56], [0, 0.94, 0], MATS["dark_metal"], 0.06)
+    box("mailbox brass front trim", [0.7, 0.04, 0.025], [0, 0.78, 0.262], MATS["brass"], 0.003)
+    box("mailbox brass handle plate", [0.18, 0.18, 0.025], [0, 0.62, 0.262], MATS["brass"], 0.004)
+    cylinder("mailbox handle pull", 0.025, 0.16, [0, 0.62, 0.282], MATS["brass"], 14, True, "x")
+    # Stenciled label on the front (cream paint over dark body).
+    text_label("mailbox stenciled letters", "U.S. MAIL", 0.072, [0, 0.46, 0.262], MATS["cream"])
+    # Riveted side trim.
+    for i, y in enumerate([0.18, 0.48, 0.78]):
+        sphere(f"mailbox rivet l {i}", 0.018, [-0.32, y, 0.18], MATS["brass"], 10)
+        sphere(f"mailbox rivet r {i}", 0.018, [0.32, y, 0.18], MATS["brass"], 10)
+    # Pole base.
+    box("mailbox concrete footing", [0.42, 0.06, 0.42], [0, 0.03, 0], MATS["bank_stone"], 0.012)
+
+
+def neon_bank_sign():
+    # Overhead neon sign for First City Bank — meant to mount above the door.
+    box("neon sign black backplate", [3.6, 0.9, 0.18], [0, 0.45, 0], MATS["black"], 0.022)
+    box("neon sign brass frame", [3.7, 0.96, 0.2], [0, 0.45, -0.012], MATS["brass"], 0.018)
+    # Neon lettering — emissive cylinders bent into rectangles to suggest tube glyphs.
+    text_label("neon sign top word", "FIRST CITY", 0.42, [0, 0.6, 0.105], MATS["neon_amber"], extrude=0.04)
+    text_label("neon sign bottom word", "BANK", 0.34, [0, 0.16, 0.105], MATS["neon_red"], extrude=0.04)
+    # Underglow tubes flanking the lettering.
+    cylinder("neon sign tube glow left", 0.015, 0.84, [-1.74, 0.45, 0.105], MATS["neon_amber"], 14, True, "y")
+    cylinder("neon sign tube glow right", 0.015, 0.84, [1.74, 0.45, 0.105], MATS["neon_amber"], 14, True, "y")
+    # Mounting brackets at each end (simulate wall attachment).
+    box("neon sign mount bracket left", [0.12, 0.18, 0.32], [-1.8, 0.45, -0.18], MATS["dark_metal"], 0.01)
+    box("neon sign mount bracket right", [0.12, 0.18, 0.32], [1.8, 0.45, -0.18], MATS["dark_metal"], 0.01)
+
+
 def cafe_interior():
     box("cafe long walnut counter body", [10.0, 1.1, 1.0], [0, 0.55, -3.5], MATS["wood"], 0.045)
     box("cafe black stone counter top", [10.25, 0.08, 1.08], [0, 1.14, -3.5], MATS["black"], 0.026)
@@ -518,6 +574,9 @@ ASSETS = {
     "teller-counter": teller_counter,
     "records-plaque": records_plaque,
     "vault-audit-panel": vault_audit_panel,
+    "briefcase": briefcase,
+    "street-mailbox": street_mailbox,
+    "neon-bank-sign": neon_bank_sign,
 }
 
 

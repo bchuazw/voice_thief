@@ -12,6 +12,7 @@ import TargetPing from "@/components/world/TargetPing";
 import MarbleFloor from "@/components/props/MarbleFloor";
 import TellerCounter from "@/components/props/TellerCounter";
 import Chandelier from "@/components/props/Chandelier";
+import Briefcase from "@/components/props/Briefcase";
 import NoirAsset from "@/components/assets/NoirAsset";
 import type { NpcId } from "@/game/types";
 
@@ -242,23 +243,7 @@ export default function BankInteriorScene() {
       ))}
 
       {/* Briefcase pedestal inside vault, visible after open */}
-      {vaultOpen && (
-        <group position={[0, 0, -13]}>
-          <mesh position={[0, 0.45, 0]} castShadow>
-            <boxGeometry args={[0.7, 0.9, 0.6]} />
-            <meshStandardMaterial color="#2a1810" />
-          </mesh>
-          <mesh position={[0, 1, 0]} castShadow>
-            <boxGeometry args={[0.6, 0.18, 0.4]} />
-            <meshStandardMaterial color="#5a3a22" roughness={0.4} />
-          </mesh>
-          <mesh position={[0, 1.05, 0.21]}>
-            <boxGeometry args={[0.18, 0.06, 0.02]} />
-            <meshStandardMaterial color="#a07020" metalness={1} roughness={0.3} />
-          </mesh>
-          <pointLight position={[0, 1.5, 0]} intensity={1.4} color="#ffd9a0" distance={3} />
-        </group>
-      )}
+      {vaultOpen && <Briefcase position={[0, 0, -13]} />}
 
       {viewMode === "diorama" && <PlayerCharacter />}
       {viewMode === "diorama" && <TargetPing />}

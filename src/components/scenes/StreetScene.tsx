@@ -17,6 +17,7 @@ import ApartmentBlock from "@/components/props/ApartmentBlock";
 import StreetLamp from "@/components/props/StreetLamp";
 import Payphone from "@/components/props/Payphone";
 import StreetFurniture from "@/components/props/StreetFurniture";
+import NeonBankSign from "@/components/props/NeonBankSign";
 import TrainStation from "@/components/props/TrainStation";
 import type { NpcId } from "@/game/types";
 
@@ -112,6 +113,8 @@ export default function StreetScene() {
 
       {/* The buildings */}
       <BankFacade position={[-10, 0, -4]} />
+      {/* Overhead neon sign for the bank, mounted above the door */}
+      <NeonBankSign position={[-10, 3.7, 0.6]} />
       <CafeFacade position={[10, 0, -4]} />
       <ApartmentBlock position={[18, 0, -2]} />
 
