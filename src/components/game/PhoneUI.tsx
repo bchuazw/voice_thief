@@ -7,9 +7,16 @@ import { speakStolenText } from "@/audio/npcSpeech";
 import { emotionGlyph } from "@/game/emotionDisplay";
 import { setBranch } from "@/game/npcSchedules";
 import { distance } from "@/game/pathfinding";
-import { resolvePhoneRule, type PhoneRuleEffect } from "@/game/phoneRules";
+import {
+  analyzeTurnDoubt,
+  resolvePhoneRule,
+  type PhoneRuleEffect,
+} from "@/game/phoneRules";
 import { useGame } from "@/game/store";
 import type { NpcId } from "@/game/types";
+
+const HANGUP_DOUBT = 60;
+const BRANCH_BLOCK_DOUBT = 30;
 
 const TARGETS: NpcId[] = ["bankManager", "secretary", "bankGuard", "wife"];
 const OVERHEAR_RADIUS = 5;
@@ -56,6 +63,7 @@ export default function PhoneUI() {
   const setActiveCall = useGame((s) => s.setActiveCall);
   const activeCall = useGame((s) => s.activeCall);
   const pushCallTurn = useGame((s) => s.pushCallTurn);
+  const raiseCallDoubt = useGame((s) => s.raiseCallDoubt);
   const raiseSuspicion = useGame((s) => s.raiseSuspicion);
   const inGameTime = useGame((s) => s.inGameTime);
   // Subscribing to npcs makes the overhear warning live-update if a patrolling
@@ -101,10 +109,22 @@ export default function PhoneUI() {
       voiceCardId: card.id,
       transcript: [],
       pending: true,
+      doubt: 0,
     };
     if (!activeCall) setActiveCall(newCall);
 
+    // Compute turn doubt against the prior caller turns *before* we push
+    // the new turn. priorDoubt is the entry state — branch flips with
+    // priorDoubt ≥ 30 are blocked because the NPC was already suspicious
+    // when this turn started.
+    const priorCallerTurns = newCall.transcript
+      .filter((t) => t.role === "caller")
+      .map((t) => t.text);
+    const turnAnalysis = analyzeTurnDoubt(message, priorCallerTurns);
+    const priorDoubt = newCall.doubt;
+
     pushCallTurn({ role: "caller", text: message });
+    raiseCallDoubt(turnAnalysis.doubt);
 
     try {
       const res = await fetch("/api/conversation", {
@@ -137,17 +157,48 @@ export default function PhoneUI() {
         playAudio(data.callerAudio);
       }
 
-      pushCallTurn({ role: "npc", text: data.npcText });
+      const rule = resolvePhoneRule({
+        targetNpc: target,
+        callerNpc: card.npcId,
+        text: message,
+      });
+
+      // Branch flips ARE blocked when prior doubt was already too high. The
+      // NPC text is rewritten to a "you sound off" pushback so the player
+      // hears the consequence of fumbling the opener.
+      const branchBlocked = priorDoubt >= BRANCH_BLOCK_DOUBT && rule.effect?.branch;
+      const newDoubt = useGame.getState().activeCall?.doubt ?? 0;
+      const forceHangup = newDoubt >= HANGUP_DOUBT;
+
+      let displayedNpcText = data.npcText;
+      let effectiveHangup = data.hangUp;
+
+      if (branchBlocked) {
+        displayedNpcText = `Wait — slow down. You sound off. Who exactly is this?`;
+        effectiveHangup = false;
+      }
+      if (forceHangup) {
+        displayedNpcText = `That's it. I'm hanging up.`;
+        effectiveHangup = true;
+      }
+
+      pushCallTurn({ role: "npc", text: displayedNpcText });
       setTimeout(() => {
         if (data.mock || !data.npcAudio) {
-          speakStolenText(target, data.npcText, "calm");
+          speakStolenText(target, displayedNpcText, "calm");
         } else {
           playAudio(data.npcAudio);
         }
       }, 600);
 
-      if (data.raisedSuspicion > 0) {
+      if (data.raisedSuspicion > 0 && !branchBlocked) {
         raiseSuspicion(data.raisedSuspicion, `${target} grew suspicious`);
+      }
+
+      // High-doubt hangup is a serious heat event — scaled with how badly the
+      // bluff was botched. 60-doubt = 12 heat; 100-doubt = 24 heat.
+      if (forceHangup) {
+        raiseSuspicion(Math.round(newDoubt * 0.2), `${target} smelled the bluff`);
       }
 
       const overhearer = findOverhearer(target);
@@ -155,14 +206,11 @@ export default function PhoneUI() {
         raiseSuspicion(6, `${NPC_PROFILES[overhearer].displayName} overheard the call`);
       }
 
-      const rule = resolvePhoneRule({
-        targetNpc: target,
-        callerNpc: card.npcId,
-        text: message,
-      });
-      applyPhoneEffect(rule.effect);
+      if (!branchBlocked && !forceHangup) {
+        applyPhoneEffect(rule.effect);
+      }
 
-      if (data.hangUp) {
+      if (effectiveHangup) {
         setTimeout(() => {
           useGame.getState().pushToast(`${NPC_PROFILES[target].displayName} hung up.`);
           setActiveCall(null);
@@ -203,6 +251,8 @@ export default function PhoneUI() {
   const callerVoiceNpcId = selectedVoiceCard?.npcId ?? null;
   const placeholder = phonePlaceholder(callerVoiceNpcId, target);
   const hasVoices = inventory.length > 0;
+  const callDoubt = activeCall?.doubt ?? 0;
+  const doubtTone = callDoubt < 30 ? "calm" : callDoubt < 60 ? "wary" : "exposed";
   // Live overhear check — recomputes whenever npcs / player position change.
   const nearbyOverhearer = (() => {
     for (const id of Object.keys(npcs) as NpcId[]) {
@@ -276,6 +326,46 @@ export default function PhoneUI() {
         {!hasVoices && (
           <div className="mt-4 rounded border border-noir-amber/30 bg-black/35 px-3 py-3 text-sm text-noir-fog">
             Record someone first. The best leads are in the notebook schedule.
+          </div>
+        )}
+
+        {/* Tension meter: how doubtful the target sounds. Branch flips fail
+            once it crosses 30; the call ends entirely at 60. */}
+        {hasVoices && activeCall && (
+          <div className="mt-4">
+            <div className="flex items-baseline justify-between text-[10px] uppercase tracking-[0.3em] text-noir-fog">
+              <span>Tension</span>
+              <span
+                className={
+                  doubtTone === "calm"
+                    ? "text-[#3affa6]"
+                    : doubtTone === "wary"
+                      ? "text-noir-amber"
+                      : "text-noir-neon"
+                }
+              >
+                {doubtTone}
+              </span>
+            </div>
+            <div
+              className="mt-1 h-1 w-full overflow-hidden rounded-full bg-black/50"
+              role="progressbar"
+              aria-valuenow={Math.round(callDoubt)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Call tension"
+            >
+              <div
+                className={`h-full transition-all duration-300 ${
+                  doubtTone === "calm"
+                    ? "bg-[#3affa6]"
+                    : doubtTone === "wary"
+                      ? "bg-noir-amber"
+                      : "bg-noir-neon"
+                }`}
+                style={{ width: `${Math.min(100, callDoubt)}%` }}
+              />
+            </div>
           </div>
         )}
 

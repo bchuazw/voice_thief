@@ -617,6 +617,106 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     }
   }
 
+  // ── 11. Doubt accumulator (multi-turn bluff system) ──────────────────
+  console.log("\n=== Phase 11: doubt accumulator ===");
+  // Reset to a clean playing state with a wife voice card to test multi-turn flow.
+  await page.evaluate(() => window.__vt.getState().reset());
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.__vt.getState().setPhase("playing"));
+  await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    s.addVoiceCard({
+      id: "card_wife_doubt",
+      npcId: "wife",
+      elevenLabsVoiceId: "mock_voice_wife_doubt",
+      capturedAtInGameTime: 18 * 3600,
+      emotionalState: "calm",
+      durationSeconds: 6,
+      sourceMomentId: "wife-gossip-6_30",
+      mock: true,
+    });
+  });
+
+  // Test 1: Weak opener spikes doubt above the branch-block threshold.
+  await page.keyboard.press("p");
+  await page.waitForTimeout(400);
+  await page.locator("select").nth(1).selectOption("card_wife_doubt");
+  await page.locator("textarea").fill("hi");
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => (window.__vt.getState().activeCall?.transcript ?? []).some((t) => t.role === "npc"),
+    "weak opener gets a reply",
+    4000,
+  );
+  let doubtState = await page.evaluate(() => ({
+    doubt: window.__vt.getState().activeCall?.doubt ?? 0,
+    branch: window.__vt.getState().npcs.bankManager.branch,
+  }));
+  check("weak opener raises doubt above 0", doubtState.doubt > 0, `doubt=${doubtState.doubt}`);
+  check("weak opener does NOT flip branch", doubtState.branch === "default");
+
+  // Test 2: Send another weak follow-up to push doubt past 30 (block-flip
+  // threshold). Then a "winning" emergency message should NOT flip the
+  // branch because prior doubt was already too high.
+  await page.locator("textarea").fill("yes");
+  await page.locator("text=Place Call").first().click();
+  await page.waitForTimeout(800);
+  doubtState = await page.evaluate(() => ({
+    doubt: window.__vt.getState().activeCall?.doubt ?? 0,
+    branch: window.__vt.getState().npcs.bankManager.branch,
+  }));
+  check("two weak turns push doubt over branch-block threshold", doubtState.doubt >= 30, `doubt=${doubtState.doubt}`);
+
+  // The winning emergency phrase, but with priorDoubt already >= 30 — should be blocked.
+  await page.locator("textarea").fill("Maggie here. Stranger at the house, please hurry home now.");
+  await page.locator("text=Place Call").first().click();
+  await page.waitForTimeout(800);
+  doubtState = await page.evaluate(() => ({
+    doubt: window.__vt.getState().activeCall?.doubt ?? 0,
+    branch: window.__vt.getState().npcs.bankManager.branch,
+    npcReplies: (window.__vt.getState().activeCall?.transcript ?? [])
+      .filter((t) => t.role === "npc")
+      .map((t) => t.text),
+  }));
+  check(
+    "branch flip blocked when prior doubt was high",
+    doubtState.branch === "default",
+    `branch=${doubtState.branch}, last npc reply=${doubtState.npcReplies.slice(-1)[0]}`,
+  );
+  check(
+    "blocked turn shows pushback text",
+    doubtState.npcReplies.some((r) => /sound off|slow down/i.test(r)),
+    `replies=${JSON.stringify(doubtState.npcReplies)}`,
+  );
+
+  // Test 3: Fresh call with strong opener should flip branch normally.
+  await page.evaluate(() => {
+    window.__vt.getState().setActiveCall(null);
+    window.__vt.getState().togglePhone(false);
+  });
+  await page.waitForTimeout(300);
+  await page.keyboard.press("p");
+  await page.waitForTimeout(400);
+  await page.locator("select").nth(1).selectOption("card_wife_doubt");
+  await page.locator("textarea").fill(
+    "Harry, please listen. There is a stranger at the bedroom window. I am scared and I need you to come home now.",
+  );
+  await page.locator("text=Place Call").first().click();
+  await waitFor(
+    page,
+    () => window.__vt.getState().npcs.bankManager.branch === "rushedHome",
+    "strong opener flips branch normally",
+    4000,
+  );
+  doubtState = await page.evaluate(() => ({
+    doubt: window.__vt.getState().activeCall?.doubt ?? 0,
+    branch: window.__vt.getState().npcs.bankManager.branch,
+  }));
+  check("strong specific opener keeps doubt low", doubtState.doubt < 30, `doubt=${doubtState.doubt}`);
+  check("strong specific opener flips branch", doubtState.branch === "rushedHome");
+
   await browser.close();
 
   // ── Report ─────────────────────────────────────────────────────────

@@ -62,6 +62,11 @@ export interface ActiveCall {
   voiceCardId: string;
   transcript: { role: "caller" | "npc"; text: string }[];
   pending: boolean;
+  /** 0-100. Each turn that isn't tonally right adds doubt; once it crosses
+   *  60 the NPC hangs up regardless of keywords. Branch-flip side effects
+   *  are blocked if doubt was already ≥ 30 going into a turn — meaning a
+   *  player who fumbles the opener can't just spam keywords to recover. */
+  doubt: number;
 }
 
 export interface AuthAttempt {

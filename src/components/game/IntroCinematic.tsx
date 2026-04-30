@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useGame } from "@/game/store";
 
+// The cinematic earns its mood. Tutorial text used to live in beat 6 — it
+// undercut the silence. The notebook teaches itself; trust the silence.
 const BEATS = [
   { t: 0, line: "A hotel room. Rain on the window." },
   { t: 4500, line: "The radio whispers: First City Bank, the vault that listens." },
   { t: 9500, line: "A folded note on the bed. One word. ONE JOB." },
   { t: 14500, line: "You don't speak. You haven't, since the war." },
   { t: 19500, line: "But the city is full of voices." },
-  { t: 23500, line: "Press N for schedules. Hold E when a voice is worth stealing." },
-  { t: 28500, line: "Be at the station by 9." },
+  { t: 24500, line: "Last train at nine." },
 ];
 
 export default function IntroCinematic() {
@@ -24,7 +25,7 @@ export default function IntroCinematic() {
   }, []);
 
   useEffect(() => {
-    if (now >= 33000) setPhase("playing");
+    if (now >= 29000) setPhase("playing");
   }, [now, setPhase]);
 
   const visible = BEATS.filter((b) => now >= b.t).slice(-1)[0];

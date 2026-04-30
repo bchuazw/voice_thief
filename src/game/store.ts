@@ -114,6 +114,7 @@ export interface GameActions {
   takeBriefcase(): void;
   setActiveCall(call: ActiveCall | null): void;
   pushCallTurn(turn: { role: "caller" | "npc"; text: string }): void;
+  raiseCallDoubt(delta: number): void;
   setActiveAuth(auth: AuthAttempt | null): void;
   toggleNotebook(open?: boolean): void;
   togglePhone(open?: boolean): void;
@@ -284,6 +285,18 @@ export const useGame = create<GameState & GameActions>()(
               activeCall: {
                 ...s.activeCall,
                 transcript: [...s.activeCall.transcript, turn],
+              },
+            }
+          : s,
+      ),
+
+    raiseCallDoubt: (delta) =>
+      set((s) =>
+        s.activeCall
+          ? {
+              activeCall: {
+                ...s.activeCall,
+                doubt: Math.max(0, Math.min(100, s.activeCall.doubt + delta)),
               },
             }
           : s,

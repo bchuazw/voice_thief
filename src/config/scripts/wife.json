@@ -15,7 +15,9 @@
       "id": "wife-quiet-7_15",
       "emotion": "stressed",
       "lines": [
-        { "text": "He's working late again. Same as every Thursday.", "pause": 0.9 }
+        { "text": "He's working late again. Same as every Thursday.", "pause": 0.9 },
+        { "text": "When we married, he said the bank was a stepping stone. Twenty years.", "pause": 1.0 },
+        { "text": "I don't ask anymore. I just keep the porch light on.", "pause": 0.8 }
       ]
     }
   ]

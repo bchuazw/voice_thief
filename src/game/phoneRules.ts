@@ -265,3 +265,70 @@ export function resolvePhoneRule(input: PhoneRuleInput): PhoneRuleResult {
   }
   return wifeReply(input.callerNpc, text);
 }
+
+/**
+ * Score how plausible/coherent a single turn sounds. Returns a doubt delta
+ * (0-30 typical) plus a tone tag the UI can display ("specific", "weak",
+ * "generic", "neutral"). Calls accumulate doubt across turns; ≥60 ends the
+ * call, ≥30 (going into a turn) blocks branch-flip side effects so a
+ * fumbled opener can't be salvaged by spamming the right keywords later.
+ */
+export interface TurnAnalysis {
+  doubt: number;
+  tone: "specific" | "weak" | "generic" | "neutral";
+}
+
+const NOUN_HINTS = [
+  // people / pet-names
+  /maggie|margaret|harold|harry|lillian|cole|eddie|vance|park/i,
+  // places
+  /home|house|bedroom|window|cafe|booth|counter|lobby|alley|gate|office|attic|storage|supply|upstairs|vault|records/i,
+  // items
+  /ledger|file|papers|folder|key|button|coffee|patrol|round|beat/i,
+  // numbers / time
+  /\b(\d{1,2})(:\d\d)?\b|\b(seven|eight|nine|ten|eleven)\b/i,
+];
+
+const GENERIC_OPENERS = /^(hi|hey|hello|yo|yes|no|ok|okay|wait|um|uh)\b/i;
+
+function countNounHints(text: string): number {
+  let n = 0;
+  for (const r of NOUN_HINTS) if (r.test(text)) n += 1;
+  return n;
+}
+
+function wordCount(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+export function analyzeTurnDoubt(text: string, priorTranscript: string[]): TurnAnalysis {
+  const words = wordCount(text);
+  const nouns = countNounHints(text);
+
+  // Repetition is the single most damning signal — if you say the same line
+  // twice, the NPC notices.
+  const seenBefore = priorTranscript.some((t) => t.trim().toLowerCase() === text.trim().toLowerCase());
+  if (seenBefore && text.trim().length > 0) {
+    return { doubt: 25, tone: "weak" };
+  }
+
+  // Very short or no nouns → reads as fishing / panicked. 18 is calibrated so
+  // a SECOND weak turn pushes cumulative doubt past the 30 branch-block
+  // threshold (player can't recover by spamming keywords after a fumble).
+  if (words < 4) return { doubt: 18, tone: "weak" };
+  if (nouns === 0) return { doubt: 16, tone: "weak" };
+
+  // Generic opener with little behind it.
+  if (GENERIC_OPENERS.test(text) && nouns < 2) return { doubt: 10, tone: "generic" };
+
+  // Specific multi-noun message with reasonable length: rapport-building.
+  if (nouns >= 3 && words >= 8) return { doubt: -3, tone: "specific" };
+
+  // Solid, coherent, on-topic.
+  if (nouns >= 2 && words >= 6) return { doubt: 2, tone: "neutral" };
+
+  // Default: light doubt for anything else.
+  return { doubt: 5, tone: "neutral" };
+}

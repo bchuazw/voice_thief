@@ -46,7 +46,7 @@ export default function EndCard() {
         </h1>
         <p className="mx-auto mt-3 max-w-lg text-noir-fog">
           {won
-            ? "The train groans out of First City with the briefcase under your coat. Nobody remembers your voice, because you never used it."
+            ? "The platform is empty. The whistle is far. You step onto the train. It leaves the way trains leave when nobody is watching."
             : lossText(lossReason)}
         </p>
         <div className="mx-auto mt-6 grid max-w-xl grid-cols-3 gap-2 text-center">

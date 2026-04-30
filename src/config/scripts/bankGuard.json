@@ -7,6 +7,8 @@
       "lines": [
         { "text": "Hmmm-mm-mm... duh-duh-duh...", "pause": 0.5 },
         { "text": "Quiet night. Always a quiet night on this beat.", "pause": 0.8 },
+        { "text": "Used to be on the docks. Knee gave out, they put me here.", "pause": 1.0 },
+        { "text": "Twelve years. Same alley, same gate, same hum.", "pause": 0.8 },
         { "text": "Hmmm-mm... 'round midnight...", "pause": 0.6 }
       ]
     },
