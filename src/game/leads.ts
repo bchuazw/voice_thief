@@ -75,6 +75,22 @@ export function buildLeads(state: GameState): Lead[] {
     });
   }
 
+  if (hasCalmSecretary && state.bankHallwayUnlocked && !state.auditLedgerForged && !state.vaultOpen) {
+    leads.push({
+      id: "audit-cabinet",
+      title: "The audit cabinet",
+      body: "A records drawer waits beside the vault hall. Lillian's calm voice might file a clean-looking clearance without moving her.",
+      urgency: "active",
+    });
+  } else if (state.auditLedgerForged && !state.vaultOpen) {
+    leads.push({
+      id: "audit-cabinet-done",
+      title: "False clearance filed",
+      body: "The audit lamp is green. Harold's calm voice should reach the vault without Lillian's ledger objecting.",
+      urgency: "solved",
+    });
+  }
+
   if (hasWife && state.npcs.bankManager.branch === "default") {
     leads.push({
       id: "wife-diversion",
@@ -107,8 +123,8 @@ export function buildLeads(state: GameState): Lead[] {
       id: "use-manager",
       title: "The vault remembers Harold",
       body:
-        state.npcs.secretary.branch !== "runningErrand"
-          ? "Harold's voice can fool the vault, but Lillian's closing ledger will flag the clunk. Move her off the counter first."
+        state.npcs.secretary.branch !== "runningErrand" && !state.auditLedgerForged
+          ? "Harold's voice can fool the vault, but Lillian's closing ledger will flag the clunk. Move her off the counter or file a records clearance first."
           : state.bankHallwayUnlocked
             ? "Lillian is out and the hallway is open. Harold's calm voice is the final key."
             : "Lillian is out. Use her records voice on the hallway, then Harold's calm voice at the vault.",

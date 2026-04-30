@@ -87,6 +87,7 @@ export interface GameState {
   alarmTriggered: boolean;
   vaultOpen: boolean;
   briefcaseTaken: boolean;
+  auditLedgerForged: boolean;
   bankFrontUnlocked: boolean;
   bankHallwayUnlocked: boolean;
   bankBackExitUnlocked: boolean;

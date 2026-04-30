@@ -418,6 +418,27 @@ def vault_audit_panel():
         cylinder(f"vault audit jewel lamp {i}", 0.04, 0.025, [x, 0.1, 0.09], MATS["neon_amber"], 12, True, "z")
 
 
+def records_cabinet():
+    box("records cabinet oak case", [1.34, 1.26, 0.52], [0, 0.63, 0], MATS["wood"], 0.035)
+    box("records cabinet black enamel back", [1.18, 1.06, 0.055], [0, 0.66, 0.285], MATS["black"], 0.01)
+    box("records cabinet brass top rail", [1.22, 0.055, 0.06], [0, 1.22, 0.33], MATS["brass"], 0.005)
+    box("records cabinet brass kick rail", [1.22, 0.055, 0.06], [0, 0.12, 0.33], MATS["brass"], 0.005)
+    for i, y in enumerate([0.34, 0.64, 0.94]):
+        box(f"records drawer dark face {i}", [1.04, 0.22, 0.055], [0, y, 0.34], MATS["dark_metal"], 0.012)
+        box(f"records drawer brass label {i}", [0.42, 0.08, 0.026], [0, y + 0.035, 0.38], MATS["brass"], 0.004)
+        cylinder(f"records drawer pull {i}", 0.026, 0.46, [0, y - 0.045, 0.395], MATS["brass"], 14, True, "x")
+    text_label("records drawer label text", "CLEARANCE", 0.052, [0, 0.98, 0.415], MATS["black"])
+    box("records open audit tray", [0.9, 0.07, 0.48], [0, 1.36, 0.02], MATS["brass"], 0.008)
+    box("records audit slip paper", [0.74, 0.028, 0.34], [0, 1.43, 0.04], MATS["paper"], 0.003, rot=(0.0, 0.0, math.radians(-2)))
+    text_label("records audit slip clearance", "L. PARK  CLEAR", 0.055, [0, 1.46, 0.17], MATS["black"])
+    cylinder("records voice spool left", 0.08, 0.035, [-0.46, 1.24, 0.36], MATS["dark_metal"], 20, True, "z")
+    cylinder("records voice spool right", 0.08, 0.035, [0.46, 1.24, 0.36], MATS["dark_metal"], 20, True, "z")
+    box("records voice tape strip", [0.76, 0.018, 0.018], [0, 1.24, 0.405], MATS["brass"], 0.002)
+    sphere("records amber waiting lamp", 0.055, [-0.55, 1.1, 0.39], MATS["neon_amber"], 16)
+    sphere("records teal cleared lamp", 0.055, [0.55, 1.1, 0.39], MATS["neon_teal"], 16)
+    text_label("records cabinet side letters", "AUDIT", 0.08, [-0.48, 0.18, -0.27], MATS["cream"])
+
+
 def briefcase():
     # Brass-cornered wood briefcase that sits on its pedestal inside the vault.
     box("briefcase wood pedestal", [0.74, 0.92, 0.6], [0, 0.46, 0], MATS["wood"], 0.025)
@@ -573,6 +594,7 @@ ASSETS = {
     "train-station": train_station,
     "teller-counter": teller_counter,
     "records-plaque": records_plaque,
+    "records-cabinet": records_cabinet,
     "vault-audit-panel": vault_audit_panel,
     "briefcase": briefcase,
     "street-mailbox": street_mailbox,

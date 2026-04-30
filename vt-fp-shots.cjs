@@ -113,6 +113,15 @@ function browserExecutablePath() {
   await page.screenshot({ path: `${out}/07-fp-bank-lobby.png` });
 
   await page.evaluate(() => {
+    window.__vt.setState({ bankHallwayUnlocked: true, vaultOpen: false, auditLedgerForged: false });
+  });
+  await fp([-2.45, -8.15], [-2.65, -9.35], "vault");
+  await page.waitForTimeout(2400);
+  await fp([-2.45, -8.15], [-2.65, -9.35], "vault");
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${out}/07b-fp-records-cabinet.png` });
+
+  await page.evaluate(() => {
     window.__vt.setState({ vaultOpen: true });
   });
   // Stand inside the vault chamber, off-axis from the door, looking at

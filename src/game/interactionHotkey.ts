@@ -34,6 +34,14 @@ export function useInteractionHotkey(): void {
             result: "pending",
           });
           return;
+        case "auditLedger": {
+          if (s.auditLedgerForged) {
+            s.pushToast("The false clearance is already filed.");
+            return;
+          }
+          if (s.fileAuditLedger()) s.raiseSuspicion(8, "records cabinet tampering");
+          return;
+        }
         case "briefcase":
           s.takeBriefcase();
           s.pushToast("Briefcase secured. Get to the train station.");

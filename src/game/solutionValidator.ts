@@ -66,10 +66,10 @@ export function validateVaultOpening(state: GameState, card: VoiceCard): AuthVer
     return { passes: false, reason: "Alarm already raised.", stressScore: verdict.stressScore };
   }
   const secretary = state.npcs.secretary;
-  if (secretary.branch !== "runningErrand") {
+  if (secretary.branch !== "runningErrand" && !state.auditLedgerForged) {
     return {
       passes: false,
-      reason: "Lillian's closing ledger is still active - clear her from the counter first.",
+      reason: "Lillian's closing ledger is still active - clear her from the counter or file a records clearance first.",
       stressScore: verdict.stressScore,
     };
   }

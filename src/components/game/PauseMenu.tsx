@@ -67,7 +67,7 @@ export default function PauseMenu() {
         <p className="mt-4 text-sm text-noir-fog">
           {hasBriefcase
             ? "Briefcase in hand. Main Street, then the train."
-            : "Open the notebook for leads, move Lillian off the counter, and keep calm voices for the hallway and vault."}
+            : "Open the notebook for leads, clear Lillian's ledger, and keep calm voices for the hallway and vault."}
         </p>
         <div className="mt-5 rounded border border-noir-paper/10 bg-black/25 p-3">
           <div className="flex items-center justify-between gap-3">

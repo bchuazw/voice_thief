@@ -189,6 +189,12 @@ function listTargets(scene: LocationId): InteractableTarget[] {
           toast: "The audit glass holds on one line: L. Park - closing ledger - clear before vault cycle.",
         }),
       });
+      targets.push({
+        pos: new THREE.Vector3(-2.65, 1.15, -9.35),
+        radius: 1.1,
+        priority: 5,
+        build: () => ({ kind: "auditLedger" }),
+      });
     } else if (!s.briefcaseTaken) {
       targets.push({
         pos: new THREE.Vector3(0, 1.4, -11),

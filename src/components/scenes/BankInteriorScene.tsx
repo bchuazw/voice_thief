@@ -24,6 +24,7 @@ export default function BankInteriorScene() {
   const setPlayerTarget = useGame((s) => s.setPlayerTarget);
   const viewMode = useGame((s) => s.viewMode);
   const vaultOpen = useGame((s) => s.vaultOpen);
+  const auditLedgerForged = useGame((s) => s.auditLedgerForged);
   const bankHallwayUnlocked = useGame((s) => s.bankHallwayUnlocked);
   const bankBackExitUnlocked = useGame((s) => s.bankBackExitUnlocked);
   const lastPos = useRef(player.position);
@@ -210,6 +211,13 @@ export default function BankInteriorScene() {
       {/* Vault door at the entrance to the chamber */}
       <VaultDoor open={vaultOpen} position={[0, 2, -11.6]} />
       <NoirAsset name="vaultAuditPanel" position={[3.15, 1.28, -11.34]} scale={0.86} />
+      <NoirAsset name="recordsCabinet" position={[-2.65, 0, -9.35]} rotation={[0, 0.18, 0]} scale={0.92} />
+      <pointLight
+        position={[-2.65, 1.25, -9.08]}
+        intensity={auditLedgerForged ? 0.7 : 0.48}
+        color={auditLedgerForged ? "#3affa6" : "#f5a623"}
+        distance={3.4}
+      />
       {/* Vault door frame ring */}
       <mesh position={[0, 2, -11.4]}>
         <torusGeometry args={[2.6, 0.15, 16, 32]} />

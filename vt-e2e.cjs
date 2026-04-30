@@ -354,6 +354,38 @@ async function waitFor(page, predFn, label, timeoutMs = 8000) {
     check("calm card visible in dialog", false, "button not found");
   }
 
+  // Alternate route: forge a records clearance with Lillian's calm voice,
+  // keeping her at the counter while bypassing the closing-ledger blocker.
+  await page.evaluate(() => {
+    const s = window.__vt.getState();
+    s.setActiveAuth(null);
+    if (s.fileAuditLedger()) s.raiseSuspicion(8, "records cabinet tampering");
+  });
+  await page.waitForTimeout(300);
+  state = await getState(page);
+  check("records cabinet files false Lillian clearance", state.auditLedgerForged === true);
+  check("forged clearance keeps Lillian on default branch", state.npcs.secretary.branch === "default");
+
+  await page.evaluate(() => {
+    window.__vt.getState().setActiveAuth({ device: "vault", voiceCardId: "", result: "pending" });
+  });
+  await page.waitForTimeout(500);
+  const forgedCalmBtn = page.locator("button", { hasText: /calm/ }).first();
+  if (await forgedCalmBtn.count()) {
+    await forgedCalmBtn.click();
+    await page.waitForTimeout(2000);
+    state = await getState(page);
+    check("forged clearance lets calm manager voice open vault", state.vaultOpen === true);
+    await shoot(page, "10b-vault-auth-forged-ledger-pass.png");
+  } else {
+    check("calm card visible for forged clearance auth", false, "button not found");
+  }
+
+  await page.evaluate(() => {
+    window.__vt.setState({ vaultOpen: false, auditLedgerForged: false, activeAuth: null });
+  });
+  await page.waitForTimeout(300);
+
   // Clear the counter with Harold's voice, then try the vault again.
   await page.evaluate(() => window.__vt.getState().setActiveAuth(null));
   await page.keyboard.press("p");

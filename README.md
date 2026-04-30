@@ -70,6 +70,14 @@ end. Harold Vance the manager is doing paperwork.
 
 ![FP — Bank lobby](docs/screenshots/07-fp-bank-lobby.png)
 
+### The records cabinet
+
+Past Lillian's hallway intercom, a records cabinet sits by the vault approach.
+If you have Lillian's calm voice, you can file a false clearance here instead
+of moving her off the counter by phone.
+
+![FP — Records cabinet](docs/screenshots/07b-fp-records-cabinet.png)
+
 ### The vault
 
 Past the manager's hallway, the brass torus frame rings the open vault door.
@@ -152,7 +160,7 @@ time, then offers an immediate replay.
 | **Shift** | Run |
 | Mouse | Look around (FP only — click the canvas to engage pointer-lock) |
 | Click ground | Walk to that point (Diorama only) |
-| **E** | Interact with what's centered in the crosshair: record an NPC, use the payphone, open a door, authenticate at a voice-locked intercom, take the briefcase |
+| **E** | Interact with what's centered in the crosshair: record an NPC, use the payphone, open a door, file a records clearance, authenticate at a voice-locked intercom, take the briefcase |
 | **N** | Toggle the Notebook |
 | **P** | Toggle the Phone |
 | **M** | Mute / unmute audio |
@@ -172,10 +180,10 @@ thing.
 2. **Vault key.** Harold Vance still owns the vault voiceprint. The best calm
    recording is his 6:15 PM cigarette break, though the ledger diversion can
    lure him to the cafe for another clean take.
-3. **Clear the counter.** The vault will reject even a perfect Harold sample
-   while Lillian's closing ledger is active. Use Harold's voice on the phone
-   to give her a boring records errand, then authenticate the hallway and the
-   vault in the right order.
+3. **Clear the ledger.** The vault will reject even a perfect Harold sample
+   while Lillian's closing ledger is active. Either use Harold's voice on the
+   phone to give her a boring records errand, or get into the hallway with
+   Lillian's calm voice and forge a records clearance at the cabinet.
 4. **Optional exits and diversions.** Margaret's voice can pull Harold out of
    the bank. Eddie Cole's beat-call can open the alley gate for a faster
    escape. These help, but they do not replace the records/vault voice puzzle.
@@ -233,11 +241,12 @@ npm run dev
 ## Tests
 
 The end-to-end suite lives at `vt-e2e.cjs`. Boot the dev or production server
-in mock mode and run `node vt-e2e.cjs` in another terminal. **79 / 79 checks pass.**
+in mock mode and run `node vt-e2e.cjs` in another terminal. **82 / 82 checks pass.**
 Set `VT_BASE_URL=http://localhost:<port>` if your server is not on port 3000.
 It exercises first-person startup and WASD movement, phase transitions,
 save/continue, pause settings, recording, notebook inventory, phone diversion,
-hallway voice gating, vault watcher rejection, voice auth, briefcase, train-station win,
+hallway voice gating, vault watcher rejection, forged records clearance,
+voice auth, briefcase, train-station win,
 suspicion-driven loss, time-out loss, Solution C, weak-call failure
 regressions, guard back-exit diversion, caller-aware guard replies,
 recording-awareness busts, the doubt accumulator, direct API contracts, and

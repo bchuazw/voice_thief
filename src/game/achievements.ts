@@ -79,6 +79,13 @@ export function evaluateAchievements(state: GameState): Achievement[] {
         detail: "Moved Lillian off the closing ledger",
       });
     }
+    if (state.auditLedgerForged) {
+      out.push({
+        id: "solution-e",
+        label: "Forged Ledger",
+        detail: "Filed a false records clearance",
+      });
+    }
     if (state.npcs.bankManager.branch === "atCafe") {
       out.push({
         id: "solution-b1",

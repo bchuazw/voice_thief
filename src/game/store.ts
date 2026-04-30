@@ -72,6 +72,7 @@ export const initialState: GameState = {
   alarmTriggered: false,
   vaultOpen: false,
   briefcaseTaken: false,
+  auditLedgerForged: false,
   bankFrontUnlocked: true,
   bankHallwayUnlocked: false,
   bankBackExitUnlocked: false,
@@ -110,6 +111,7 @@ export interface GameActions {
   openBankFront(open: boolean): void;
   openHallway(open: boolean): void;
   openBackExit(open: boolean): void;
+  fileAuditLedger(): boolean;
   openVault(): void;
   takeBriefcase(): void;
   setActiveCall(call: ActiveCall | null): void;
@@ -257,6 +259,41 @@ export const useGame = create<GameState & GameActions>()(
     openBankFront: (open) => set({ bankFrontUnlocked: open }),
     openHallway: (open) => set({ bankHallwayUnlocked: open }),
     openBackExit: (open) => set({ bankBackExitUnlocked: open }),
+
+    fileAuditLedger: () => {
+      let filed = false;
+      set((s) => {
+        if (s.auditLedgerForged) return s;
+        const hasLillianCalm = s.voiceInventory.some(
+          (card) => card.npcId === "secretary" && card.emotionalState === "calm",
+        );
+        if (!hasLillianCalm) {
+          return {
+            toasts: [
+              ...s.toasts,
+              {
+                id: `${Date.now()}_audit_need_voice`,
+                text: "The drawer wants L. Park's calm voiceprint.",
+                expiresAt: Date.now() + 4200,
+              },
+            ],
+          };
+        }
+        filed = true;
+        return {
+          auditLedgerForged: true,
+          toasts: [
+            ...s.toasts,
+            {
+              id: `${Date.now()}_audit`,
+              text: "False L. Park clearance filed. The audit lamp flips green.",
+              expiresAt: Date.now() + 5200,
+            },
+          ],
+        };
+      });
+      return filed;
+    },
 
     openVault: () =>
       set({
